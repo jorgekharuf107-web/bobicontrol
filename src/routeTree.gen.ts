@@ -9,38 +9,228 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AceitarConviteTokenRouteImport } from './routes/aceitar-convite.$token'
+import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
+import { Route as AuthenticatedAtmsRouteImport } from './routes/_authenticated/atms'
+import { Route as AuthenticatedFornecedoresIndexRouteImport } from './routes/_authenticated/fornecedores/index'
+import { Route as AuthenticatedFornecedoresNovoRouteImport } from './routes/_authenticated/fornecedores/novo'
+import { Route as AuthenticatedFornecedoresIdRouteImport } from './routes/_authenticated/fornecedores/$id'
+import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
+import { Route as AuthenticatedAdminSobreRouteImport } from './routes/_authenticated/admin/sobre'
+import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
+import { Route as AuthenticatedAdminAlertasRouteImport } from './routes/_authenticated/admin/alertas'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AceitarConviteTokenRoute = AceitarConviteTokenRouteImport.update({
+  id: '/aceitar-convite/$token',
+  path: '/aceitar-convite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedLinhasRoute = AuthenticatedLinhasRouteImport.update({
+  id: '/linhas',
+  path: '/linhas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCdsRoute = AuthenticatedCdsRouteImport.update({
+  id: '/cds',
+  path: '/cds',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAtmsRoute = AuthenticatedAtmsRouteImport.update({
+  id: '/atms',
+  path: '/atms',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFornecedoresIndexRoute =
+  AuthenticatedFornecedoresIndexRouteImport.update({
+    id: '/fornecedores/',
+    path: '/fornecedores/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFornecedoresNovoRoute =
+  AuthenticatedFornecedoresNovoRouteImport.update({
+    id: '/fornecedores/novo',
+    path: '/fornecedores/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFornecedoresIdRoute =
+  AuthenticatedFornecedoresIdRouteImport.update({
+    id: '/fornecedores/$id',
+    path: '/fornecedores/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminUsuariosRoute =
+  AuthenticatedAdminUsuariosRouteImport.update({
+    id: '/admin/usuarios',
+    path: '/admin/usuarios',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminSobreRoute = AuthenticatedAdminSobreRouteImport.update({
+  id: '/admin/sobre',
+  path: '/admin/sobre',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminAuditoriaRoute =
+  AuthenticatedAdminAuditoriaRouteImport.update({
+    id: '/admin/auditoria',
+    path: '/admin/auditoria',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminAlertasRoute =
+  AuthenticatedAdminAlertasRouteImport.update({
+    id: '/admin/alertas',
+    path: '/admin/alertas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/atms': typeof AuthenticatedAtmsRoute
+  '/cds': typeof AuthenticatedCdsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/linhas': typeof AuthenticatedLinhasRoute
+  '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
+  '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
+  '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/sobre': typeof AuthenticatedAdminSobreRoute
+  '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
+  '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
+  '/fornecedores/': typeof AuthenticatedFornecedoresIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/atms': typeof AuthenticatedAtmsRoute
+  '/cds': typeof AuthenticatedCdsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/linhas': typeof AuthenticatedLinhasRoute
+  '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
+  '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
+  '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/sobre': typeof AuthenticatedAdminSobreRoute
+  '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
+  '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
+  '/fornecedores': typeof AuthenticatedFornecedoresIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/atms': typeof AuthenticatedAtmsRoute
+  '/_authenticated/cds': typeof AuthenticatedCdsRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
+  '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
+  '/_authenticated/admin/alertas': typeof AuthenticatedAdminAlertasRoute
+  '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/_authenticated/admin/sobre': typeof AuthenticatedAdminSobreRoute
+  '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
+  '/_authenticated/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
+  '/_authenticated/fornecedores/': typeof AuthenticatedFornecedoresIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/atms'
+    | '/cds'
+    | '/dashboard'
+    | '/linhas'
+    | '/aceitar-convite/$token'
+    | '/admin/alertas'
+    | '/admin/auditoria'
+    | '/admin/sobre'
+    | '/admin/usuarios'
+    | '/fornecedores/$id'
+    | '/fornecedores/novo'
+    | '/fornecedores/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/atms'
+    | '/cds'
+    | '/dashboard'
+    | '/linhas'
+    | '/aceitar-convite/$token'
+    | '/admin/alertas'
+    | '/admin/auditoria'
+    | '/admin/sobre'
+    | '/admin/usuarios'
+    | '/fornecedores/$id'
+    | '/fornecedores/novo'
+    | '/fornecedores'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/atms'
+    | '/_authenticated/cds'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/linhas'
+    | '/aceitar-convite/$token'
+    | '/_authenticated/admin/alertas'
+    | '/_authenticated/admin/auditoria'
+    | '/_authenticated/admin/sobre'
+    | '/_authenticated/admin/usuarios'
+    | '/_authenticated/fornecedores/$id'
+    | '/_authenticated/fornecedores/novo'
+    | '/_authenticated/fornecedores/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  AceitarConviteTokenRoute: typeof AceitarConviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +238,129 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aceitar-convite/$token': {
+      id: '/aceitar-convite/$token'
+      path: '/aceitar-convite/$token'
+      fullPath: '/aceitar-convite/$token'
+      preLoaderRoute: typeof AceitarConviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/linhas': {
+      id: '/_authenticated/linhas'
+      path: '/linhas'
+      fullPath: '/linhas'
+      preLoaderRoute: typeof AuthenticatedLinhasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cds': {
+      id: '/_authenticated/cds'
+      path: '/cds'
+      fullPath: '/cds'
+      preLoaderRoute: typeof AuthenticatedCdsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/atms': {
+      id: '/_authenticated/atms'
+      path: '/atms'
+      fullPath: '/atms'
+      preLoaderRoute: typeof AuthenticatedAtmsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fornecedores/': {
+      id: '/_authenticated/fornecedores/'
+      path: '/fornecedores'
+      fullPath: '/fornecedores/'
+      preLoaderRoute: typeof AuthenticatedFornecedoresIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fornecedores/novo': {
+      id: '/_authenticated/fornecedores/novo'
+      path: '/fornecedores/novo'
+      fullPath: '/fornecedores/novo'
+      preLoaderRoute: typeof AuthenticatedFornecedoresNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/fornecedores/$id': {
+      id: '/_authenticated/fornecedores/$id'
+      path: '/fornecedores/$id'
+      fullPath: '/fornecedores/$id'
+      preLoaderRoute: typeof AuthenticatedFornecedoresIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/usuarios': {
+      id: '/_authenticated/admin/usuarios'
+      path: '/admin/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AuthenticatedAdminUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/sobre': {
+      id: '/_authenticated/admin/sobre'
+      path: '/admin/sobre'
+      fullPath: '/admin/sobre'
+      preLoaderRoute: typeof AuthenticatedAdminSobreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/auditoria': {
+      id: '/_authenticated/admin/auditoria'
+      path: '/admin/auditoria'
+      fullPath: '/admin/auditoria'
+      preLoaderRoute: typeof AuthenticatedAdminAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/alertas': {
+      id: '/_authenticated/admin/alertas'
+      path: '/admin/alertas'
+      fullPath: '/admin/alertas'
+      preLoaderRoute: typeof AuthenticatedAdminAlertasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAtmsRoute: typeof AuthenticatedAtmsRoute
+  AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
+  AuthenticatedAdminAlertasRoute: typeof AuthenticatedAdminAlertasRoute
+  AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
+  AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
+  AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
+  AuthenticatedFornecedoresIdRoute: typeof AuthenticatedFornecedoresIdRoute
+  AuthenticatedFornecedoresNovoRoute: typeof AuthenticatedFornecedoresNovoRoute
+  AuthenticatedFornecedoresIndexRoute: typeof AuthenticatedFornecedoresIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAtmsRoute: AuthenticatedAtmsRoute,
+  AuthenticatedCdsRoute: AuthenticatedCdsRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
+  AuthenticatedAdminAlertasRoute: AuthenticatedAdminAlertasRoute,
+  AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
+  AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
+  AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
+  AuthenticatedFornecedoresIdRoute: AuthenticatedFornecedoresIdRoute,
+  AuthenticatedFornecedoresNovoRoute: AuthenticatedFornecedoresNovoRoute,
+  AuthenticatedFornecedoresIndexRoute: AuthenticatedFornecedoresIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  AceitarConviteTokenRoute: AceitarConviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

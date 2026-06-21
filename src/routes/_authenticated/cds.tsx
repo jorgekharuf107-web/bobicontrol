@@ -22,8 +22,12 @@ type Cd = {
   capacidade: number; nivel_minimo: number; status: "ativo" | "inativo";
 };
 
-const emptyForm = {
-  nome_cd: "", estacao: "", linha_id: "", capacidade: 0, nivel_minimo: 0, status: "ativo" as const,
+type CdForm = {
+  nome_cd: string; estacao: string; linha_id: string;
+  capacidade: number; nivel_minimo: number; status: "ativo" | "inativo";
+};
+const emptyForm: CdForm = {
+  nome_cd: "", estacao: "", linha_id: "", capacidade: 0, nivel_minimo: 0, status: "ativo",
 };
 
 function CdsPage() {
