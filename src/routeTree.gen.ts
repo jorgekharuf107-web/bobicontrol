@@ -18,6 +18,7 @@ import { Route as AuthenticatedRelatorioGerencialRouteImport } from './routes/_a
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
 import { Route as AuthenticatedItensEstoqueRouteImport } from './routes/_authenticated/itens-estoque'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_authenticated/controle-estoque'
 import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
 import { Route as AuthenticatedAtmsRouteImport } from './routes/_authenticated/atms'
 import { Route as AuthenticatedFornecedoresIndexRouteImport } from './routes/_authenticated/fornecedores/index'
@@ -75,6 +76,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedControleEstoqueRoute =
+  AuthenticatedControleEstoqueRouteImport.update({
+    id: '/controle-estoque',
+    path: '/controle-estoque',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCdsRoute = AuthenticatedCdsRouteImport.update({
   id: '/cds',
   path: '/cds',
@@ -132,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/atms': typeof AuthenticatedAtmsRoute
   '/cds': typeof AuthenticatedCdsRoute
+  '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
@@ -151,6 +159,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/atms': typeof AuthenticatedAtmsRoute
   '/cds': typeof AuthenticatedCdsRoute
+  '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
@@ -172,6 +181,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/atms': typeof AuthenticatedAtmsRoute
   '/_authenticated/cds': typeof AuthenticatedCdsRoute
+  '/_authenticated/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/atms'
     | '/cds'
+    | '/controle-estoque'
     | '/dashboard'
     | '/itens-estoque'
     | '/linhas'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/atms'
     | '/cds'
+    | '/controle-estoque'
     | '/dashboard'
     | '/itens-estoque'
     | '/linhas'
@@ -232,6 +244,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/atms'
     | '/_authenticated/cds'
+    | '/_authenticated/controle-estoque'
     | '/_authenticated/dashboard'
     | '/_authenticated/itens-estoque'
     | '/_authenticated/linhas'
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/controle-estoque': {
+      id: '/_authenticated/controle-estoque'
+      path: '/controle-estoque'
+      fullPath: '/controle-estoque'
+      preLoaderRoute: typeof AuthenticatedControleEstoqueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/cds': {
       id: '/_authenticated/cds'
       path: '/cds'
@@ -388,6 +408,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAtmsRoute: typeof AuthenticatedAtmsRoute
   AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
+  AuthenticatedControleEstoqueRoute: typeof AuthenticatedControleEstoqueRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedItensEstoqueRoute: typeof AuthenticatedItensEstoqueRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
@@ -405,6 +426,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAtmsRoute: AuthenticatedAtmsRoute,
   AuthenticatedCdsRoute: AuthenticatedCdsRoute,
+  AuthenticatedControleEstoqueRoute: AuthenticatedControleEstoqueRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedItensEstoqueRoute: AuthenticatedItensEstoqueRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
