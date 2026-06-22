@@ -1,16 +1,8 @@
 import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
-  Building2,
-  Users,
-  Truck,
-  Banknote,
-  Train,
-  Bell,
-  ClipboardList,
-  Info,
-  LogOut,
-  Shield,
+  LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
+  Banknote, Truck, Train, Building2, MapPin,
+  Bell, ClipboardList, Users, Info, LogOut, Shield,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -18,18 +10,26 @@ import { cn } from "@/lib/utils";
 
 type Item = { title: string; to: string; icon: React.ComponentType<{ className?: string }> };
 
-const operacao: Item[] = [
-  { title: "Dashboard", to: "/", icon: LayoutDashboard },
-  { title: "Fornecedores", to: "/fornecedores", icon: Building2 },
-  { title: "ATMs", to: "/atms", icon: Banknote },
-  { title: "CDs", to: "/cds", icon: Truck },
-  { title: "Linhas", to: "/linhas", icon: Train },
+const principal: Item[] = [
+  { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { title: "Relatório Gerencial", to: "/relatorio-gerencial", icon: FileBarChart },
+  { title: "Reposição de Bobinas", to: "/reposicao-bobinas", icon: PackagePlus },
 ];
-
+const estoque: Item[] = [
+  { title: "Controle de Estoque", to: "/controle-estoque", icon: Boxes },
+  { title: "Itens de Estoque", to: "/itens-estoque", icon: Layers },
+];
+const cadastros: Item[] = [
+  { title: "Cadastro de ATM", to: "/atms", icon: Banknote },
+  { title: "Centros de Distribuição", to: "/cds", icon: Truck },
+  { title: "Estações", to: "/estacoes", icon: MapPin },
+  { title: "Linhas", to: "/linhas", icon: Train },
+  { title: "Fornecedores", to: "/fornecedores", icon: Building2 },
+];
 const admin: Item[] = [
-  { title: "Usuários", to: "/admin/usuarios", icon: Users },
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
+  { title: "Usuários", to: "/admin/usuarios", icon: Users },
   { title: "Sobre", to: "/admin/sobre", icon: Info },
 ];
 
@@ -44,8 +44,8 @@ export function AppSidebar() {
   }
 
   const NavGroup = ({ label, items }: { label: string; items: Item[] }) => (
-    <div className="mb-6">
-      <p className="px-3 mb-2 text-[11px] uppercase tracking-wider text-sidebar-foreground/60">
+    <div className="mb-5">
+      <p className="px-3 mb-2 text-[11px] uppercase tracking-wider font-semibold text-sidebar-foreground/60">
         {label}
       </p>
       <nav className="flex flex-col gap-0.5">
@@ -72,18 +72,20 @@ export function AppSidebar() {
   );
 
   return (
-    <aside className="w-60 shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
-      <div className="px-4 py-5 border-b border-sidebar-border">
+    <aside className="w-64 shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
+      <div className="px-4 py-4 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-sidebar-primary" />
+          <Shield className="h-6 w-6 text-sidebar-primary-foreground" />
           <div>
-            <p className="font-semibold leading-tight">Gestão ATMs</p>
-            <p className="text-[11px] text-sidebar-foreground/60">Sistema interno</p>
+            <p className="font-semibold leading-tight text-[13px]">Controle de Estoque</p>
+            <p className="text-[11px] text-sidebar-foreground/60">de Bobinas</p>
           </div>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto py-4">
-        <NavGroup label="Operação" items={operacao} />
+        <NavGroup label="Principal" items={principal} />
+        <NavGroup label="Estoque" items={estoque} />
+        <NavGroup label="Cadastros" items={cadastros} />
         {isAdmin && <NavGroup label="Administração" items={admin} />}
       </div>
       <div className="border-t border-sidebar-border p-3">

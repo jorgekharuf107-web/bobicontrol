@@ -13,8 +13,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AceitarConviteTokenRouteImport } from './routes/aceitar-convite.$token'
+import { Route as AuthenticatedReposicaoBobinasRouteImport } from './routes/_authenticated/reposicao-bobinas'
+import { Route as AuthenticatedRelatorioGerencialRouteImport } from './routes/_authenticated/relatorio-gerencial'
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
+import { Route as AuthenticatedItensEstoqueRouteImport } from './routes/_authenticated/itens-estoque'
+import { Route as AuthenticatedEstacoesRouteImport } from './routes/_authenticated/estacoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_authenticated/controle-estoque'
 import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
 import { Route as AuthenticatedAtmsRouteImport } from './routes/_authenticated/atms'
 import { Route as AuthenticatedFornecedoresIndexRouteImport } from './routes/_authenticated/fornecedores/index'
@@ -44,9 +49,32 @@ const AceitarConviteTokenRoute = AceitarConviteTokenRouteImport.update({
   path: '/aceitar-convite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedReposicaoBobinasRoute =
+  AuthenticatedReposicaoBobinasRouteImport.update({
+    id: '/reposicao-bobinas',
+    path: '/reposicao-bobinas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRelatorioGerencialRoute =
+  AuthenticatedRelatorioGerencialRouteImport.update({
+    id: '/relatorio-gerencial',
+    path: '/relatorio-gerencial',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLinhasRoute = AuthenticatedLinhasRouteImport.update({
   id: '/linhas',
   path: '/linhas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedItensEstoqueRoute =
+  AuthenticatedItensEstoqueRouteImport.update({
+    id: '/itens-estoque',
+    path: '/itens-estoque',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEstacoesRoute = AuthenticatedEstacoesRouteImport.update({
+  id: '/estacoes',
+  path: '/estacoes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -54,6 +82,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedControleEstoqueRoute =
+  AuthenticatedControleEstoqueRouteImport.update({
+    id: '/controle-estoque',
+    path: '/controle-estoque',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCdsRoute = AuthenticatedCdsRouteImport.update({
   id: '/cds',
   path: '/cds',
@@ -111,8 +145,13 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/atms': typeof AuthenticatedAtmsRoute
   '/cds': typeof AuthenticatedCdsRoute
+  '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/estacoes': typeof AuthenticatedEstacoesRoute
+  '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
+  '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
+  '/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -127,8 +166,13 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/atms': typeof AuthenticatedAtmsRoute
   '/cds': typeof AuthenticatedCdsRoute
+  '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/estacoes': typeof AuthenticatedEstacoesRoute
+  '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
+  '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
+  '/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -145,8 +189,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/atms': typeof AuthenticatedAtmsRoute
   '/_authenticated/cds': typeof AuthenticatedCdsRoute
+  '/_authenticated/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/estacoes': typeof AuthenticatedEstacoesRoute
+  '/_authenticated/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
+  '/_authenticated/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
+  '/_authenticated/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/_authenticated/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -163,8 +212,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/atms'
     | '/cds'
+    | '/controle-estoque'
     | '/dashboard'
+    | '/estacoes'
+    | '/itens-estoque'
     | '/linhas'
+    | '/relatorio-gerencial'
+    | '/reposicao-bobinas'
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
@@ -179,8 +233,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/atms'
     | '/cds'
+    | '/controle-estoque'
     | '/dashboard'
+    | '/estacoes'
+    | '/itens-estoque'
     | '/linhas'
+    | '/relatorio-gerencial'
+    | '/reposicao-bobinas'
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
@@ -196,8 +255,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/atms'
     | '/_authenticated/cds'
+    | '/_authenticated/controle-estoque'
     | '/_authenticated/dashboard'
+    | '/_authenticated/estacoes'
+    | '/_authenticated/itens-estoque'
     | '/_authenticated/linhas'
+    | '/_authenticated/relatorio-gerencial'
+    | '/_authenticated/reposicao-bobinas'
     | '/aceitar-convite/$token'
     | '/_authenticated/admin/alertas'
     | '/_authenticated/admin/auditoria'
@@ -245,6 +309,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AceitarConviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/reposicao-bobinas': {
+      id: '/_authenticated/reposicao-bobinas'
+      path: '/reposicao-bobinas'
+      fullPath: '/reposicao-bobinas'
+      preLoaderRoute: typeof AuthenticatedReposicaoBobinasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/relatorio-gerencial': {
+      id: '/_authenticated/relatorio-gerencial'
+      path: '/relatorio-gerencial'
+      fullPath: '/relatorio-gerencial'
+      preLoaderRoute: typeof AuthenticatedRelatorioGerencialRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/linhas': {
       id: '/_authenticated/linhas'
       path: '/linhas'
@@ -252,11 +330,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLinhasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/itens-estoque': {
+      id: '/_authenticated/itens-estoque'
+      path: '/itens-estoque'
+      fullPath: '/itens-estoque'
+      preLoaderRoute: typeof AuthenticatedItensEstoqueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/estacoes': {
+      id: '/_authenticated/estacoes'
+      path: '/estacoes'
+      fullPath: '/estacoes'
+      preLoaderRoute: typeof AuthenticatedEstacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/controle-estoque': {
+      id: '/_authenticated/controle-estoque'
+      path: '/controle-estoque'
+      fullPath: '/controle-estoque'
+      preLoaderRoute: typeof AuthenticatedControleEstoqueRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cds': {
@@ -328,8 +427,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAtmsRoute: typeof AuthenticatedAtmsRoute
   AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
+  AuthenticatedControleEstoqueRoute: typeof AuthenticatedControleEstoqueRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEstacoesRoute: typeof AuthenticatedEstacoesRoute
+  AuthenticatedItensEstoqueRoute: typeof AuthenticatedItensEstoqueRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
+  AuthenticatedRelatorioGerencialRoute: typeof AuthenticatedRelatorioGerencialRoute
+  AuthenticatedReposicaoBobinasRoute: typeof AuthenticatedReposicaoBobinasRoute
   AuthenticatedAdminAlertasRoute: typeof AuthenticatedAdminAlertasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
@@ -342,8 +446,13 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAtmsRoute: AuthenticatedAtmsRoute,
   AuthenticatedCdsRoute: AuthenticatedCdsRoute,
+  AuthenticatedControleEstoqueRoute: AuthenticatedControleEstoqueRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEstacoesRoute: AuthenticatedEstacoesRoute,
+  AuthenticatedItensEstoqueRoute: AuthenticatedItensEstoqueRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
+  AuthenticatedRelatorioGerencialRoute: AuthenticatedRelatorioGerencialRoute,
+  AuthenticatedReposicaoBobinasRoute: AuthenticatedReposicaoBobinasRoute,
   AuthenticatedAdminAlertasRoute: AuthenticatedAdminAlertasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
