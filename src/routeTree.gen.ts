@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AceitarConviteTokenRouteImport } from './routes/aceitar-convite.$token'
+import { Route as AuthenticatedReposicaoBobinasRouteImport } from './routes/_authenticated/reposicao-bobinas'
 import { Route as AuthenticatedRelatorioGerencialRouteImport } from './routes/_authenticated/relatorio-gerencial'
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -45,6 +46,12 @@ const AceitarConviteTokenRoute = AceitarConviteTokenRouteImport.update({
   path: '/aceitar-convite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedReposicaoBobinasRoute =
+  AuthenticatedReposicaoBobinasRouteImport.update({
+    id: '/reposicao-bobinas',
+    path: '/reposicao-bobinas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRelatorioGerencialRoute =
   AuthenticatedRelatorioGerencialRouteImport.update({
     id: '/relatorio-gerencial',
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
+  '/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -138,6 +146,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
+  '/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -157,6 +166,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
   '/_authenticated/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
+  '/_authenticated/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/_authenticated/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/linhas'
     | '/relatorio-gerencial'
+    | '/reposicao-bobinas'
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/linhas'
     | '/relatorio-gerencial'
+    | '/reposicao-bobinas'
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
@@ -211,6 +223,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/linhas'
     | '/_authenticated/relatorio-gerencial'
+    | '/_authenticated/reposicao-bobinas'
     | '/aceitar-convite/$token'
     | '/_authenticated/admin/alertas'
     | '/_authenticated/admin/auditoria'
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/aceitar-convite/$token'
       preLoaderRoute: typeof AceitarConviteTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/reposicao-bobinas': {
+      id: '/_authenticated/reposicao-bobinas'
+      path: '/reposicao-bobinas'
+      fullPath: '/reposicao-bobinas'
+      preLoaderRoute: typeof AuthenticatedReposicaoBobinasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/relatorio-gerencial': {
       id: '/_authenticated/relatorio-gerencial'
@@ -351,6 +371,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
   AuthenticatedRelatorioGerencialRoute: typeof AuthenticatedRelatorioGerencialRoute
+  AuthenticatedReposicaoBobinasRoute: typeof AuthenticatedReposicaoBobinasRoute
   AuthenticatedAdminAlertasRoute: typeof AuthenticatedAdminAlertasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
@@ -366,6 +387,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
   AuthenticatedRelatorioGerencialRoute: AuthenticatedRelatorioGerencialRoute,
+  AuthenticatedReposicaoBobinasRoute: AuthenticatedReposicaoBobinasRoute,
   AuthenticatedAdminAlertasRoute: AuthenticatedAdminAlertasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
