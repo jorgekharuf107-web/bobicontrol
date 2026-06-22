@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource-variable/inter";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -29,6 +30,10 @@
   --color-input: var(--input);
   --color-input-bg: var(--input-bg);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -37,62 +42,44 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.99 0.005 250);
-  --foreground: oklch(0.20 0.04 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.04 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.04 260);
-  --primary: oklch(0.42 0.15 260);
-  --primary-foreground: oklch(0.99 0.005 250);
-  --secondary: oklch(0.96 0.01 250);
-  --secondary-foreground: oklch(0.25 0.04 260);
-  --muted: oklch(0.96 0.01 250);
-  --muted-foreground: oklch(0.50 0.03 260);
-  --accent: oklch(0.94 0.02 255);
-  --accent-foreground: oklch(0.25 0.04 260);
-  --destructive: oklch(0.58 0.22 25);
-  --destructive-foreground: oklch(0.99 0.005 250);
-  --border: oklch(0.90 0.015 255);
-  --input: oklch(0.90 0.015 255);
-  /* Cor de fundo dos campos digitáveis e dropdowns (#f1f5f9) */
-  --input-bg: oklch(0.968 0.007 247.896);
-  --ring: oklch(0.55 0.10 260);
-  --sidebar: oklch(0.22 0.04 260);
-  --sidebar-foreground: oklch(0.96 0.01 250);
-  --sidebar-primary: oklch(0.55 0.15 260);
-  --sidebar-primary-foreground: oklch(0.99 0.005 250);
-  --sidebar-accent: oklch(0.30 0.05 260);
-  --sidebar-accent-foreground: oklch(0.96 0.01 250);
-  --sidebar-border: oklch(0.30 0.05 260);
-  --sidebar-ring: oklch(0.55 0.10 260);
-}
-
-.dark {
-  --background: oklch(0.18 0.03 260);
-  --foreground: oklch(0.96 0.01 250);
-  --card: oklch(0.22 0.04 260);
-  --card-foreground: oklch(0.96 0.01 250);
-  --popover: oklch(0.22 0.04 260);
-  --popover-foreground: oklch(0.96 0.01 250);
-  --primary: oklch(0.70 0.15 260);
-  --primary-foreground: oklch(0.20 0.04 260);
-  --secondary: oklch(0.28 0.04 260);
-  --secondary-foreground: oklch(0.96 0.01 250);
-  --muted: oklch(0.28 0.04 260);
-  --muted-foreground: oklch(0.70 0.03 260);
-  --accent: oklch(0.30 0.05 260);
-  --accent-foreground: oklch(0.96 0.01 250);
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.99 0.005 250);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --input-bg: oklch(0.30 0.04 260);
-  --ring: oklch(0.55 0.10 260);
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  /* SAP/Oracle corporate blue */
+  --primary: #1e40af;
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #dbeafe;
+  --accent-foreground: #1e3a8a;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --info: #1e40af;
+  --border: #e2e8f0;
+  --input: #cbd5e1;
+  --input-bg: #f1f5f9;
+  --ring: #1e40af;
+  --sidebar: #0f1e3d;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #1e40af;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e3a8a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1e3a8a;
+  --sidebar-ring: #1e40af;
 }
 
 @layer base {
@@ -100,11 +87,10 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   }
 }
 
-/* Garante que todos os campos digitáveis e dropdowns usem o fundo cinza azulado clarinho (#f1f5f9) */
 @layer components {
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
   textarea,
@@ -112,4 +98,29 @@
   [role="combobox"] {
     background-color: var(--input-bg) !important;
   }
+
+  /* Excel-style table */
+  .excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .excel-table th,
+  .excel-table td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  .excel-table thead th {
+    background: #1e40af;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+  }
+  .excel-table tbody tr:nth-child(odd) { background: #ffffff; }
+  .excel-table tbody tr:nth-child(even) { background: #f1f5f9; }
+  .excel-table tbody tr:hover { background: #dbeafe; }
 }
