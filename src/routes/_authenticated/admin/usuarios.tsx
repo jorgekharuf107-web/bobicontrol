@@ -144,7 +144,6 @@ function UsuariosPage() {
                 <SelectContent>
                   <SelectItem value="Usuário">Usuário</SelectItem>
                   <SelectItem value="Administrador">Administrador</SelectItem>
-                  <SelectItem value="SUPER ADMIN">SUPER ADMIN</SelectItem>
                 </SelectContent>
               </Select></div>
             <p className="text-xs text-muted-foreground">
