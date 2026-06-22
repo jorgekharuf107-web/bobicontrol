@@ -89,14 +89,17 @@ function UsuariosPage() {
             {usuarios.length === 0 && (
               <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Nenhum usuário cadastrado.</TableCell></TableRow>
             )}
-            {usuarios.map((u: any) => (
-              <TableRow key={u.id}>
-                <TableCell className="font-medium">{u.nome_completo}</TableCell>
-                <TableCell>{u.email}</TableCell>
-                <TableCell>{u.perfil}</TableCell>
-                <TableCell>{new Date(u.data_cadastro).toLocaleDateString("pt-BR")}</TableCell>
-              </TableRow>
-            ))}
+            {usuarios.map((u: any) => {
+              const perfilMostrar = (u.perfil ?? "").toUpperCase().includes("SUPER") ? "Administrador" : u.perfil;
+              return (
+                <TableRow key={u.id}>
+                  <TableCell className="font-medium">{u.nome_completo}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell>{perfilMostrar}</TableCell>
+                  <TableCell>{new Date(u.data_cadastro).toLocaleDateString("pt-BR")}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Card>
