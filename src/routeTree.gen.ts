@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AceitarConviteTokenRouteImport } from './routes/aceitar-convite.$token'
+import { Route as AuthenticatedRelatorioGerencialRouteImport } from './routes/_authenticated/relatorio-gerencial'
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
@@ -44,6 +45,12 @@ const AceitarConviteTokenRoute = AceitarConviteTokenRouteImport.update({
   path: '/aceitar-convite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRelatorioGerencialRoute =
+  AuthenticatedRelatorioGerencialRouteImport.update({
+    id: '/relatorio-gerencial',
+    path: '/relatorio-gerencial',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLinhasRoute = AuthenticatedLinhasRouteImport.update({
   id: '/linhas',
   path: '/linhas',
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/cds': typeof AuthenticatedCdsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/linhas': typeof AuthenticatedLinhasRoute
+  '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -129,6 +137,7 @@ export interface FileRoutesByTo {
   '/cds': typeof AuthenticatedCdsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/linhas': typeof AuthenticatedLinhasRoute
+  '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -147,6 +156,7 @@ export interface FileRoutesById {
   '/_authenticated/cds': typeof AuthenticatedCdsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
+  '/_authenticated/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/_authenticated/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/cds'
     | '/dashboard'
     | '/linhas'
+    | '/relatorio-gerencial'
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/cds'
     | '/dashboard'
     | '/linhas'
+    | '/relatorio-gerencial'
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
@@ -198,6 +210,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cds'
     | '/_authenticated/dashboard'
     | '/_authenticated/linhas'
+    | '/_authenticated/relatorio-gerencial'
     | '/aceitar-convite/$token'
     | '/_authenticated/admin/alertas'
     | '/_authenticated/admin/auditoria'
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/aceitar-convite/$token'
       preLoaderRoute: typeof AceitarConviteTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/relatorio-gerencial': {
+      id: '/_authenticated/relatorio-gerencial'
+      path: '/relatorio-gerencial'
+      fullPath: '/relatorio-gerencial'
+      preLoaderRoute: typeof AuthenticatedRelatorioGerencialRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/linhas': {
       id: '/_authenticated/linhas'
@@ -330,6 +350,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
+  AuthenticatedRelatorioGerencialRoute: typeof AuthenticatedRelatorioGerencialRoute
   AuthenticatedAdminAlertasRoute: typeof AuthenticatedAdminAlertasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
@@ -344,6 +365,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCdsRoute: AuthenticatedCdsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
+  AuthenticatedRelatorioGerencialRoute: AuthenticatedRelatorioGerencialRoute,
   AuthenticatedAdminAlertasRoute: AuthenticatedAdminAlertasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
