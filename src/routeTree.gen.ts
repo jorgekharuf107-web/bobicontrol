@@ -17,6 +17,7 @@ import { Route as AuthenticatedReposicaoBobinasRouteImport } from './routes/_aut
 import { Route as AuthenticatedRelatorioGerencialRouteImport } from './routes/_authenticated/relatorio-gerencial'
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
 import { Route as AuthenticatedItensEstoqueRouteImport } from './routes/_authenticated/itens-estoque'
+import { Route as AuthenticatedEstacoesRouteImport } from './routes/_authenticated/estacoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_authenticated/controle-estoque'
 import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
@@ -71,6 +72,11 @@ const AuthenticatedItensEstoqueRoute =
     path: '/itens-estoque',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEstacoesRoute = AuthenticatedEstacoesRouteImport.update({
+  id: '/estacoes',
+  path: '/estacoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/cds': typeof AuthenticatedCdsRoute
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/estacoes': typeof AuthenticatedEstacoesRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/cds': typeof AuthenticatedCdsRoute
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/estacoes': typeof AuthenticatedEstacoesRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/_authenticated/cds': typeof AuthenticatedCdsRoute
   '/_authenticated/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/estacoes': typeof AuthenticatedEstacoesRoute
   '/_authenticated/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
   '/_authenticated/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/cds'
     | '/controle-estoque'
     | '/dashboard'
+    | '/estacoes'
     | '/itens-estoque'
     | '/linhas'
     | '/relatorio-gerencial'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/cds'
     | '/controle-estoque'
     | '/dashboard'
+    | '/estacoes'
     | '/itens-estoque'
     | '/linhas'
     | '/relatorio-gerencial'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cds'
     | '/_authenticated/controle-estoque'
     | '/_authenticated/dashboard'
+    | '/_authenticated/estacoes'
     | '/_authenticated/itens-estoque'
     | '/_authenticated/linhas'
     | '/_authenticated/relatorio-gerencial'
@@ -323,6 +335,13 @@ declare module '@tanstack/react-router' {
       path: '/itens-estoque'
       fullPath: '/itens-estoque'
       preLoaderRoute: typeof AuthenticatedItensEstoqueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/estacoes': {
+      id: '/_authenticated/estacoes'
+      path: '/estacoes'
+      fullPath: '/estacoes'
+      preLoaderRoute: typeof AuthenticatedEstacoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -410,6 +429,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
   AuthenticatedControleEstoqueRoute: typeof AuthenticatedControleEstoqueRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEstacoesRoute: typeof AuthenticatedEstacoesRoute
   AuthenticatedItensEstoqueRoute: typeof AuthenticatedItensEstoqueRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
   AuthenticatedRelatorioGerencialRoute: typeof AuthenticatedRelatorioGerencialRoute
@@ -428,6 +448,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCdsRoute: AuthenticatedCdsRoute,
   AuthenticatedControleEstoqueRoute: AuthenticatedControleEstoqueRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEstacoesRoute: AuthenticatedEstacoesRoute,
   AuthenticatedItensEstoqueRoute: AuthenticatedItensEstoqueRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
   AuthenticatedRelatorioGerencialRoute: AuthenticatedRelatorioGerencialRoute,
