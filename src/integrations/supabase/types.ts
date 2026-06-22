@@ -21,6 +21,7 @@ export type Database = {
           cd_id: string | null
           criado_em: string
           estacao: string | null
+          estacao_id: string | null
           id: string
           id_atm: string
           localizacao_detalhada: string | null
@@ -34,6 +35,7 @@ export type Database = {
           cd_id?: string | null
           criado_em?: string
           estacao?: string | null
+          estacao_id?: string | null
           id?: string
           id_atm: string
           localizacao_detalhada?: string | null
@@ -47,6 +49,7 @@ export type Database = {
           cd_id?: string | null
           criado_em?: string
           estacao?: string | null
+          estacao_id?: string | null
           id?: string
           id_atm?: string
           localizacao_detalhada?: string | null
@@ -60,6 +63,13 @@ export type Database = {
             columns: ["cd_id"]
             isOneToOne: false
             referencedRelation: "cds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atms_estacao_id_fkey"
+            columns: ["estacao_id"]
+            isOneToOne: false
+            referencedRelation: "estacoes"
             referencedColumns: ["id"]
           },
         ]
@@ -102,6 +112,7 @@ export type Database = {
           capacidade: number
           criado_em: string
           estacao: string | null
+          estacao_id: string | null
           id: string
           linha_id: string | null
           nivel_minimo: number
@@ -112,6 +123,7 @@ export type Database = {
           capacidade?: number
           criado_em?: string
           estacao?: string | null
+          estacao_id?: string | null
           id?: string
           linha_id?: string | null
           nivel_minimo?: number
@@ -122,6 +134,7 @@ export type Database = {
           capacidade?: number
           criado_em?: string
           estacao?: string | null
+          estacao_id?: string | null
           id?: string
           linha_id?: string | null
           nivel_minimo?: number
@@ -129,6 +142,13 @@ export type Database = {
           status?: Database["public"]["Enums"]["status_geral"]
         }
         Relationships: [
+          {
+            foreignKeyName: "cds_estacao_id_fkey"
+            columns: ["estacao_id"]
+            isOneToOne: false
+            referencedRelation: "estacoes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cds_linha_id_fkey"
             columns: ["linha_id"]
@@ -210,6 +230,38 @@ export type Database = {
         }
         Relationships: []
       }
+      estacoes: {
+        Row: {
+          ativa: boolean
+          criado_em: string
+          id: string
+          linha_id: string | null
+          nome: string
+        }
+        Insert: {
+          ativa?: boolean
+          criado_em?: string
+          id?: string
+          linha_id?: string | null
+          nome: string
+        }
+        Update: {
+          ativa?: boolean
+          criado_em?: string
+          id?: string
+          linha_id?: string | null
+          nome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estacoes_linha_id_fkey"
+            columns: ["linha_id"]
+            isOneToOne: false
+            referencedRelation: "linhas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fornecedores: {
         Row: {
           bairro: string | null
@@ -266,6 +318,56 @@ export type Database = {
           telefone?: string | null
         }
         Relationships: []
+      }
+      itens: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          criado_em: string
+          descricao: string | null
+          estoque_minimo: number
+          fornecedor_padrao_id: string | null
+          id: string
+          medida: string | null
+          nome: string
+          qtd_por_unidade: number
+          unidade: Database["public"]["Enums"]["item_unidade"]
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          criado_em?: string
+          descricao?: string | null
+          estoque_minimo?: number
+          fornecedor_padrao_id?: string | null
+          id?: string
+          medida?: string | null
+          nome: string
+          qtd_por_unidade?: number
+          unidade?: Database["public"]["Enums"]["item_unidade"]
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          criado_em?: string
+          descricao?: string | null
+          estoque_minimo?: number
+          fornecedor_padrao_id?: string | null
+          id?: string
+          medida?: string | null
+          nome?: string
+          qtd_por_unidade?: number
+          unidade?: Database["public"]["Enums"]["item_unidade"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_fornecedor_padrao_id_fkey"
+            columns: ["fornecedor_padrao_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       linhas: {
         Row: {
@@ -328,6 +430,66 @@ export type Database = {
             columns: ["fornecedor_id"]
             isOneToOne: false
             referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movimentacoes: {
+        Row: {
+          criado_em: string
+          data: string
+          destino_id: string | null
+          destino_tipo: Database["public"]["Enums"]["local_tipo"] | null
+          id: string
+          item_id: string | null
+          observacao: string | null
+          origem_id: string | null
+          origem_tipo: Database["public"]["Enums"]["local_tipo"] | null
+          qtd: number
+          tecnico_id: string | null
+          tipo: Database["public"]["Enums"]["movimentacao_tipo"]
+        }
+        Insert: {
+          criado_em?: string
+          data?: string
+          destino_id?: string | null
+          destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
+          id?: string
+          item_id?: string | null
+          observacao?: string | null
+          origem_id?: string | null
+          origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
+          qtd: number
+          tecnico_id?: string | null
+          tipo: Database["public"]["Enums"]["movimentacao_tipo"]
+        }
+        Update: {
+          criado_em?: string
+          data?: string
+          destino_id?: string | null
+          destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
+          id?: string
+          item_id?: string | null
+          observacao?: string | null
+          origem_id?: string | null
+          origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
+          qtd?: number
+          tecnico_id?: string | null
+          tipo?: Database["public"]["Enums"]["movimentacao_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimentacoes_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimentacoes_tecnico_id_fkey"
+            columns: ["tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -403,6 +565,14 @@ export type Database = {
     Enums: {
       app_role: "super_admin" | "admin" | "usuario"
       convite_status: "pendente" | "aceito" | "expirado"
+      item_unidade: "Unidade" | "Caixa" | "Pacote" | "Rolo"
+      local_tipo: "CD" | "ATM"
+      movimentacao_tipo:
+        | "Entrada"
+        | "Saida"
+        | "Transferencia"
+        | "Ajuste"
+        | "Abastecimento"
       status_geral: "ativo" | "inativo"
       status_operacional: "operacional" | "manutencao" | "desativado"
       tipo_contato_motorista: "motorista1" | "motorista2"
@@ -536,6 +706,15 @@ export const Constants = {
     Enums: {
       app_role: ["super_admin", "admin", "usuario"],
       convite_status: ["pendente", "aceito", "expirado"],
+      item_unidade: ["Unidade", "Caixa", "Pacote", "Rolo"],
+      local_tipo: ["CD", "ATM"],
+      movimentacao_tipo: [
+        "Entrada",
+        "Saida",
+        "Transferencia",
+        "Ajuste",
+        "Abastecimento",
+      ],
       status_geral: ["ativo", "inativo"],
       status_operacional: ["operacional", "manutencao", "desativado"],
       tipo_contato_motorista: ["motorista1", "motorista2"],
