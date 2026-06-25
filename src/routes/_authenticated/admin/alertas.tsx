@@ -114,8 +114,8 @@ function AlertasPage() {
               <Input type="number" value={form.nivel_alerta_percentual}
                 onChange={(e) => setForm({ ...form, nivel_alerta_percentual: +e.target.value })} /></div>
             <div className="space-y-2"><Label>Frequência (horas)</Label>
-              <Input type="number" value={form.frequencia_envio_horas}
-                onChange={(e) => setForm({ ...form, frequencia_envio_horas: +e.target.value })} /></div>
+              <Input type="number" min={0} value={form.frequencia_envio_horas}
+                onChange={(e) => setForm({ ...form, frequencia_envio_horas: Math.max(0, +e.target.value || 0) })} /></div>
             <div className="space-y-2"><Label>Destinatários (separados por vírgula)</Label>
               <Input value={form.destinatarios_email}
                 onChange={(e) => setForm({ ...form, destinatarios_email: e.target.value })} /></div>
