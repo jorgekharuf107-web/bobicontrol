@@ -180,9 +180,20 @@ function ItensPage() {
               </Select>
             </div>
             <div><Label>Qtd por Unidade</Label>
-              <Input type="number" min={1} value={form.qtd_por_unidade}
-                onChange={(e) => setForm({ ...form, qtd_por_unidade: Math.max(1, +e.target.value || 1) })}
-                disabled={form.unidade === "Unidade"} />
+              <Input
+                type="number"
+                min={1}
+                max={form.unidade === "Unidade" ? 1 : undefined}
+                value={form.unidade === "Unidade" ? 1 : form.qtd_por_unidade}
+                onChange={(e) => {
+                  if (form.unidade === "Unidade") return;
+                  setForm({ ...form, qtd_por_unidade: Math.max(1, +e.target.value || 1) });
+                }}
+                disabled={form.unidade === "Unidade"}
+              />
+              {form.unidade === "Unidade" && (
+                <p className="text-xs text-muted-foreground mt-1">Travado em 1 quando a unidade é "Unidade".</p>
+              )}
             </div>
             <div><Label>Medida</Label>
               <Input placeholder="Ex: 80mm" value={form.medida} onChange={(e) => setForm({ ...form, medida: e.target.value })} />
