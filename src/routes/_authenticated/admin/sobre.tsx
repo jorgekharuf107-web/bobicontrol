@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/back-button";
 import bobinas from "@/assets/bobinas.jpg";
 
@@ -8,12 +7,10 @@ export const Route = createFileRoute("/_authenticated/admin/sobre")({
 });
 
 function SobrePage() {
-  const fichas = [
-    { label: "Versão", valor: "2.1.4" },
-    { label: "Lançamento", valor: "20/03/2026" },
-    { label: "Autor", valor: "Jorge Wilson Carneiro" },
-    { label: "Contato", valor: "jorgekharuf107@gmail.com" },
-  ];
+  const fichaStyle = {
+    background: "#f3f4f6",
+    color: "#000000",
+  } as const;
 
   return (
     <div className="space-y-6">
@@ -22,43 +19,42 @@ function SobrePage() {
         <h1 className="text-2xl font-semibold">Sobre</h1>
       </div>
 
-      <Card className="p-8 space-y-2">
-        <p className="text-base"><span className="font-semibold">Versão</span> 2.1.4</p>
-        <p className="text-base"><span className="font-semibold">Lançamento</span> 20/03/2026</p>
-        <p className="text-base">
-          <span className="font-semibold">Autor</span> Jorge Wilson Carneiro{" "}
-          <a href="mailto:jorgekharuf107@gmail.com" className="text-primary underline">
-            jorgekharuf107@gmail.com
-          </a>
-        </p>
-        <p className="text-base italic font-bold pt-2">
-          Participação e Solicitação: Emerson Ziliotti
-        </p>
-      </Card>
+      <div className="w-full overflow-hidden rounded-md">
+        <img
+          src={bobinas}
+          alt="Bobinas de papel térmico para ATM"
+          loading="lazy"
+          className="w-full h-auto max-h-80 object-cover rounded-md"
+        />
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <Card className="p-4 overflow-hidden">
-          <img
-            src={bobinas}
-            alt="Bobinas de papel térmico para ATM"
-            loading="lazy"
-            width={1024}
-            height={1024}
-            className="w-full h-auto rounded-md object-cover"
-          />
-        </Card>
+      <div className="space-y-2">
+        <p className="text-xl font-bold">Controle de Bobinas</p>
+        <p className="text-base font-bold">
+          Sistema de gestão e controle de estoque de bobinas para ATM's e CD's, com Dashboards, alertas de nível baixo e histórico de movimentações.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          {fichas.map((f) => (
-            <div
-              key={f.label}
-              className="rounded-md p-4 shadow-sm"
-              style={{ background: "#f3f4f6", color: "#000000" }}
-            >
-              <p className="text-xs uppercase tracking-wider opacity-70">{f.label}</p>
-              <p className="text-base font-semibold mt-1 break-words">{f.valor}</p>
-            </div>
-          ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-md p-4 shadow-sm" style={fichaStyle}>
+          <p className="font-bold">Versão</p>
+          <p className="mt-1">2.1.4</p>
+        </div>
+
+        <div className="rounded-md p-4 shadow-sm" style={fichaStyle}>
+          <p className="font-bold">Lançamento</p>
+          <p className="mt-1">20/03/2026</p>
+        </div>
+
+        <div className="rounded-md p-4 shadow-sm" style={fichaStyle}>
+          <p className="font-bold">Autor</p>
+          <p className="mt-1">Jorge Wilson Carneiro</p>
+          <p className="mt-1 break-words">jorgekharuf107@gmail.com</p>
+        </div>
+
+        <div className="rounded-md p-4 shadow-sm" style={fichaStyle}>
+          <p className="italic font-bold">Participação e Solicitação: Emerson Ziliotti</p>
+          <p className="italic font-bold mt-2">Orientações e Correções gerais: META</p>
         </div>
       </div>
     </div>
