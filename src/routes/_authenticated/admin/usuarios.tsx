@@ -1,33 +1,48 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Trash2, Copy } from "lucide-react";
+import { Plus, Trash2, Copy, Pencil, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 
+type Papel = "Administrador" | "Gestor" | "Operador";
+const PAPEIS: Papel[] = ["Administrador", "Gestor", "Operador"];
+
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return;
-    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
-    const isAdmin = roles?.some((r: any) => r.role === "admin" || r.role === "super_admin");
-    if (!isAdmin) throw redirect({ to: "/dashboard" });
+    const { data: isAdmin } = await supabase.rpc("e_admin", { _user_id: data.user.id });
+    if (!isAdmin) {
+      throw redirect({ to: "/dashboard" });
+    }
   },
   component: UsuariosPage,
 });
 
+function badgeColor(p: string) {
+  if (p === "Administrador") return "bg-red-100 text-red-800 border-red-200";
+  if (p === "Gestor") return "bg-blue-100 text-blue-800 border-blue-200";
+  return "bg-green-100 text-green-800 border-green-200";
+}
+
 function UsuariosPage() {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [invite, setInvite] = useState({ email_convidado: "", perfil_convidado: "Usuário" as const });
+  const [openInvite, setOpenInvite] = useState(false);
+  const [invite, setInvite] = useState<{ email_convidado: string; perfil_convidado: Papel }>({
+    email_convidado: "", perfil_convidado: "Operador",
+  });
+  const [editing, setEditing] = useState<any | null>(null);
 
   const { data: usuarios = [] } = useQuery({
     queryKey: ["usuarios"],
@@ -43,13 +58,30 @@ function UsuariosPage() {
     const { data, error } = await supabase.from("convites").insert(invite).select("token").single();
     if (error) return toast.error(error.message);
     const url = `${window.location.origin}/aceitar-convite/${data.token}`;
-    toast.success("Convite criado", {
-      description: `Envie este link ao usuário:`,
-      action: { label: "Copiar link", onClick: () => navigator.clipboard.writeText(url) },
-    });
-    setOpen(false);
-    setInvite({ email_convidado: "", perfil_convidado: "Usuário" });
+    await navigator.clipboard.writeText(url).catch(() => {});
+    toast.success("Convite criado", { description: "Link copiado para a área de transferência." });
+    setOpenInvite(false);
+    setInvite({ email_convidado: "", perfil_convidado: "Operador" });
     qc.invalidateQueries({ queryKey: ["convites"] });
+  }
+
+  async function saveEdit() {
+    if (!editing) return;
+    const { error } = await supabase.from("usuarios").update({
+      nome_completo: editing.nome_completo,
+      perfil: editing.perfil,
+      ativo: editing.ativo,
+    }).eq("id", editing.id);
+    if (error) return toast.error(error.message);
+    toast.success("Usuário atualizado");
+    setEditing(null);
+    qc.invalidateQueries({ queryKey: ["usuarios"] });
+  }
+
+  async function resetSenha(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) return toast.error(error.message);
+    toast.success(`Email de redefinição enviado para ${email}`);
   }
 
   async function copyLink(token: string) {
@@ -68,7 +100,7 @@ function UsuariosPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3"><BackButton to="/dashboard" /><h1 className="text-2xl font-semibold">Usuários</h1></div>
-        <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Convidar usuário</Button>
+        <Button onClick={() => setOpenInvite(true)}><Plus className="h-4 w-4" /> Convidar usuário</Button>
       </div>
 
       <div className="rounded-md border-l-4 border-l-yellow-400 bg-yellow-50 p-3"
@@ -83,23 +115,37 @@ function UsuariosPage() {
         <h3 className="px-4 py-3 font-medium border-b">Usuários cadastrados</h3>
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Nome</TableHead><TableHead>Email</TableHead><TableHead>Perfil</TableHead><TableHead>Cadastrado em</TableHead>
+            <TableHead>Nome Completo</TableHead><TableHead>Email</TableHead>
+            <TableHead>Papel</TableHead><TableHead>Ativo</TableHead>
+            <TableHead>Cadastrado em</TableHead><TableHead className="text-right">Ações</TableHead>
           </TableRow></TableHeader>
           <TableBody>
             {usuarios.length === 0 && (
-              <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Nenhum usuário cadastrado.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum usuário cadastrado.</TableCell></TableRow>
             )}
-            {usuarios.map((u: any) => {
-              const perfilMostrar = (u.perfil ?? "").toUpperCase().includes("SUPER") ? "Administrador" : u.perfil;
-              return (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">{u.nome_completo}</TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>{perfilMostrar}</TableCell>
-                  <TableCell>{new Date(u.data_cadastro).toLocaleDateString("pt-BR")}</TableCell>
-                </TableRow>
-              );
-            })}
+            {usuarios.map((u: any) => (
+              <TableRow key={u.id}>
+                <TableCell className="font-medium">{u.nome_completo}</TableCell>
+                <TableCell>{u.email}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={badgeColor(u.perfil)}>{u.perfil}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={u.ativo ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-700 border-gray-200"}>
+                    {u.ativo ? "Ativo" : "Inativo"}
+                  </Badge>
+                </TableCell>
+                <TableCell>{new Date(u.data_cadastro).toLocaleDateString("pt-BR")}</TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditing({ ...u })}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => resetSenha(u.email)}>
+                    <KeyRound className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </Card>
@@ -108,7 +154,7 @@ function UsuariosPage() {
         <h3 className="px-4 py-3 font-medium border-b">Convites</h3>
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Email</TableHead><TableHead>Perfil</TableHead><TableHead>Status</TableHead>
+            <TableHead>Email</TableHead><TableHead>Papel</TableHead><TableHead>Status</TableHead>
             <TableHead>Expira em</TableHead><TableHead className="text-right">Ações</TableHead>
           </TableRow></TableHeader>
           <TableBody>
@@ -131,19 +177,19 @@ function UsuariosPage() {
         </Table>
       </Card>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* Convidar */}
+      <Dialog open={openInvite} onOpenChange={setOpenInvite}>
         <DialogContent>
           <DialogHeader><DialogTitle>Convidar novo usuário</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2"><Label>Email</Label>
               <Input type="email" value={invite.email_convidado}
                 onChange={(e) => setInvite({ ...invite, email_convidado: e.target.value })} /></div>
-            <div className="space-y-2"><Label>Perfil</Label>
-              <Select value={invite.perfil_convidado} onValueChange={(v: any) => setInvite({ ...invite, perfil_convidado: v })}>
+            <div className="space-y-2"><Label>Papel</Label>
+              <Select value={invite.perfil_convidado} onValueChange={(v: Papel) => setInvite({ ...invite, perfil_convidado: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Usuário">Usuário</SelectItem>
-                  <SelectItem value="Administrador">Administrador</SelectItem>
+                  {PAPEIS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
                 </SelectContent>
               </Select></div>
             <p className="text-xs text-muted-foreground">
@@ -151,8 +197,41 @@ function UsuariosPage() {
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setOpenInvite(false)}>Cancelar</Button>
             <Button onClick={sendInvite}>Criar convite</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Editar */}
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar usuário</DialogTitle></DialogHeader>
+          {editing && (
+            <div className="space-y-4">
+              <div className="space-y-2"><Label>Email</Label>
+                <Input value={editing.email} disabled /></div>
+              <div className="space-y-2"><Label>Nome completo</Label>
+                <Input value={editing.nome_completo}
+                  onChange={(e) => setEditing({ ...editing, nome_completo: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Papel</Label>
+                <Select value={editing.perfil} onValueChange={(v: Papel) => setEditing({ ...editing, perfil: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {PAPEIS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  </SelectContent>
+                </Select></div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <div><Label>Ativo</Label>
+                  <p className="text-xs text-muted-foreground">Usuário inativo não pode acessar o sistema.</p>
+                </div>
+                <Switch checked={editing.ativo} onCheckedChange={(v) => setEditing({ ...editing, ativo: v })} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>Cancelar</Button>
+            <Button onClick={saveEdit}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
