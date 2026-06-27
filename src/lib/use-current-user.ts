@@ -2,43 +2,47 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
-export type AppRole = "super_admin" | "admin" | "usuario";
+export type Papel = "Administrador" | "Gestor" | "Operador";
 
 export interface CurrentUser {
   user: User | null;
-  role: AppRole | null;
-  perfil: string | null;
+  perfil: Papel | null;
   nome: string | null;
+  ativo: boolean;
   loading: boolean;
   isAdmin: boolean;
+  isGestor: boolean;
+  isOperador: boolean;
+  canManageCadastros: boolean; // Admin ou Gestor
+  canManageEstoque: boolean;   // Admin, Gestor ou Operador
 }
 
-// Esconde "SUPER ADMIN" do usuário; apresenta como "Administrador"
-function mascararPerfil(perfil: string | null): string | null {
-  if (!perfil) return perfil;
-  if (perfil.toUpperCase().includes("SUPER")) return "Administrador";
-  return perfil;
+function normalizar(p: string | null): Papel | null {
+  if (!p) return null;
+  const up = p.toUpperCase();
+  if (up.includes("SUPER") || up === "ADMINISTRADOR" || up === "ADMIN") return "Administrador";
+  if (up === "GESTOR") return "Gestor";
+  return "Operador";
 }
 
 export function useCurrentUser(): CurrentUser {
   const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
-  const [perfil, setPerfil] = useState<string | null>(null);
+  const [perfil, setPerfil] = useState<Papel | null>(null);
   const [nome, setNome] = useState<string | null>(null);
+  const [ativo, setAtivo] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
     async function loadProfile(u: User | null) {
-      if (!u) { setRole(null); setPerfil(null); setNome(null); return; }
-      const [{ data: ur }, { data: usr }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", u.id).maybeSingle(),
-        supabase.from("usuarios").select("perfil, nome_completo").eq("id", u.id).maybeSingle(),
-      ]);
+      if (!u) { setPerfil(null); setNome(null); setAtivo(true); return; }
+      const { data: usr } = await supabase
+        .from("usuarios").select("perfil, nome_completo, ativo")
+        .eq("id", u.id).maybeSingle();
       if (!active) return;
-      setRole((ur?.role as AppRole) ?? null);
-      setPerfil(mascararPerfil(usr?.perfil ?? null));
-      setNome(usr?.nome_completo ?? null);
+      setPerfil(normalizar((usr as any)?.perfil ?? null));
+      setNome((usr as any)?.nome_completo ?? null);
+      setAtivo((usr as any)?.ativo ?? true);
     }
     supabase.auth.getUser().then(({ data }) => {
       if (!active) return;
@@ -53,8 +57,14 @@ export function useCurrentUser(): CurrentUser {
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
+  const isAdmin = perfil === "Administrador";
+  const isGestor = perfil === "Gestor";
+  const isOperador = perfil === "Operador";
+
   return {
-    user, role, perfil, nome, loading,
-    isAdmin: role === "admin" || role === "super_admin",
+    user, perfil, nome, ativo, loading,
+    isAdmin, isGestor, isOperador,
+    canManageCadastros: isAdmin || isGestor,
+    canManageEstoque: isAdmin || isGestor || isOperador,
   };
 }
