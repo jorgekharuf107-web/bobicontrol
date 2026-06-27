@@ -204,7 +204,7 @@ export type Database = {
           email_convidado: string
           expira_em: string
           id: string
-          perfil_convidado: Database["public"]["Enums"]["user_perfil"]
+          perfil_convidado: string
           status: Database["public"]["Enums"]["convite_status"]
           token: string
         }
@@ -214,7 +214,7 @@ export type Database = {
           email_convidado: string
           expira_em?: string
           id?: string
-          perfil_convidado?: Database["public"]["Enums"]["user_perfil"]
+          perfil_convidado?: string
           status?: Database["public"]["Enums"]["convite_status"]
           token?: string
         }
@@ -224,7 +224,7 @@ export type Database = {
           email_convidado?: string
           expira_em?: string
           id?: string
-          perfil_convidado?: Database["public"]["Enums"]["user_perfil"]
+          perfil_convidado?: string
           status?: Database["public"]["Enums"]["convite_status"]
           token?: string
         }
@@ -517,6 +517,7 @@ export type Database = {
       }
       usuarios: {
         Row: {
+          ativo: boolean
           criado_em: string
           data_cadastro: string
           email: string
@@ -524,9 +525,10 @@ export type Database = {
           id: string
           microsoft_id: string | null
           nome_completo: string
-          perfil: Database["public"]["Enums"]["user_perfil"]
+          perfil: string
         }
         Insert: {
+          ativo?: boolean
           criado_em?: string
           data_cadastro?: string
           email: string
@@ -534,9 +536,10 @@ export type Database = {
           id: string
           microsoft_id?: string | null
           nome_completo: string
-          perfil?: Database["public"]["Enums"]["user_perfil"]
+          perfil?: string
         }
         Update: {
+          ativo?: boolean
           criado_em?: string
           data_cadastro?: string
           email?: string
@@ -544,7 +547,7 @@ export type Database = {
           id?: string
           microsoft_id?: string | null
           nome_completo?: string
-          perfil?: Database["public"]["Enums"]["user_perfil"]
+          perfil?: string
         }
         Relationships: []
       }
@@ -553,6 +556,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      e_admin: { Args: { _user_id: string }; Returns: boolean }
+      e_gestor: { Args: { _user_id: string }; Returns: boolean }
+      e_operador: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -561,6 +567,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_super: { Args: { _user_id: string }; Returns: boolean }
+      tem_funcao: {
+        Args: { _funcao: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "usuario"
@@ -576,7 +586,6 @@ export type Database = {
       status_geral: "ativo" | "inativo"
       status_operacional: "operacional" | "manutencao" | "desativado"
       tipo_contato_motorista: "motorista1" | "motorista2"
-      user_perfil: "Usuário" | "Administrador" | "SUPER ADMIN"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -718,7 +727,6 @@ export const Constants = {
       status_geral: ["ativo", "inativo"],
       status_operacional: ["operacional", "manutencao", "desativado"],
       tipo_contato_motorista: ["motorista1", "motorista2"],
-      user_perfil: ["Usuário", "Administrador", "SUPER ADMIN"],
     },
   },
 } as const
