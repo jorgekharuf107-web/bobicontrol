@@ -1,6 +1,14 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/app-sidebar";
+import { useCurrentUser } from "@/lib/use-current-user";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOut, User as UserIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -12,12 +20,55 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
 });
 
+function papelBadge(p: string | null) {
+  if (p === "Administrador") return "bg-red-100 text-red-800 border-red-200";
+  if (p === "Gestor") return "bg-blue-100 text-blue-800 border-blue-200";
+  return "bg-green-100 text-green-800 border-green-200";
+}
+
+function TopHeader() {
+  const router = useRouter();
+  const { nome, perfil, user } = useCurrentUser();
+  const display = nome ?? user?.email ?? "Usuário";
+  const initials = (display.match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase();
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    router.navigate({ to: "/auth", replace: true });
+  }
+
+  return (
+    <header className="h-14 border-b bg-white flex items-center justify-end px-6 gap-3">
+      <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
+      {perfil && <Badge variant="outline" className={papelBadge(perfil)}>{perfil}</Badge>}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary">
+            <Avatar className="h-9 w-9"><AvatarFallback>{initials || "U"}</AvatarFallback></Avatar>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => router.navigate({ to: "/admin/usuarios" })}>
+            <UserIcon className="h-4 w-4 mr-2" /> Meu Perfil
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={signOut} className="text-red-600">
+            <LogOut className="h-4 w-4 mr-2" /> Sair
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </header>
+  );
+}
+
 function AuthenticatedLayout() {
   return (
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
-      <main className="flex-1 overflow-x-hidden">
-        <div className="max-w-7xl mx-auto p-6">
+      <main className="flex-1 overflow-x-hidden flex flex-col">
+        <TopHeader />
+        <div className="max-w-7xl mx-auto p-6 w-full">
           <Outlet />
         </div>
       </main>
