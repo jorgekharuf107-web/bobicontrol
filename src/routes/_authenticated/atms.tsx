@@ -151,10 +151,10 @@ function AtmsPage() {
                 <td>{a.id_atm}</td>
                 <td>{a.modelo ?? "—"}</td>
                 <td>{a.estacoes?.nome ?? a.estacao ?? "—"}</td>
-                <td>{a.estacoes?.linhas ? (
+                <td>{a.linhas ? (
                   <span className="inline-flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full" style={{ background: a.estacoes.linhas.cor_hex || "#1e40af" }} />
-                    {a.estacoes.linhas.nome}
+                    <span className="w-3 h-3 rounded-full" style={{ background: a.linhas.cor_hex || "#1e40af" }} />
+                    {a.linhas.nome}
                   </span>
                 ) : "—"}</td>
                 <td>{a.localizacao_detalhada ?? "—"}</td>
