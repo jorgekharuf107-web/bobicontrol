@@ -53,6 +53,10 @@ function AtmsPage() {
     queryKey: ["estacoes-sel"],
     queryFn: async () => (await supabase.from("estacoes").select("id, nome").order("nome")).data ?? [],
   });
+  const { data: linhas = [] } = useQuery({
+    queryKey: ["linhas-sel-atm"],
+    queryFn: async () => (await supabase.from("linhas").select("id, nome, cor_hex").order("nome")).data ?? [],
+  });
 
   const filtrados = useMemo(() => {
     const f = busca.toLowerCase();
