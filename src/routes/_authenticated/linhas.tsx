@@ -94,10 +94,7 @@ function LinhasPage() {
               <TableRow key={l.id}>
                 <TableCell className="font-medium">{l.nome}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <span className="h-4 w-4 rounded" style={{ background: l.cor_hex }} />
-                    <span className="text-xs text-muted-foreground">{l.cor_hex}</span>
-                  </div>
+                  <div style={{ width: 16, height: 16, borderRadius: "50%", backgroundColor: l.cor_hex }} />
                 </TableCell>
                 <TableCell>{l.linha_ativa_sim_nao ? "Ativa" : "Inativa"}</TableCell>
                 <TableCell className="text-right">
