@@ -25,15 +25,16 @@ const atmSchema = z.object({
   id_atm: z.string().trim().min(1, "Informe o ID do ATM").max(40),
   modelo: z.string().trim().min(1, "Informe o modelo").max(80),
   estacao_id: z.string().uuid().optional().or(z.literal("")),
+  linha_id: z.string().uuid("Selecione a linha"),
   localizacao_detalhada: z.string().trim().max(200).optional().or(z.literal("")),
-  capacidade_bobinas: z.number().int().min(1, "Capacidade deve ser ≥ 1"),
+  capacidade_bobinas: z.number().int().min(1, "Capacidade deve ser ≥ 1").max(9, "Máximo 9 bobinas"),
   nivel_minimo: z.number().int().min(1, "Nível mínimo deve ser ≥ 1"),
   status_operacional: z.enum(statusEnum),
   atm_ativo_sim_nao: z.boolean(),
 });
 
 type AtmForm = z.infer<typeof atmSchema>;
-const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true };
+const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", linha_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true };
 
 function AtmsPage() {
   const qc = useQueryClient();
