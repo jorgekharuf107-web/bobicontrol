@@ -24,6 +24,7 @@ export type Database = {
           estacao_id: string | null
           id: string
           id_atm: string
+          linha_id: string | null
           localizacao_detalhada: string | null
           modelo: string | null
           nivel_minimo: number
@@ -38,6 +39,7 @@ export type Database = {
           estacao_id?: string | null
           id?: string
           id_atm: string
+          linha_id?: string | null
           localizacao_detalhada?: string | null
           modelo?: string | null
           nivel_minimo?: number
@@ -52,6 +54,7 @@ export type Database = {
           estacao_id?: string | null
           id?: string
           id_atm?: string
+          linha_id?: string | null
           localizacao_detalhada?: string | null
           modelo?: string | null
           nivel_minimo?: number
@@ -70,6 +73,13 @@ export type Database = {
             columns: ["estacao_id"]
             isOneToOne: false
             referencedRelation: "estacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "atms_linha_id_fkey"
+            columns: ["linha_id"]
+            isOneToOne: false
+            referencedRelation: "linhas"
             referencedColumns: ["id"]
           },
         ]
