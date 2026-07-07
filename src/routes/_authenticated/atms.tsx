@@ -47,7 +47,7 @@ function AtmsPage() {
 
   const { data: atms = [] } = useQuery({
     queryKey: ["atms"],
-    queryFn: async () => (await supabase.from("atms").select("*, estacoes(nome, linhas(nome, cor_hex))").order("id_atm")).data ?? [],
+    queryFn: async () => (await supabase.from("atms").select("*, estacoes(nome), linhas(nome, cor_hex)").order("id_atm")).data ?? [],
   });
   const { data: estacoes = [] } = useQuery({
     queryKey: ["estacoes-sel"],
