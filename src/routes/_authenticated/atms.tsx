@@ -186,11 +186,28 @@ function AtmsPage() {
                 <SelectContent>{estacoes.map((e: any) => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <div><Label>Linha</Label>
+              <Select value={form.linha_id || undefined} onValueChange={(v) => setForm({ ...form, linha_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione a linha" /></SelectTrigger>
+                <SelectContent>{linhas.map((l: any) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    <span className="inline-flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full" style={{ background: l.cor_hex || "#1e40af" }} />
+                      {l.nome}
+                    </span>
+                  </SelectItem>
+                ))}</SelectContent>
+              </Select>
+            </div>
             <div><Label>Localização Detalhada</Label>
               <Input placeholder="Ex: Hall de entrada" value={form.localizacao_detalhada} onChange={(e) => setForm({ ...form, localizacao_detalhada: e.target.value })} />
             </div>
             <div><Label>Capacidade de Bobinas</Label>
-              <Input type="number" min={1} value={form.capacidade_bobinas} onChange={(e) => setForm({ ...form, capacidade_bobinas: Math.max(1, +e.target.value || 1) })} />
+              <Input type="number" min={1} max={9} value={form.capacidade_bobinas} onChange={(e) => {
+                const n = +e.target.value || 1;
+                if (n > 9) { toast.error("Máximo 9 bobinas"); return; }
+                setForm({ ...form, capacidade_bobinas: Math.max(1, Math.min(9, n)) });
+              }} />
             </div>
             <div><Label>Nível Mínimo</Label>
               <Input type="number" min={1} value={form.nivel_minimo} onChange={(e) => setForm({ ...form, nivel_minimo: Math.max(1, +e.target.value || 1) })} />
