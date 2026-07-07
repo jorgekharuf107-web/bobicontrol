@@ -184,14 +184,15 @@ function CdsPage() {
             <div><Label>Nível Mínimo</Label>
               <Input type="number" min={0} value={form.nivel_minimo} onChange={(e) => setForm({ ...form, nivel_minimo: Math.max(0, +e.target.value || 0) })} />
             </div>
-            <div className="col-span-2"><Label>Status</Label>
-              <Select value={form.status} onValueChange={(v: any) => setForm({ ...form, status: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ativo">Ativo</SelectItem>
-                  <SelectItem value="inativo">Inativo</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="col-span-2 flex items-center gap-2">
+              <input
+                id="cd-ativo"
+                type="checkbox"
+                className="h-4 w-4"
+                checked={form.status === "ativo"}
+                onChange={(e) => setForm({ ...form, status: e.target.checked ? "ativo" : "inativo" })}
+              />
+              <Label htmlFor="cd-ativo">Ativo</Label>
             </div>
           </div>
           <DialogFooter>

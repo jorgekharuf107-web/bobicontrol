@@ -25,15 +25,16 @@ const atmSchema = z.object({
   id_atm: z.string().trim().min(1, "Informe o ID do ATM").max(40),
   modelo: z.string().trim().min(1, "Informe o modelo").max(80),
   estacao_id: z.string().uuid().optional().or(z.literal("")),
+  linha_id: z.string().uuid("Selecione a linha"),
   localizacao_detalhada: z.string().trim().max(200).optional().or(z.literal("")),
-  capacidade_bobinas: z.number().int().min(1, "Capacidade deve ser ≥ 1"),
+  capacidade_bobinas: z.number().int().min(1, "Capacidade deve ser ≥ 1").max(9, "Máximo 9 bobinas"),
   nivel_minimo: z.number().int().min(1, "Nível mínimo deve ser ≥ 1"),
   status_operacional: z.enum(statusEnum),
   atm_ativo_sim_nao: z.boolean(),
 });
 
 type AtmForm = z.infer<typeof atmSchema>;
-const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true };
+const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", linha_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true };
 
 function AtmsPage() {
   const qc = useQueryClient();
@@ -46,11 +47,15 @@ function AtmsPage() {
 
   const { data: atms = [] } = useQuery({
     queryKey: ["atms"],
-    queryFn: async () => (await supabase.from("atms").select("*, estacoes(nome, linhas(nome, cor_hex))").order("id_atm")).data ?? [],
+    queryFn: async () => (await supabase.from("atms").select("*, estacoes(nome), linhas(nome, cor_hex)").order("id_atm")).data ?? [],
   });
   const { data: estacoes = [] } = useQuery({
     queryKey: ["estacoes-sel"],
     queryFn: async () => (await supabase.from("estacoes").select("id, nome").order("nome")).data ?? [],
+  });
+  const { data: linhas = [] } = useQuery({
+    queryKey: ["linhas-sel-atm"],
+    queryFn: async () => (await supabase.from("linhas").select("id, nome, cor_hex").order("nome")).data ?? [],
   });
 
   const filtrados = useMemo(() => {
@@ -69,6 +74,7 @@ function AtmsPage() {
     setEditingId(a.id);
     setForm({
       id_atm: a.id_atm, modelo: a.modelo ?? "", estacao_id: a.estacao_id ?? "",
+      linha_id: a.linha_id ?? "",
       localizacao_detalhada: a.localizacao_detalhada ?? "", capacidade_bobinas: a.capacidade_bobinas,
       nivel_minimo: a.nivel_minimo, status_operacional: a.status_operacional, atm_ativo_sim_nao: a.atm_ativo_sim_nao,
     });
@@ -145,10 +151,10 @@ function AtmsPage() {
                 <td>{a.id_atm}</td>
                 <td>{a.modelo ?? "—"}</td>
                 <td>{a.estacoes?.nome ?? a.estacao ?? "—"}</td>
-                <td>{a.estacoes?.linhas ? (
+                <td>{a.linhas ? (
                   <span className="inline-flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full" style={{ background: a.estacoes.linhas.cor_hex || "#1e40af" }} />
-                    {a.estacoes.linhas.nome}
+                    <span className="w-3 h-3 rounded-full" style={{ background: a.linhas.cor_hex || "#1e40af" }} />
+                    {a.linhas.nome}
                   </span>
                 ) : "—"}</td>
                 <td>{a.localizacao_detalhada ?? "—"}</td>
@@ -180,11 +186,28 @@ function AtmsPage() {
                 <SelectContent>{estacoes.map((e: any) => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <div><Label>Linha</Label>
+              <Select value={form.linha_id || undefined} onValueChange={(v) => setForm({ ...form, linha_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione a linha" /></SelectTrigger>
+                <SelectContent>{linhas.map((l: any) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    <span className="inline-flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full" style={{ background: l.cor_hex || "#1e40af" }} />
+                      {l.nome}
+                    </span>
+                  </SelectItem>
+                ))}</SelectContent>
+              </Select>
+            </div>
             <div><Label>Localização Detalhada</Label>
               <Input placeholder="Ex: Hall de entrada" value={form.localizacao_detalhada} onChange={(e) => setForm({ ...form, localizacao_detalhada: e.target.value })} />
             </div>
             <div><Label>Capacidade de Bobinas</Label>
-              <Input type="number" min={1} value={form.capacidade_bobinas} onChange={(e) => setForm({ ...form, capacidade_bobinas: Math.max(1, +e.target.value || 1) })} />
+              <Input type="number" min={1} max={9} value={form.capacidade_bobinas} onChange={(e) => {
+                const n = +e.target.value || 1;
+                if (n > 9) { toast.error("Máximo 9 bobinas"); return; }
+                setForm({ ...form, capacidade_bobinas: Math.max(1, Math.min(9, n)) });
+              }} />
             </div>
             <div><Label>Nível Mínimo</Label>
               <Input type="number" min={1} value={form.nivel_minimo} onChange={(e) => setForm({ ...form, nivel_minimo: Math.max(1, +e.target.value || 1) })} />

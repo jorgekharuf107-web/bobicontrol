@@ -123,4 +123,8 @@
   .excel-table tbody tr:nth-child(odd) { background: #ffffff; }
   .excel-table tbody tr:nth-child(even) { background: #f1f5f9; }
   .excel-table tbody tr:hover { background: #dbeafe; }
+  @media (max-width: 767px) {
+    .excel-table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
+    .excel-table th, .excel-table td { padding: 4px 6px; }
+  }
 }
