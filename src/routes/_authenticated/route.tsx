@@ -40,7 +40,7 @@ function TopHeader() {
   return (
     <header className="h-14 border-b bg-white flex items-center justify-end px-6 gap-3">
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
-      {perfil && <Badge variant="outline" className={papelBadge(perfil)}>{perfil}</Badge>}
+      {perfil && <Badge variant="outline" className={papelBadge(perfil === "SUPER_ADMIN" ? "Administrador" : perfil)}>{perfil === "SUPER_ADMIN" ? "Administrador" : perfil}</Badge>}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary">
