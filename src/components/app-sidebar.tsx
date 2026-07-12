@@ -95,7 +95,7 @@ export function AppSidebar() {
       <div className="border-t border-sidebar-border p-3">
         <div className="px-2 mb-2">
           <p className="text-sm font-medium truncate">{nome ?? "Usuário"}</p>
-          <p className="text-[11px] text-sidebar-foreground/60 truncate">{perfil ?? ""}</p>
+          <p className="text-[11px] text-sidebar-foreground/60 truncate">{perfil === "SUPER_ADMIN" ? "Administrador" : (perfil ?? "")}</p>
         </div>
         <button
           onClick={signOut}
