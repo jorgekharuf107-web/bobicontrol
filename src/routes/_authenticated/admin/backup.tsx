@@ -179,29 +179,29 @@ function BackupPage() {
 
       <Card className="p-5 space-y-4">
         <div>
-          <h2 className="text-lg font-semibold">Fechamento do Ano {anoCorrente - 1}</h2>
+          <h2 className="text-lg font-semibold">Fechamento do Ano {anoCorrente - 2}</h2>
           <ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1">
-            <li>Salva o saldo de fechamento de 31/12/{anoCorrente - 1}</li>
-            <li>Apaga todas as movimentações de {anoCorrente - 1}</li>
-            <li>Mantém o saldo atual das ATM e CD para o novo ano</li>
+            <li>Salva o saldo de fechamento de 31/12/{anoCorrente - 2}</li>
+            <li>Apaga todas as movimentações até {anoCorrente - 2}</li>
+            <li>Mantém os anos {anoCorrente - 1} e {anoCorrente} ativos</li>
           </ol>
           <p className="text-sm text-muted-foreground mt-2">
-            Cadastros são mantidos. O ano {anoCorrente} continua normal.
+            Importante: BobControl trabalha com bobinas. O saldo é de estoque de papel.
           </p>
         </div>
         <Button variant="destructive" onClick={() => setConfirmar(true)} disabled={zerando}>
-          <Trash2 className="h-4 w-4" /> Zerar Dados do Ano Anterior
+          <Trash2 className="h-4 w-4" /> Fechar e Zerar até {anoCorrente - 2}
         </Button>
       </Card>
 
       <AlertDialog open={confirmar} onOpenChange={setConfirmar}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar fechamento de {anoCorrente - 1}</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar fechamento até {anoCorrente - 2}</AlertDialogTitle>
             <AlertDialogDescription>
-              O saldo de 31/12/{anoCorrente - 1} será salvo no histórico e todas as movimentações
-              de {anoCorrente - 1} serão removidas permanentemente. Esta ação não pode ser desfeita.
-              Faça o backup primeiro.
+              O saldo de 31/12/{anoCorrente - 2} será salvo no histórico e todas as movimentações
+              até {anoCorrente - 2} serão removidas permanentemente. Os anos {anoCorrente - 1} e {anoCorrente} permanecem ativos.
+              Esta ação não pode ser desfeita. Faça o backup primeiro.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
