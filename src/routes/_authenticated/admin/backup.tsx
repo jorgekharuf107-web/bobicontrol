@@ -73,13 +73,59 @@ function BackupPage() {
   async function zerar() {
     setZerando(true);
     try {
-      const corte = `${anoCorrente}-01-01`;
-      const { error, count } = await supabase
+      const anoAnterior = anoCorrente - 1;
+      const inicio = `${anoAnterior}-01-01`;
+      const fimExcl = `${anoCorrente}-01-01`;
+      const snapshotData = `${anoAnterior}-12-31`;
+
+      const [{ data: atms, error: eA }, { data: cdsList, error: eC }] = await Promise.all([
+        supabase.from("atms").select("id"),
+        supabase.from("cds").select("id"),
+      ]);
+      if (eA) throw eA;
+      if (eC) throw eC;
+
+      const { data: movs, error: eM } = await supabase
+        .from("movimentacoes")
+        .select("qtd, origem_tipo, origem_id, destino_tipo, destino_id, data")
+        .lt("data", fimExcl);
+      if (eM) throw eM;
+
+      const saldos = new Map<string, number>();
+      const key = (tipo: string, id: string) => `${tipo}:${id}`;
+      for (const a of atms ?? []) saldos.set(key("atm", a.id), 0);
+      for (const c of cdsList ?? []) saldos.set(key("cd", c.id), 0);
+
+      for (const m of (movs ?? []) as any[]) {
+        if (m.destino_tipo && m.destino_id) {
+          const k = key(m.destino_tipo, m.destino_id);
+          if (saldos.has(k)) saldos.set(k, (saldos.get(k) ?? 0) + (m.qtd ?? 0));
+        }
+        if (m.origem_tipo && m.origem_id) {
+          const k = key(m.origem_tipo, m.origem_id);
+          if (saldos.has(k)) saldos.set(k, (saldos.get(k) ?? 0) - (m.qtd ?? 0));
+        }
+      }
+
+      const snapshot = Array.from(saldos.entries()).map(([k, saldo]) => {
+        const [tipo, id_item] = k.split(":");
+        return { tipo, id_item, saldo, data_snapshot: snapshotData };
+      });
+
+      if (snapshot.length > 0) {
+        await supabase.from("historico_saldos" as any).delete().eq("data_snapshot", snapshotData);
+        const { error: eIns } = await supabase.from("historico_saldos" as any).insert(snapshot);
+        if (eIns) throw eIns;
+      }
+
+      const { error: eDel, count } = await supabase
         .from("movimentacoes")
         .delete({ count: "exact" })
-        .lt("data", corte);
-      if (error) throw error;
-      toast.success(`${count ?? 0} movimentações anteriores a ${corte} removidas`);
+        .gte("data", inicio)
+        .lt("data", fimExcl);
+      if (eDel) throw eDel;
+
+      toast.success(`Fechamento ${anoAnterior}: ${snapshot.length} saldos salvos, ${count ?? 0} movimentações removidas`);
     } catch (e: any) {
       toast.error(e.message ?? "Falha ao zerar");
     } finally {
