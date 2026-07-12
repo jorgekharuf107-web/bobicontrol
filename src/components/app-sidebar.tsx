@@ -40,7 +40,7 @@ const adminSuper: Item[] = [
 export function AppSidebar() {
   const router = useRouter();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const { isAdmin, perfil, nome } = useCurrentUser();
+  const { isAdmin, isSuperAdmin, perfil, nome } = useCurrentUser();
 
   async function signOut() {
     await supabase.auth.signOut();
