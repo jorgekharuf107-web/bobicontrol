@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
-export type Papel = "Administrador" | "Gestor" | "Operador";
+export type Papel = "SUPER_ADMIN" | "Administrador" | "Gestor" | "Operador";
 
 export interface CurrentUser {
   user: User | null;
@@ -10,17 +10,19 @@ export interface CurrentUser {
   nome: string | null;
   ativo: boolean;
   loading: boolean;
+  isSuperAdmin: boolean;
   isAdmin: boolean;
   isGestor: boolean;
   isOperador: boolean;
-  canManageCadastros: boolean; // Admin ou Gestor
-  canManageEstoque: boolean;   // Admin, Gestor ou Operador
+  canManageCadastros: boolean;
+  canManageEstoque: boolean;
 }
 
 function normalizar(p: string | null): Papel | null {
   if (!p) return null;
   const up = p.toUpperCase();
-  if (up.includes("SUPER") || up === "ADMINISTRADOR" || up === "ADMIN") return "Administrador";
+  if (up === "SUPER_ADMIN" || up === "SUPERADMIN" || up === "SUPER") return "SUPER_ADMIN";
+  if (up === "ADMINISTRADOR" || up === "ADMIN") return "Administrador";
   if (up === "GESTOR") return "Gestor";
   return "Operador";
 }
@@ -57,14 +59,16 @@ export function useCurrentUser(): CurrentUser {
     return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
-  const isAdmin = perfil === "Administrador";
+  const isSuperAdmin = perfil === "SUPER_ADMIN";
+  const isAdmin = perfil === "Administrador" || isSuperAdmin;
   const isGestor = perfil === "Gestor";
   const isOperador = perfil === "Operador";
 
   return {
     user, perfil, nome, ativo, loading,
-    isAdmin, isGestor, isOperador,
+    isSuperAdmin, isAdmin, isGestor, isOperador,
     canManageCadastros: isAdmin || isGestor,
     canManageEstoque: isAdmin || isGestor || isOperador,
   };
 }
+
