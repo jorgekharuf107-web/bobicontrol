@@ -143,10 +143,10 @@ function AtmsPage() {
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
           <thead><tr>
-            <th>ID</th><th>Modelo</th><th>Estação</th><th>Linha</th><th>Localização</th><th>Capacidade</th><th>Status</th><th>Ações</th>
+            <th>ID</th><th>Modelo</th><th>Estação</th><th>Linha</th><th>Localização</th><th>Capacidade</th><th>Possui CD</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody>
-            {filtrados.length === 0 && <tr><td colSpan={8} className="text-center py-8 font-bold text-muted-foreground">Nenhum ATM cadastrado</td></tr>}
+            {filtrados.length === 0 && <tr><td colSpan={9} className="text-center py-8 font-bold text-muted-foreground">Nenhum ATM cadastrado</td></tr>}
             {filtrados.map((a: any) => (
               <tr key={a.id}>
                 <td>{a.id_atm}</td>
