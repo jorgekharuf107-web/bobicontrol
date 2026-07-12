@@ -102,7 +102,7 @@ function BackupPage() {
         <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
         <div className="text-sm">
           <p className="font-bold">Esta ação não pode ser desfeita. Faça o backup primeiro.</p>
-          <p className="mt-1">Mantenha o Supabase apenas com dados do ano corrente para não estourar o limite do plano gratuito.</p>
+          <p className="mt-1">Mantém o BobControl apenas com dados do ano corrente para não estourar o limite de Armazenamento.</p>
         </div>
       </div>
 
@@ -120,8 +120,8 @@ function BackupPage() {
               type="number"
               value={ano}
               min={2000}
-              max={anoCorrente}
-              onChange={(e) => setAno(Math.min(anoCorrente, Math.max(2000, +e.target.value || anoCorrente - 1)))}
+              max={anoCorrente - 1}
+              onChange={(e) => setAno(Math.min(anoCorrente - 1, Math.max(2000, +e.target.value || anoCorrente - 1)))}
               className="w-32"
             />
           </div>
@@ -135,8 +135,7 @@ function BackupPage() {
         <div>
           <h2 className="text-lg font-semibold">Zerar Ano Anterior</h2>
           <p className="text-sm text-muted-foreground">
-            Remove todas as movimentações com data anterior a <b>01/01/{anoCorrente}</b>.
-            Cadastros de ATM, CD e Usuário são mantidos.
+            Remove todas as movimentações com data anterior a <b>01/01/{anoCorrente}</b>: Cadastros de ATM, CD, Linhas, Estações, Fornecedor e Usuário são mantidos.
           </p>
         </div>
         <Button variant="destructive" onClick={() => setConfirmar(true)} disabled={zerando}>
