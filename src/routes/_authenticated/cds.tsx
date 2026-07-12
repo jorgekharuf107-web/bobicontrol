@@ -48,7 +48,7 @@ function CdsPage() {
   });
   const { data: linhas = [] } = useQuery({
     queryKey: ["linhas-sel-cd"],
-    queryFn: async () => (await supabase.from("linhas").select("id, nome").order("nome")).data ?? [],
+    queryFn: async () => (await supabase.from("linhas").select("id, nome, cor_hex").order("nome")).data ?? [],
   });
 
   const filtrados = useMemo(() => {
