@@ -179,23 +179,29 @@ function BackupPage() {
 
       <Card className="p-5 space-y-4">
         <div>
-          <h2 className="text-lg font-semibold">Zerar Ano Anterior</h2>
-          <p className="text-sm text-muted-foreground">
-            Remove todas as movimentações com data anterior a <b>01/01/{anoCorrente}</b>: Cadastros de ATM, CD, Linhas, Estações, Fornecedor e Usuário são mantidos.
+          <h2 className="text-lg font-semibold">Fechamento do Ano {anoCorrente - 1}</h2>
+          <ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1">
+            <li>Salva o saldo de fechamento de 31/12/{anoCorrente - 1}</li>
+            <li>Apaga todas as movimentações de {anoCorrente - 1}</li>
+            <li>Mantém o saldo atual das ATM e CD para o novo ano</li>
+          </ol>
+          <p className="text-sm text-muted-foreground mt-2">
+            Cadastros são mantidos. O ano {anoCorrente} continua normal.
           </p>
         </div>
         <Button variant="destructive" onClick={() => setConfirmar(true)} disabled={zerando}>
-          <Trash2 className="h-4 w-4" /> Zerar Ano Anterior
+          <Trash2 className="h-4 w-4" /> Zerar Dados do Ano Anterior
         </Button>
       </Card>
 
       <AlertDialog open={confirmar} onOpenChange={setConfirmar}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar fechamento de {anoCorrente - 1}</AlertDialogTitle>
             <AlertDialogDescription>
-              Todas as movimentações anteriores a 01/01/{anoCorrente} serão removidas permanentemente.
-              Esta ação não pode ser desfeita. Faça o backup primeiro.
+              O saldo de 31/12/{anoCorrente - 1} será salvo no histórico e todas as movimentações
+              de {anoCorrente - 1} serão removidas permanentemente. Esta ação não pode ser desfeita.
+              Faça o backup primeiro.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
