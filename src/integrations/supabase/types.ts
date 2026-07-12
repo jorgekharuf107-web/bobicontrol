@@ -572,6 +572,7 @@ export type Database = {
       e_admin: { Args: { _user_id: string }; Returns: boolean }
       e_gestor: { Args: { _user_id: string }; Returns: boolean }
       e_operador: { Args: { _user_id: string }; Returns: boolean }
+      e_super_admin: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
