@@ -89,7 +89,7 @@ function BackupPage() {
       const { data: movs, error: eM } = await supabase
         .from("movimentacoes")
         .select("qtd, origem_tipo, origem_id, destino_tipo, destino_id, data")
-        .lt("data", fimExcl);
+        .lt("data", dataCorte);
       if (eM) throw eM;
 
       const saldos = new Map<string, number>();
