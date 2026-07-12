@@ -175,7 +175,14 @@ function CdsPage() {
             <div><Label>Linha</Label>
               <Select value={form.linha_id || undefined} onValueChange={(v) => setForm({ ...form, linha_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{linhas.map((l: any) => <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>)}</SelectContent>
+                <SelectContent>{linhas.map((l: any) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    <span className="inline-flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full" style={{ background: l.cor_hex || "#1e40af" }} />
+                      {l.nome}
+                    </span>
+                  </SelectItem>
+                ))}</SelectContent>
               </Select>
             </div>
             <div><Label>Capacidade</Label>
