@@ -2,7 +2,7 @@ import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
   Banknote, Truck, Train, Building2, MapPin,
-  Bell, ClipboardList, Users, Info, LogOut, Shield,
+  Bell, ClipboardList, Users, Info, LogOut, Shield, Database,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/use-current-user";
