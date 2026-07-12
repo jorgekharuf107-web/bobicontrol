@@ -332,6 +332,33 @@ export type Database = {
         }
         Relationships: []
       }
+      historico_saldos: {
+        Row: {
+          criado_em: string
+          data_snapshot: string
+          id: string
+          id_item: string
+          saldo: number
+          tipo: string
+        }
+        Insert: {
+          criado_em?: string
+          data_snapshot: string
+          id?: string
+          id_item: string
+          saldo?: number
+          tipo: string
+        }
+        Update: {
+          criado_em?: string
+          data_snapshot?: string
+          id?: string
+          id_item?: string
+          saldo?: number
+          tipo?: string
+        }
+        Relationships: []
+      }
       itens: {
         Row: {
           ativo: boolean
