@@ -74,9 +74,10 @@ function BackupPage() {
     setZerando(true);
     try {
       const anoAnterior = anoCorrente - 1;
-      const inicio = `${anoAnterior}-01-01`;
-      const fimExcl = `${anoCorrente}-01-01`;
-      const snapshotData = `${anoAnterior}-12-31`;
+      const anoCorte = anoAnterior - 1;
+      const dataCorte = `${anoCorte + 1}-01-01`;
+      const snapshotData = `${anoCorte}-12-31`;
+
 
       const [{ data: atms, error: eA }, { data: cdsList, error: eC }] = await Promise.all([
         supabase.from("atms").select("id"),
