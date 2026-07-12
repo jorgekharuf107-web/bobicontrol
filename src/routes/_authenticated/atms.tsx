@@ -31,10 +31,11 @@ const atmSchema = z.object({
   nivel_minimo: z.number().int().min(1, "Nível mínimo deve ser ≥ 1"),
   status_operacional: z.enum(statusEnum),
   atm_ativo_sim_nao: z.boolean(),
+  possui_cd: z.boolean(),
 });
 
 type AtmForm = z.infer<typeof atmSchema>;
-const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", linha_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true };
+const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", linha_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true, possui_cd: false };
 
 function AtmsPage() {
   const qc = useQueryClient();
@@ -76,7 +77,7 @@ function AtmsPage() {
       id_atm: a.id_atm, modelo: a.modelo ?? "", estacao_id: a.estacao_id ?? "",
       linha_id: a.linha_id ?? "",
       localizacao_detalhada: a.localizacao_detalhada ?? "", capacidade_bobinas: a.capacidade_bobinas,
-      nivel_minimo: a.nivel_minimo, status_operacional: a.status_operacional, atm_ativo_sim_nao: a.atm_ativo_sim_nao,
+      nivel_minimo: a.nivel_minimo, status_operacional: a.status_operacional, atm_ativo_sim_nao: a.atm_ativo_sim_nao, possui_cd: !!a.possui_cd,
     });
     setOpen(true);
   }
@@ -142,10 +143,10 @@ function AtmsPage() {
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
           <thead><tr>
-            <th>ID</th><th>Modelo</th><th>Estação</th><th>Linha</th><th>Localização</th><th>Capacidade</th><th>Status</th><th>Ações</th>
+            <th>ID</th><th>Modelo</th><th>Estação</th><th>Linha</th><th>Localização</th><th>Capacidade</th><th>Possui CD</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody>
-            {filtrados.length === 0 && <tr><td colSpan={8} className="text-center py-8 font-bold text-muted-foreground">Nenhum ATM cadastrado</td></tr>}
+            {filtrados.length === 0 && <tr><td colSpan={9} className="text-center py-8 font-bold text-muted-foreground">Nenhum ATM cadastrado</td></tr>}
             {filtrados.map((a: any) => (
               <tr key={a.id}>
                 <td>{a.id_atm}</td>
@@ -159,6 +160,7 @@ function AtmsPage() {
                 ) : "—"}</td>
                 <td>{a.localizacao_detalhada ?? "—"}</td>
                 <td>{a.capacidade_bobinas}</td>
+                <td>{a.possui_cd ? "Sim" : "Não"}</td>
                 <td>{statusLabel[a.status_operacional] ?? a.status_operacional}</td>
                 <td className="whitespace-nowrap">
                   <Button variant="ghost" size="icon" onClick={() => startEdit(a)}><Pencil className="h-4 w-4" /></Button>
@@ -222,9 +224,15 @@ function AtmsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="col-span-2 flex items-center gap-2">
-              <Switch checked={form.atm_ativo_sim_nao} onCheckedChange={(v) => setForm({ ...form, atm_ativo_sim_nao: v })} />
-              <Label>ATM ativo</Label>
+            <div className="col-span-2 flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch checked={form.atm_ativo_sim_nao} onCheckedChange={(v) => setForm({ ...form, atm_ativo_sim_nao: v })} />
+                <Label>ATM ativo</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input id="possui-cd" type="checkbox" className="h-4 w-4" checked={form.possui_cd} onChange={(e) => setForm({ ...form, possui_cd: e.target.checked })} />
+                <Label htmlFor="possui-cd">Possui CD</Label>
+              </div>
             </div>
           </div>
           <DialogFooter>

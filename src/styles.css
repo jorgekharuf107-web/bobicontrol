@@ -125,6 +125,8 @@
   .excel-table tbody tr:hover { background: #dbeafe; }
   @media (max-width: 767px) {
     .excel-table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
-    .excel-table th, .excel-table td { padding: 4px 6px; }
+    .excel-table th, .excel-table td { padding: 8px; }
+    [role="dialog"] .grid { gap: 8px; }
+    [role="dialog"] .grid > div { margin-bottom: 2px; }
   }
 }

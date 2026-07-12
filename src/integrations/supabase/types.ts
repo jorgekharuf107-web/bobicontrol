@@ -28,6 +28,7 @@ export type Database = {
           localizacao_detalhada: string | null
           modelo: string | null
           nivel_minimo: number
+          possui_cd: boolean
           status_operacional: Database["public"]["Enums"]["status_operacional"]
         }
         Insert: {
@@ -43,6 +44,7 @@ export type Database = {
           localizacao_detalhada?: string | null
           modelo?: string | null
           nivel_minimo?: number
+          possui_cd?: boolean
           status_operacional?: Database["public"]["Enums"]["status_operacional"]
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           localizacao_detalhada?: string | null
           modelo?: string | null
           nivel_minimo?: number
+          possui_cd?: boolean
           status_operacional?: Database["public"]["Enums"]["status_operacional"]
         }
         Relationships: [

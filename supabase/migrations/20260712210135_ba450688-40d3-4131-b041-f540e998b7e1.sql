@@ -1,0 +1,1 @@
+ALTER TABLE public.atms ADD COLUMN IF NOT EXISTS possui_cd boolean NOT NULL DEFAULT false;
