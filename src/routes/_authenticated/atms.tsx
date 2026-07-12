@@ -224,9 +224,15 @@ function AtmsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="col-span-2 flex items-center gap-2">
-              <Switch checked={form.atm_ativo_sim_nao} onCheckedChange={(v) => setForm({ ...form, atm_ativo_sim_nao: v })} />
-              <Label>ATM ativo</Label>
+            <div className="col-span-2 flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch checked={form.atm_ativo_sim_nao} onCheckedChange={(v) => setForm({ ...form, atm_ativo_sim_nao: v })} />
+                <Label>ATM ativo</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input id="possui-cd" type="checkbox" className="h-4 w-4" checked={form.possui_cd} onChange={(e) => setForm({ ...form, possui_cd: e.target.checked })} />
+                <Label htmlFor="possui-cd">Possui CD</Label>
+              </div>
             </div>
           </div>
           <DialogFooter>
