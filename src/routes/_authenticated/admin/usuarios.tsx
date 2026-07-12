@@ -39,16 +39,18 @@ function badgeColor(p: string) {
 
 function UsuariosPage() {
   const qc = useQueryClient();
+  const { isSuperAdmin } = useCurrentUser();
   const [openInvite, setOpenInvite] = useState(false);
   const [invite, setInvite] = useState<{ email_convidado: string; perfil_convidado: Papel }>({
     email_convidado: "", perfil_convidado: "Operador",
   });
   const [editing, setEditing] = useState<any | null>(null);
 
-  const { data: usuarios = [] } = useQuery({
+  const { data: usuariosRaw = [] } = useQuery({
     queryKey: ["usuarios"],
     queryFn: async () => (await supabase.from("usuarios").select("*").order("nome_completo")).data ?? [],
   });
+  const usuarios = isSuperAdmin ? usuariosRaw : usuariosRaw.filter((u: any) => u.perfil !== "SUPER_ADMIN");
   const { data: convites = [] } = useQuery({
     queryKey: ["convites"],
     queryFn: async () => (await supabase.from("convites").select("*").order("criado_em", { ascending: false })).data ?? [],
