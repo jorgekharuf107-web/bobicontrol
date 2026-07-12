@@ -90,7 +90,7 @@ export function AppSidebar() {
         <NavGroup label="Principal" items={principal} />
         <NavGroup label="Estoque" items={estoque} />
         <NavGroup label="Cadastros" items={cadastros} />
-        {isAdmin && <NavGroup label="Administração" items={admin} />}
+        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...admin, ...adminSuper] : admin} />}
       </div>
       <div className="border-t border-sidebar-border p-3">
         <div className="px-2 mb-2">
