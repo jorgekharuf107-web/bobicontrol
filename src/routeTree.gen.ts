@@ -27,6 +27,7 @@ import { Route as AuthenticatedFornecedoresNovoRouteImport } from './routes/_aut
 import { Route as AuthenticatedFornecedoresIdRouteImport } from './routes/_authenticated/fornecedores/$id'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminSobreRouteImport } from './routes/_authenticated/admin/sobre'
+import { Route as AuthenticatedAdminBackupRouteImport } from './routes/_authenticated/admin/backup'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAlertasRouteImport } from './routes/_authenticated/admin/alertas'
 
@@ -127,6 +128,12 @@ const AuthenticatedAdminSobreRoute = AuthenticatedAdminSobreRouteImport.update({
   path: '/admin/sobre',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminBackupRoute =
+  AuthenticatedAdminBackupRouteImport.update({
+    id: '/admin/backup',
+    path: '/admin/backup',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminAuditoriaRoute =
   AuthenticatedAdminAuditoriaRouteImport.update({
     id: '/admin/auditoria',
@@ -155,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
@@ -176,6 +184,7 @@ export interface FileRoutesByTo {
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
@@ -199,6 +208,7 @@ export interface FileRoutesById {
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
   '/_authenticated/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
+  '/_authenticated/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/_authenticated/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
+    | '/admin/backup'
     | '/admin/sobre'
     | '/admin/usuarios'
     | '/fornecedores/$id'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/aceitar-convite/$token'
     | '/admin/alertas'
     | '/admin/auditoria'
+    | '/admin/backup'
     | '/admin/sobre'
     | '/admin/usuarios'
     | '/fornecedores/$id'
@@ -265,6 +277,7 @@ export interface FileRouteTypes {
     | '/aceitar-convite/$token'
     | '/_authenticated/admin/alertas'
     | '/_authenticated/admin/auditoria'
+    | '/_authenticated/admin/backup'
     | '/_authenticated/admin/sobre'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/fornecedores/$id'
@@ -407,6 +420,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSobreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/backup': {
+      id: '/_authenticated/admin/backup'
+      path: '/admin/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AuthenticatedAdminBackupRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/auditoria': {
       id: '/_authenticated/admin/auditoria'
       path: '/admin/auditoria'
@@ -436,6 +456,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReposicaoBobinasRoute: typeof AuthenticatedReposicaoBobinasRoute
   AuthenticatedAdminAlertasRoute: typeof AuthenticatedAdminAlertasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
+  AuthenticatedAdminBackupRoute: typeof AuthenticatedAdminBackupRoute
   AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedFornecedoresIdRoute: typeof AuthenticatedFornecedoresIdRoute
@@ -455,6 +476,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReposicaoBobinasRoute: AuthenticatedReposicaoBobinasRoute,
   AuthenticatedAdminAlertasRoute: AuthenticatedAdminAlertasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
+  AuthenticatedAdminBackupRoute: AuthenticatedAdminBackupRoute,
   AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedFornecedoresIdRoute: AuthenticatedFornecedoresIdRoute,
