@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
+import { useCurrentUser } from "@/lib/use-current-user";
 
 type Papel = "Administrador" | "Gestor" | "Operador";
 const PAPEIS: Papel[] = ["Administrador", "Gestor", "Operador"];
