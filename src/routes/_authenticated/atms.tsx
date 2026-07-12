@@ -77,7 +77,7 @@ function AtmsPage() {
       id_atm: a.id_atm, modelo: a.modelo ?? "", estacao_id: a.estacao_id ?? "",
       linha_id: a.linha_id ?? "",
       localizacao_detalhada: a.localizacao_detalhada ?? "", capacidade_bobinas: a.capacidade_bobinas,
-      nivel_minimo: a.nivel_minimo, status_operacional: a.status_operacional, atm_ativo_sim_nao: a.atm_ativo_sim_nao,
+      nivel_minimo: a.nivel_minimo, status_operacional: a.status_operacional, atm_ativo_sim_nao: a.atm_ativo_sim_nao, possui_cd: !!a.possui_cd,
     });
     setOpen(true);
   }
