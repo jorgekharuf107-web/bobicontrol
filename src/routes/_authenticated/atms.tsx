@@ -160,6 +160,7 @@ function AtmsPage() {
                 ) : "—"}</td>
                 <td>{a.localizacao_detalhada ?? "—"}</td>
                 <td>{a.capacidade_bobinas}</td>
+                <td>{a.possui_cd ? "Sim" : "Não"}</td>
                 <td>{statusLabel[a.status_operacional] ?? a.status_operacional}</td>
                 <td className="whitespace-nowrap">
                   <Button variant="ghost" size="icon" onClick={() => startEdit(a)}><Pencil className="h-4 w-4" /></Button>
