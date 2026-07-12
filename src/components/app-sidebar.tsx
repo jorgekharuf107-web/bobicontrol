@@ -30,14 +30,17 @@ const admin: Item[] = [
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
-  { title: "Backup", to: "/admin/backup", icon: Database },
   { title: "Sobre", to: "/admin/sobre", icon: Info },
 ];
+const adminSuper: Item[] = [
+  { title: "Backup", to: "/admin/backup", icon: Database },
+];
+
 
 export function AppSidebar() {
   const router = useRouter();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const { isAdmin, perfil, nome } = useCurrentUser();
+  const { isAdmin, isSuperAdmin, perfil, nome } = useCurrentUser();
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -87,12 +90,12 @@ export function AppSidebar() {
         <NavGroup label="Principal" items={principal} />
         <NavGroup label="Estoque" items={estoque} />
         <NavGroup label="Cadastros" items={cadastros} />
-        {isAdmin && <NavGroup label="Administração" items={admin} />}
+        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...admin, ...adminSuper] : admin} />}
       </div>
       <div className="border-t border-sidebar-border p-3">
         <div className="px-2 mb-2">
           <p className="text-sm font-medium truncate">{nome ?? "Usuário"}</p>
-          <p className="text-[11px] text-sidebar-foreground/60 truncate">{perfil ?? ""}</p>
+          <p className="text-[11px] text-sidebar-foreground/60 truncate">{perfil === "SUPER_ADMIN" ? "Administrador" : (perfil ?? "")}</p>
         </div>
         <button
           onClick={signOut}
