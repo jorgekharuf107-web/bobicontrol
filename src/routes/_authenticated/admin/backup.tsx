@@ -122,11 +122,10 @@ function BackupPage() {
       const { error: eDel, count } = await supabase
         .from("movimentacoes")
         .delete({ count: "exact" })
-        .gte("data", inicio)
-        .lt("data", fimExcl);
+        .lt("data", dataCorte);
       if (eDel) throw eDel;
 
-      toast.success(`Fechamento ${anoAnterior}: ${snapshot.length} saldos salvos, ${count ?? 0} movimentações removidas`);
+      toast.success(`Fechamento ${anoCorte}: ${snapshot.length} saldos salvos, ${count ?? 0} movimentações removidas`);
     } catch (e: any) {
       toast.error(e.message ?? "Falha ao zerar");
     } finally {
