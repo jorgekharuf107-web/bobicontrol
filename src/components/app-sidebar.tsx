@@ -30,9 +30,12 @@ const admin: Item[] = [
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
-  { title: "Backup", to: "/admin/backup", icon: Database },
   { title: "Sobre", to: "/admin/sobre", icon: Info },
 ];
+const adminSuper: Item[] = [
+  { title: "Backup", to: "/admin/backup", icon: Database },
+];
+
 
 export function AppSidebar() {
   const router = useRouter();
