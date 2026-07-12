@@ -186,7 +186,7 @@ function BackupPage() {
             <li>Mantém os anos {anoCorrente - 1} e {anoCorrente} ativos</li>
           </ol>
           <p className="text-sm text-muted-foreground mt-2">
-            Importante: BobControl trabalha com bobinas. O saldo é de estoque de papel.
+            Cadastros de ATM, CD, Linhas, Estações, Fornecedor e Usuário são mantidos. O ano {anoCorrente} continua normal.
           </p>
         </div>
         <Button variant="destructive" onClick={() => setConfirmar(true)} disabled={zerando}>
@@ -197,11 +197,9 @@ function BackupPage() {
       <AlertDialog open={confirmar} onOpenChange={setConfirmar}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar fechamento até {anoCorrente - 2}</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar fechamento de {anoCorrente - 2}</AlertDialogTitle>
             <AlertDialogDescription>
-              O saldo de 31/12/{anoCorrente - 2} será salvo no histórico e todas as movimentações
-              até {anoCorrente - 2} serão removidas permanentemente. Os anos {anoCorrente - 1} e {anoCorrente} permanecem ativos.
-              Esta ação não pode ser desfeita. Faça o backup primeiro.
+              O saldo de 31/12/{anoCorrente - 2} será salvo e todas movimentações até {anoCorrente - 2} serão removidas. Faça o backup primeiro.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
