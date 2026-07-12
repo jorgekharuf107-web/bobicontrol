@@ -31,10 +31,11 @@ const atmSchema = z.object({
   nivel_minimo: z.number().int().min(1, "Nível mínimo deve ser ≥ 1"),
   status_operacional: z.enum(statusEnum),
   atm_ativo_sim_nao: z.boolean(),
+  possui_cd: z.boolean(),
 });
 
 type AtmForm = z.infer<typeof atmSchema>;
-const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", linha_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true };
+const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", linha_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true, possui_cd: false };
 
 function AtmsPage() {
   const qc = useQueryClient();
