@@ -72,7 +72,7 @@ function UsuariosPage() {
     await navigator.clipboard.writeText(url).catch(() => {});
     toast.success("Convite criado", { description: "Link copiado para a área de transferência." });
     setOpenInvite(false);
-    setInvite({ email_convidado: "", perfil_convidado: "Operador" });
+    setInvite({ email_convidado: "", perfil_convidado: "tecnico_estacao" });
     qc.invalidateQueries({ queryKey: ["convites"] });
   }
 
