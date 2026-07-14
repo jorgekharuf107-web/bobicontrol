@@ -25,7 +25,20 @@ function AuditoriaPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3"><BackButton to="/dashboard" /><h1 className="text-2xl font-semibold">Auditoria</h1></div>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3"><BackButton to="/dashboard" /><h1 className="text-2xl font-semibold">Auditoria</h1></div>
+        <CsvExportButton
+          rows={logs}
+          columns={[
+            { header: "Data", accessor: (l: any) => new Date(l.criado_em).toLocaleString("pt-BR") },
+            { header: "Ação", accessor: (l: any) => l.acao },
+            { header: "Tabela", accessor: (l: any) => l.tabela },
+            { header: "Registro", accessor: (l: any) => l.registro_id ?? "" },
+            { header: "Usuário", accessor: (l: any) => l.usuario_id ?? "" },
+          ]}
+          filename="auditoria"
+        />
+      </div>
       <Card className="p-0 overflow-hidden">
         <Table>
           <TableHeader><TableRow>
