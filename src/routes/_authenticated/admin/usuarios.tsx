@@ -291,6 +291,40 @@ function UsuariosPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Vincular linhas */}
+      <Dialog open={!!vinculando} onOpenChange={(o) => !o && setVinculando(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Vincular linhas — {vinculando?.nome_completo}</DialogTitle></DialogHeader>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {linhas.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma linha ativa cadastrada.</p>}
+            {linhas.map((l: any) => {
+              const checked = linhasSelecionadas.has(l.id);
+              return (
+                <label key={l.id} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-accent">
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => {
+                      const s = new Set(linhasSelecionadas);
+                      if (v) s.add(l.id); else s.delete(l.id);
+                      setLinhasSelecionadas(s);
+                    }}
+                  />
+                  <span className="inline-block h-3 w-3 rounded-full border" style={{ background: l.cor_hex ?? "#ccc" }} />
+                  <span>{l.nome}</span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Operadores só veem ATMs, CDs e movimentações das linhas vinculadas. Administradores, Supervisores e Dispatchers veem tudo.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setVinculando(null)}>Cancelar</Button>
+            <Button onClick={salvarVinculo}>Salvar vínculos</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
