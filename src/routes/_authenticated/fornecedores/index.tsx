@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BackButton } from "@/components/back-button";
+import { CsvExportButton } from "@/components/csv-export-button";
 
 export const Route = createFileRoute("/_authenticated/fornecedores/")({
   component: ListPage,
