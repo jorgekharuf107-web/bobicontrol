@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
+import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 
 type Papel = "admin_geral" | "supervisor_linha" | "tecnico_estacao" | "dispatcher";
@@ -109,9 +110,22 @@ function UsuariosPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3"><BackButton to="/dashboard" /><h1 className="text-2xl font-semibold">Usuários</h1></div>
-        <Button onClick={() => setOpenInvite(true)}><Plus className="h-4 w-4" /> Convidar usuário</Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={usuarios}
+            columns={[
+              { header: "Nome Completo", accessor: (u: any) => u.nome_completo ?? "" },
+              { header: "Email", accessor: (u: any) => u.email },
+              { header: "Papel", accessor: (u: any) => LABEL[u.perfil] ?? u.perfil },
+              { header: "Ativo", accessor: (u: any) => (u.ativo ? "Sim" : "Não") },
+              { header: "Cadastrado em", accessor: (u: any) => new Date(u.data_cadastro).toLocaleDateString("pt-BR") },
+            ]}
+            filename="usuarios"
+          />
+          <Button onClick={() => setOpenInvite(true)}><Plus className="h-4 w-4" /> Convidar usuário</Button>
+        </div>
       </div>
 
       <div className="rounded-md border-l-4 border-l-yellow-400 bg-yellow-50 p-3"

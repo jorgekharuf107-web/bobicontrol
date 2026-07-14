@@ -8,7 +8,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon, Moon, Sun } from "lucide-react";
+import { useTheme } from "@/lib/use-theme";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -37,10 +38,21 @@ function TopHeader() {
     router.navigate({ to: "/auth", replace: true });
   }
 
+  const { theme, toggle } = useTheme();
+
   return (
-    <header className="h-14 border-b bg-white flex items-center justify-end px-6 gap-3">
+    <header className="h-14 border-b bg-card flex items-center justify-end px-6 gap-3">
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
       {perfil && <Badge variant="outline" className={papelBadge(perfil === "SUPER_ADMIN" ? "Administrador" : perfil)}>{perfil === "SUPER_ADMIN" ? "Administrador" : perfil}</Badge>}
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
+        title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+        className="h-9 w-9 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
+      >
+        {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary">

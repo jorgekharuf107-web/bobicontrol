@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
+import { CsvExportButton } from "@/components/csv-export-button";
 
 export const Route = createFileRoute("/_authenticated/itens-estoque")({
   component: ItensPage,
@@ -108,7 +109,22 @@ function ItensPage() {
           <BackButton to="/dashboard" />
           <h1 className="text-2xl font-bold">Itens de Estoque</h1>
         </div>
-        <Button onClick={startCreate}><Plus className="h-4 w-4" /> Novo Item</Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={filtrados}
+            columns={[
+              { header: "Código", accessor: (i: any) => i.codigo },
+              { header: "Nome", accessor: (i: any) => i.nome },
+              { header: "Medida", accessor: (i: any) => i.medida ?? "" },
+              { header: "Unidade", accessor: (i: any) => i.unidade },
+              { header: "Qtd por Unidade", accessor: (i: any) => i.qtd_por_unidade },
+              { header: "Estoque Mínimo", accessor: (i: any) => i.estoque_minimo },
+              { header: "Status", accessor: (i: any) => (i.ativo ? "Ativo" : "Inativo") },
+            ]}
+            filename="itens-estoque"
+          />
+          <Button onClick={startCreate}><Plus className="h-4 w-4" /> Novo Item</Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 items-end">

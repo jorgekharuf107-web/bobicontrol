@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BackButton } from "@/components/back-button";
+import { CsvExportButton } from "@/components/csv-export-button";
 
 export const Route = createFileRoute("/_authenticated/fornecedores/")({
   component: ListPage,
@@ -25,7 +26,23 @@ function ListPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3"><BackButton to="/dashboard" /><h1 className="text-2xl font-semibold">Fornecedores</h1></div>
-        <Button asChild><Link to="/fornecedores/novo"><Plus className="h-4 w-4" /> Novo fornecedor</Link></Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={fornecedores}
+            columns={[
+              { header: "Razão Social", accessor: (f: any) => f.razao_social },
+              { header: "CNPJ", accessor: (f: any) => f.cnpj },
+              { header: "Cidade", accessor: (f: any) => f.cidade ?? "" },
+              { header: "UF", accessor: (f: any) => f.estado ?? "" },
+              { header: "Contato", accessor: (f: any) => f.contato_principal ?? "" },
+              { header: "Telefone", accessor: (f: any) => f.telefone ?? "" },
+              { header: "Email", accessor: (f: any) => f.email ?? "" },
+              { header: "Status", accessor: (f: any) => f.status ?? "" },
+            ]}
+            filename="fornecedores"
+          />
+          <Button asChild><Link to="/fornecedores/novo"><Plus className="h-4 w-4" /> Novo fornecedor</Link></Button>
+        </div>
       </div>
       <Card className="p-0 overflow-hidden">
         <Table>

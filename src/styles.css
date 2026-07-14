@@ -82,6 +82,37 @@
   --sidebar-ring: #1e40af;
 }
 
+.dark {
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+  --card: #111a2e;
+  --card-foreground: #e2e8f0;
+  --popover: #111a2e;
+  --popover-foreground: #e2e8f0;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e3a8a;
+  --accent-foreground: #e2e8f0;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1e293b;
+  --input: #334155;
+  --input-bg: #1e293b;
+  --ring: #3b82f6;
+  --sidebar: #060b18;
+  --sidebar-foreground: #cbd5e1;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #3b82f6;
+}
+
 @layer base {
   * { border-color: var(--color-border); }
   body {
@@ -120,9 +151,10 @@
     font-size: 11px;
     letter-spacing: 0.03em;
   }
-  .excel-table tbody tr:nth-child(odd) { background: #ffffff; }
-  .excel-table tbody tr:nth-child(even) { background: #f1f5f9; }
-  .excel-table tbody tr:hover { background: #dbeafe; }
+  .excel-table tbody tr:nth-child(odd) { background: var(--card); }
+  .excel-table tbody tr:nth-child(even) { background: var(--muted); }
+  .excel-table tbody tr:hover { background: var(--accent); color: var(--accent-foreground); }
+  .excel-table th, .excel-table td { border-color: var(--border); }
   @media (max-width: 767px) {
     .excel-table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
     .excel-table th, .excel-table td { padding: 8px; }
