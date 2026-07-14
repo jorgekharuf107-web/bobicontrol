@@ -22,10 +22,11 @@ function normalizar(p: string | null): Papel | null {
   if (!p) return null;
   const up = p.toUpperCase();
   if (up === "SUPER_ADMIN" || up === "SUPERADMIN" || up === "SUPER") return "SUPER_ADMIN";
-  if (up === "ADMINISTRADOR" || up === "ADMIN") return "Administrador";
-  if (up === "GESTOR") return "Gestor";
+  if (up === "ADMINISTRADOR" || up === "ADMIN" || up === "ADMIN_GERAL") return "Administrador";
+  if (up === "GESTOR" || up === "SUPERVISOR_LINHA" || up === "DISPATCHER") return "Gestor";
   return "Operador";
 }
+
 
 export function useCurrentUser(): CurrentUser {
   const [user, setUser] = useState<User | null>(null);
