@@ -230,7 +230,7 @@ function UsuariosPage() {
                 <Select value={editing.perfil} onValueChange={(v: Papel) => setEditing({ ...editing, perfil: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {PAPEIS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                    {PAPEIS.map((p) => <SelectItem key={p} value={p}>{LABEL[p]}</SelectItem>)}
                   </SelectContent>
                 </Select></div>
               <div className="flex items-center justify-between rounded-md border p-3">
