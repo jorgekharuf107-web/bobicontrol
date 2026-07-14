@@ -175,7 +175,7 @@ function UsuariosPage() {
             {convites.map((c: any) => (
               <TableRow key={c.id}>
                 <TableCell>{c.email_convidado}</TableCell>
-                <TableCell>{c.perfil_convidado}</TableCell>
+                <TableCell>{LABEL[c.perfil_convidado] ?? c.perfil_convidado}</TableCell>
                 <TableCell>{c.status}</TableCell>
                 <TableCell>{new Date(c.expira_em).toLocaleDateString("pt-BR")}</TableCell>
                 <TableCell className="text-right">
