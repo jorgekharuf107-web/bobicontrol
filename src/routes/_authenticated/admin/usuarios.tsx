@@ -192,6 +192,9 @@ function UsuariosPage() {
                   <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditing({ ...u })}>
                     <Pencil className="h-4 w-4" />
                   </Button>
+                  <Button variant="ghost" size="icon" title="Vincular linhas" onClick={() => abrirVinculo(u)}>
+                    <MapPin className="h-4 w-4" />
+                  </Button>
                   <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => resetSenha(u.email)}>
                     <KeyRound className="h-4 w-4" />
                   </Button>
