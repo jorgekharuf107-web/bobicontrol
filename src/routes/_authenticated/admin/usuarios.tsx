@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Trash2, Copy, Pencil, KeyRound } from "lucide-react";
+import { Plus, Trash2, Copy, Pencil, KeyRound, MapPin } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,32 @@ function UsuariosPage() {
     email_convidado: "", perfil_convidado: "tecnico_estacao",
   });
   const [editing, setEditing] = useState<any | null>(null);
+  const [vinculando, setVinculando] = useState<any | null>(null);
+  const [linhasSelecionadas, setLinhasSelecionadas] = useState<Set<string>>(new Set());
+
+  const { data: linhas = [] } = useQuery({
+    queryKey: ["linhas-vinc"],
+    queryFn: async () => (await supabase.from("linhas").select("id, nome, cor_hex").eq("linha_ativa_sim_nao", true).order("nome")).data ?? [],
+  });
+
+  async function abrirVinculo(u: any) {
+    setVinculando(u);
+    const { data } = await supabase.from("usuario_linhas").select("linha_id").eq("usuario_id", u.id);
+    setLinhasSelecionadas(new Set((data ?? []).map((r: any) => r.linha_id)));
+  }
+
+  async function salvarVinculo() {
+    if (!vinculando) return;
+    const { error: delErr } = await supabase.from("usuario_linhas").delete().eq("usuario_id", vinculando.id);
+    if (delErr) return toast.error(delErr.message);
+    const rows = Array.from(linhasSelecionadas).map((linha_id) => ({ usuario_id: vinculando.id, linha_id }));
+    if (rows.length > 0) {
+      const { error } = await supabase.from("usuario_linhas").insert(rows);
+      if (error) return toast.error(error.message);
+    }
+    toast.success("Linhas vinculadas");
+    setVinculando(null);
+  }
 
   const { data: usuariosRaw = [] } = useQuery({
     queryKey: ["usuarios"],
@@ -165,6 +192,9 @@ function UsuariosPage() {
                   <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditing({ ...u })}>
                     <Pencil className="h-4 w-4" />
                   </Button>
+                  <Button variant="ghost" size="icon" title="Vincular linhas" onClick={() => abrirVinculo(u)}>
+                    <MapPin className="h-4 w-4" />
+                  </Button>
                   <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => resetSenha(u.email)}>
                     <KeyRound className="h-4 w-4" />
                   </Button>
@@ -258,6 +288,40 @@ function UsuariosPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancelar</Button>
             <Button onClick={saveEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Vincular linhas */}
+      <Dialog open={!!vinculando} onOpenChange={(o) => !o && setVinculando(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Vincular linhas — {vinculando?.nome_completo}</DialogTitle></DialogHeader>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {linhas.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma linha ativa cadastrada.</p>}
+            {linhas.map((l: any) => {
+              const checked = linhasSelecionadas.has(l.id);
+              return (
+                <label key={l.id} className="flex items-center gap-2 rounded-md border p-2 cursor-pointer hover:bg-accent">
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => {
+                      const s = new Set(linhasSelecionadas);
+                      if (v) s.add(l.id); else s.delete(l.id);
+                      setLinhasSelecionadas(s);
+                    }}
+                  />
+                  <span className="inline-block h-3 w-3 rounded-full border" style={{ background: l.cor_hex ?? "#ccc" }} />
+                  <span>{l.nome}</span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Operadores só veem ATMs, CDs e movimentações das linhas vinculadas. Administradores, Supervisores e Dispatchers veem tudo.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setVinculando(null)}>Cancelar</Button>
+            <Button onClick={salvarVinculo}>Salvar vínculos</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

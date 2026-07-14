@@ -17,6 +17,7 @@ const principal: Item[] = [
 ];
 const estoque: Item[] = [
   { title: "Controle de Estoque", to: "/controle-estoque", icon: Boxes },
+  { title: "Permutas entre Linhas", to: "/permutas", icon: PackagePlus },
   { title: "Itens de Estoque", to: "/itens-estoque", icon: Layers },
 ];
 const cadastros: Item[] = [

@@ -563,12 +563,16 @@ export type Database = {
       }
       movimentacoes: {
         Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
           criado_em: string
           data: string
           destino_id: string | null
           destino_tipo: Database["public"]["Enums"]["local_tipo"] | null
           id: string
           item_id: string | null
+          linha_destino_id: string | null
+          linha_origem_id: string | null
           motivo_permuta: string | null
           observacao: string | null
           origem_id: string | null
@@ -579,12 +583,16 @@ export type Database = {
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
         }
         Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           criado_em?: string
           data?: string
           destino_id?: string | null
           destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           id?: string
           item_id?: string | null
+          linha_destino_id?: string | null
+          linha_origem_id?: string | null
           motivo_permuta?: string | null
           observacao?: string | null
           origem_id?: string | null
@@ -595,12 +603,16 @@ export type Database = {
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
         }
         Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           criado_em?: string
           data?: string
           destino_id?: string | null
           destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           id?: string
           item_id?: string | null
+          linha_destino_id?: string | null
+          linha_origem_id?: string | null
           motivo_permuta?: string | null
           observacao?: string | null
           origem_id?: string | null
@@ -725,6 +737,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aprovar_movimentacao: {
+        Args: { _aprovar: boolean; _id: string }
+        Returns: undefined
+      }
       calcular_total_bobinas: {
         Args: { _avulsas: number; _caixas: number }
         Returns: number
@@ -762,6 +778,7 @@ export type Database = {
         | "Transferencia"
         | "Ajuste"
         | "Abastecimento"
+        | "Permuta"
       status_geral: "ativo" | "inativo"
       status_operacional: "operacional" | "manutencao" | "desativado"
       tipo_contato_motorista: "motorista1" | "motorista2"
@@ -902,6 +919,7 @@ export const Constants = {
         "Transferencia",
         "Ajuste",
         "Abastecimento",
+        "Permuta",
       ],
       status_geral: ["ativo", "inativo"],
       status_operacional: ["operacional", "manutencao", "desativado"],
