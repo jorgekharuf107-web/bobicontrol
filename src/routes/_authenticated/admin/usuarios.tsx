@@ -16,8 +16,15 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { BackButton } from "@/components/back-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 
-type Papel = "Administrador" | "Gestor" | "Operador";
-const PAPEIS: Papel[] = ["Administrador", "Gestor", "Operador"];
+type Papel = "admin_geral" | "supervisor_linha" | "tecnico_estacao" | "dispatcher";
+const PAPEIS: Papel[] = ["admin_geral", "supervisor_linha", "tecnico_estacao", "dispatcher"];
+const LABEL: Record<string, string> = {
+  admin_geral: "Administrador",
+  supervisor_linha: "Supervisor de Linha",
+  tecnico_estacao: "Técnico de Estação",
+  dispatcher: "Dispatcher",
+  SUPER_ADMIN: "Administrador",
+};
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   beforeLoad: async () => {
@@ -32,17 +39,18 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
 });
 
 function badgeColor(p: string) {
-  if (p === "Administrador") return "bg-red-100 text-red-800 border-red-200";
-  if (p === "Gestor") return "bg-blue-100 text-blue-800 border-blue-200";
+  if (p === "admin_geral" || p === "SUPER_ADMIN") return "bg-red-100 text-red-800 border-red-200";
+  if (p === "supervisor_linha" || p === "dispatcher") return "bg-blue-100 text-blue-800 border-blue-200";
   return "bg-green-100 text-green-800 border-green-200";
 }
+
 
 function UsuariosPage() {
   const qc = useQueryClient();
   const { isSuperAdmin } = useCurrentUser();
   const [openInvite, setOpenInvite] = useState(false);
   const [invite, setInvite] = useState<{ email_convidado: string; perfil_convidado: Papel }>({
-    email_convidado: "", perfil_convidado: "Operador",
+    email_convidado: "", perfil_convidado: "tecnico_estacao",
   });
   const [editing, setEditing] = useState<any | null>(null);
 
@@ -64,7 +72,7 @@ function UsuariosPage() {
     await navigator.clipboard.writeText(url).catch(() => {});
     toast.success("Convite criado", { description: "Link copiado para a área de transferência." });
     setOpenInvite(false);
-    setInvite({ email_convidado: "", perfil_convidado: "Operador" });
+    setInvite({ email_convidado: "", perfil_convidado: "tecnico_estacao" });
     qc.invalidateQueries({ queryKey: ["convites"] });
   }
 
@@ -131,7 +139,7 @@ function UsuariosPage() {
                 <TableCell className="font-medium">{u.nome_completo}</TableCell>
                 <TableCell>{u.email}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={badgeColor(u.perfil)}>{u.perfil}</Badge>
+                  <Badge variant="outline" className={badgeColor(u.perfil)}>{LABEL[u.perfil] ?? u.perfil}</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className={u.ativo ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-700 border-gray-200"}>
@@ -167,7 +175,7 @@ function UsuariosPage() {
             {convites.map((c: any) => (
               <TableRow key={c.id}>
                 <TableCell>{c.email_convidado}</TableCell>
-                <TableCell>{c.perfil_convidado}</TableCell>
+                <TableCell>{LABEL[c.perfil_convidado] ?? c.perfil_convidado}</TableCell>
                 <TableCell>{c.status}</TableCell>
                 <TableCell>{new Date(c.expira_em).toLocaleDateString("pt-BR")}</TableCell>
                 <TableCell className="text-right">
@@ -192,7 +200,8 @@ function UsuariosPage() {
               <Select value={invite.perfil_convidado} onValueChange={(v: Papel) => setInvite({ ...invite, perfil_convidado: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {PAPEIS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  {PAPEIS.map((p) => <SelectItem key={p} value={p}>{LABEL[p]}</SelectItem>)}
+
                 </SelectContent>
               </Select></div>
             <p className="text-xs text-muted-foreground">
@@ -221,7 +230,7 @@ function UsuariosPage() {
                 <Select value={editing.perfil} onValueChange={(v: Papel) => setEditing({ ...editing, perfil: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {PAPEIS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                    {PAPEIS.map((p) => <SelectItem key={p} value={p}>{LABEL[p]}</SelectItem>)}
                   </SelectContent>
                 </Select></div>
               <div className="flex items-center justify-between rounded-md border p-3">

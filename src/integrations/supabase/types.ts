@@ -14,14 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerta_destinatarios: {
+        Row: {
+          alerta_id: string
+          criado_em: string
+          id: string
+          usuario_id: string
+        }
+        Insert: {
+          alerta_id: string
+          criado_em?: string
+          id?: string
+          usuario_id: string
+        }
+        Update: {
+          alerta_id?: string
+          criado_em?: string
+          id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerta_destinatarios_alerta_id_fkey"
+            columns: ["alerta_id"]
+            isOneToOne: false
+            referencedRelation: "configuracao_alertas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alerta_destinatarios_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       atms: {
         Row: {
           atm_ativo_sim_nao: boolean
+          avulsas: number
+          caixas: number
           capacidade_bobinas: number
           cd_id: string | null
           criado_em: string
           estacao: string | null
           estacao_id: string | null
+          fabricante: string | null
           id: string
           id_atm: string
           linha_id: string | null
@@ -33,11 +72,14 @@ export type Database = {
         }
         Insert: {
           atm_ativo_sim_nao?: boolean
+          avulsas?: number
+          caixas?: number
           capacidade_bobinas?: number
           cd_id?: string | null
           criado_em?: string
           estacao?: string | null
           estacao_id?: string | null
+          fabricante?: string | null
           id?: string
           id_atm: string
           linha_id?: string | null
@@ -49,11 +91,14 @@ export type Database = {
         }
         Update: {
           atm_ativo_sim_nao?: boolean
+          avulsas?: number
+          caixas?: number
           capacidade_bobinas?: number
           cd_id?: string | null
           criado_em?: string
           estacao?: string | null
           estacao_id?: string | null
+          fabricante?: string | null
           id?: string
           id_atm?: string
           linha_id?: string | null
@@ -126,6 +171,7 @@ export type Database = {
           criado_em: string
           estacao: string | null
           estacao_id: string | null
+          estoque_minimo: number
           id: string
           linha_id: string | null
           nivel_minimo: number
@@ -137,6 +183,7 @@ export type Database = {
           criado_em?: string
           estacao?: string | null
           estacao_id?: string | null
+          estoque_minimo?: number
           id?: string
           linha_id?: string | null
           nivel_minimo?: number
@@ -148,6 +195,7 @@ export type Database = {
           criado_em?: string
           estacao?: string | null
           estacao_id?: string | null
+          estoque_minimo?: number
           id?: string
           linha_id?: string | null
           nivel_minimo?: number
@@ -290,8 +338,11 @@ export type Database = {
           estado_uf: string | null
           fornecedor_ativo_sim_nao: boolean
           id: string
+          motorista1: string | null
+          motorista2: string | null
           razao_social: string
           status: Database["public"]["Enums"]["status_geral"]
+          tecnico_responsavel_id: string | null
           telefone: string | null
         }
         Insert: {
@@ -308,8 +359,11 @@ export type Database = {
           estado_uf?: string | null
           fornecedor_ativo_sim_nao?: boolean
           id?: string
+          motorista1?: string | null
+          motorista2?: string | null
           razao_social: string
           status?: Database["public"]["Enums"]["status_geral"]
+          tecnico_responsavel_id?: string | null
           telefone?: string | null
         }
         Update: {
@@ -326,11 +380,22 @@ export type Database = {
           estado_uf?: string | null
           fornecedor_ativo_sim_nao?: boolean
           id?: string
+          motorista1?: string | null
+          motorista2?: string | null
           razao_social?: string
           status?: Database["public"]["Enums"]["status_geral"]
+          tecnico_responsavel_id?: string | null
           telefone?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fornecedores_tecnico_responsavel_id_fkey"
+            columns: ["tecnico_responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       historico_saldos: {
         Row: {
@@ -362,6 +427,7 @@ export type Database = {
       itens: {
         Row: {
           ativo: boolean
+          cd_id: string | null
           codigo: string
           criado_em: string
           descricao: string | null
@@ -370,11 +436,16 @@ export type Database = {
           id: string
           medida: string | null
           nome: string
+          qtd_avulsas: number
+          qtd_caixas: number
           qtd_por_unidade: number
+          sku: string | null
+          tipo_bobina: string | null
           unidade: Database["public"]["Enums"]["item_unidade"]
         }
         Insert: {
           ativo?: boolean
+          cd_id?: string | null
           codigo: string
           criado_em?: string
           descricao?: string | null
@@ -383,11 +454,16 @@ export type Database = {
           id?: string
           medida?: string | null
           nome: string
+          qtd_avulsas?: number
+          qtd_caixas?: number
           qtd_por_unidade?: number
+          sku?: string | null
+          tipo_bobina?: string | null
           unidade?: Database["public"]["Enums"]["item_unidade"]
         }
         Update: {
           ativo?: boolean
+          cd_id?: string | null
           codigo?: string
           criado_em?: string
           descricao?: string | null
@@ -396,10 +472,21 @@ export type Database = {
           id?: string
           medida?: string | null
           nome?: string
+          qtd_avulsas?: number
+          qtd_caixas?: number
           qtd_por_unidade?: number
+          sku?: string | null
+          tipo_bobina?: string | null
           unidade?: Database["public"]["Enums"]["item_unidade"]
         }
         Relationships: [
+          {
+            foreignKeyName: "itens_cd_id_fkey"
+            columns: ["cd_id"]
+            isOneToOne: false
+            referencedRelation: "cds"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "itens_fornecedor_padrao_id_fkey"
             columns: ["fornecedor_padrao_id"]
@@ -482,10 +569,12 @@ export type Database = {
           destino_tipo: Database["public"]["Enums"]["local_tipo"] | null
           id: string
           item_id: string | null
+          motivo_permuta: string | null
           observacao: string | null
           origem_id: string | null
           origem_tipo: Database["public"]["Enums"]["local_tipo"] | null
           qtd: number
+          status_aprovacao: string
           tecnico_id: string | null
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
         }
@@ -496,10 +585,12 @@ export type Database = {
           destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           id?: string
           item_id?: string | null
+          motivo_permuta?: string | null
           observacao?: string | null
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           qtd: number
+          status_aprovacao?: string
           tecnico_id?: string | null
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
         }
@@ -510,10 +601,12 @@ export type Database = {
           destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           id?: string
           item_id?: string | null
+          motivo_permuta?: string | null
           observacao?: string | null
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           qtd?: number
+          status_aprovacao?: string
           tecnico_id?: string | null
           tipo?: Database["public"]["Enums"]["movimentacao_tipo"]
         }
@@ -554,6 +647,42 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      usuario_linhas: {
+        Row: {
+          criado_em: string
+          id: string
+          linha_id: string
+          usuario_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          linha_id: string
+          usuario_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          linha_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_linhas_linha_id_fkey"
+            columns: ["linha_id"]
+            isOneToOne: false
+            referencedRelation: "linhas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "usuario_linhas_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usuarios: {
         Row: {
@@ -596,7 +725,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calcular_total_bobinas: {
+        Args: { _avulsas: number; _caixas: number }
+        Returns: number
+      }
       e_admin: { Args: { _user_id: string }; Returns: boolean }
+      e_dispatcher: { Args: { _user_id: string }; Returns: boolean }
       e_gestor: { Args: { _user_id: string }; Returns: boolean }
       e_operador: { Args: { _user_id: string }; Returns: boolean }
       e_super_admin: { Args: { _user_id: string }; Returns: boolean }
@@ -610,6 +744,10 @@ export type Database = {
       is_admin_or_super: { Args: { _user_id: string }; Returns: boolean }
       tem_funcao: {
         Args: { _funcao: string; _user_id: string }
+        Returns: boolean
+      }
+      usuario_ve_linha: {
+        Args: { _linha_id: string; _user_id: string }
         Returns: boolean
       }
     }
