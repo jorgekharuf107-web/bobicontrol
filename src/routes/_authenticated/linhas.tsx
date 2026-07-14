@@ -71,7 +71,18 @@ function LinhasPage() {
           <BackButton to="/dashboard" />
           <h1 className="text-2xl font-semibold">Linhas</h1>
         </div>
-        <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova linha</Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={linhas}
+            columns={[
+              { header: "Nome", accessor: (l) => l.nome },
+              { header: "Cor", accessor: (l) => l.cor_hex },
+              { header: "Status", accessor: (l) => (l.linha_ativa_sim_nao ? "Ativa" : "Inativa") },
+            ]}
+            filename="linhas"
+          />
+          <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova linha</Button>
+        </div>
       </div>
 
       <Card className="p-0 overflow-hidden">
