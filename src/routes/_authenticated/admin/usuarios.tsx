@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Trash2, Copy, Pencil, KeyRound } from "lucide-react";
+import { Plus, Trash2, Copy, Pencil, KeyRound, MapPin } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
