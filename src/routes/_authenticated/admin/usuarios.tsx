@@ -50,7 +50,7 @@ function UsuariosPage() {
   const { isSuperAdmin } = useCurrentUser();
   const [openInvite, setOpenInvite] = useState(false);
   const [invite, setInvite] = useState<{ email_convidado: string; perfil_convidado: Papel }>({
-    email_convidado: "", perfil_convidado: "Operador",
+    email_convidado: "", perfil_convidado: "tecnico_estacao",
   });
   const [editing, setEditing] = useState<any | null>(null);
 
