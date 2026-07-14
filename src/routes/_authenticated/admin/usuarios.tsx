@@ -55,6 +55,32 @@ function UsuariosPage() {
     email_convidado: "", perfil_convidado: "tecnico_estacao",
   });
   const [editing, setEditing] = useState<any | null>(null);
+  const [vinculando, setVinculando] = useState<any | null>(null);
+  const [linhasSelecionadas, setLinhasSelecionadas] = useState<Set<string>>(new Set());
+
+  const { data: linhas = [] } = useQuery({
+    queryKey: ["linhas-vinc"],
+    queryFn: async () => (await supabase.from("linhas").select("id, nome, cor_hex").eq("linha_ativa_sim_nao", true).order("nome")).data ?? [],
+  });
+
+  async function abrirVinculo(u: any) {
+    setVinculando(u);
+    const { data } = await supabase.from("usuario_linhas").select("linha_id").eq("usuario_id", u.id);
+    setLinhasSelecionadas(new Set((data ?? []).map((r: any) => r.linha_id)));
+  }
+
+  async function salvarVinculo() {
+    if (!vinculando) return;
+    const { error: delErr } = await supabase.from("usuario_linhas").delete().eq("usuario_id", vinculando.id);
+    if (delErr) return toast.error(delErr.message);
+    const rows = Array.from(linhasSelecionadas).map((linha_id) => ({ usuario_id: vinculando.id, linha_id }));
+    if (rows.length > 0) {
+      const { error } = await supabase.from("usuario_linhas").insert(rows);
+      if (error) return toast.error(error.message);
+    }
+    toast.success("Linhas vinculadas");
+    setVinculando(null);
+  }
 
   const { data: usuariosRaw = [] } = useQuery({
     queryKey: ["usuarios"],
