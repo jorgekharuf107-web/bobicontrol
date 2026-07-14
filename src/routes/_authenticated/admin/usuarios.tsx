@@ -200,7 +200,8 @@ function UsuariosPage() {
               <Select value={invite.perfil_convidado} onValueChange={(v: Papel) => setInvite({ ...invite, perfil_convidado: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {PAPEIS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                  {PAPEIS.map((p) => <SelectItem key={p} value={p}>{LABEL[p]}</SelectItem>)}
+
                 </SelectContent>
               </Select></div>
             <p className="text-xs text-muted-foreground">
