@@ -108,7 +108,25 @@ function AtmsPage() {
           <BackButton to="/dashboard" />
           <h1 className="text-2xl font-bold">Cadastro de ATM</h1>
         </div>
-        <Button onClick={startCreate}><Plus className="h-4 w-4" /> Novo ATM</Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={filtrados}
+            columns={[
+              { header: "ID", accessor: (a: any) => a.id_atm },
+              { header: "Modelo", accessor: (a: any) => a.modelo ?? "" },
+              { header: "Estação", accessor: (a: any) => a.estacoes?.nome ?? "" },
+              { header: "Linha", accessor: (a: any) => a.linhas?.nome ?? "" },
+              { header: "Localização", accessor: (a: any) => a.localizacao_detalhada ?? "" },
+              { header: "Capacidade", accessor: (a: any) => a.capacidade_bobinas },
+              { header: "Nível Mínimo", accessor: (a: any) => a.nivel_minimo },
+              { header: "Possui CD", accessor: (a: any) => (a.possui_cd ? "Sim" : "Não") },
+              { header: "Status", accessor: (a: any) => statusLabel[a.status_operacional] ?? a.status_operacional },
+              { header: "Ativo", accessor: (a: any) => (a.atm_ativo_sim_nao ? "Sim" : "Não") },
+            ]}
+            filename="atms"
+          />
+          <Button onClick={startCreate}><Plus className="h-4 w-4" /> Novo ATM</Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 items-end">
