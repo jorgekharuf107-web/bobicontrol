@@ -98,7 +98,21 @@ function CdsPage() {
           <BackButton to="/dashboard" />
           <h1 className="text-2xl font-bold">Centros de Distribuição</h1>
         </div>
-        <Button onClick={startCreate}><Plus className="h-4 w-4" /> Novo CD</Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={filtrados}
+            columns={[
+              { header: "Nome do CD", accessor: (c: any) => c.nome_cd },
+              { header: "Estação", accessor: (c: any) => c.estacoes?.nome ?? "" },
+              { header: "Linha", accessor: (c: any) => c.linhas?.nome ?? "" },
+              { header: "Capacidade", accessor: (c: any) => c.capacidade },
+              { header: "Nível Mínimo", accessor: (c: any) => c.nivel_minimo },
+              { header: "Status", accessor: (c: any) => (c.status === "ativo" ? "Ativo" : "Inativo") },
+            ]}
+            filename="cds"
+          />
+          <Button onClick={startCreate}><Plus className="h-4 w-4" /> Novo CD</Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 items-end">
