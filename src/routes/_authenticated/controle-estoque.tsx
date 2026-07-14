@@ -143,12 +143,15 @@ function ControleEstoque() {
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
-          <thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th>Qtd</th><th>Origem</th><th>Destino</th><th>Técnico</th><th>Ações</th></tr></thead>
+          <thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th>Qtd</th><th>Origem</th><th>Destino</th><th>Técnico</th><th>Status</th><th>Ações</th></tr></thead>
           <tbody>
             {movs.length === 0 && (
-              <tr><td colSpan={8} className="text-center py-8 font-bold text-muted-foreground">Nenhuma movimentação registrada</td></tr>
+              <tr><td colSpan={9} className="text-center py-8 font-bold text-muted-foreground">Nenhuma movimentação registrada</td></tr>
             )}
-            {movs.map((m: any) => (
+            {movs.map((m: any) => {
+              const st = m.status_aprovacao ?? "aprovado";
+              const cls = st === "pendente" ? "bg-yellow-100 text-yellow-800" : st === "rejeitado" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800";
+              return (
               <tr key={m.id}>
                 <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
                 <td>{m.tipo}</td>
@@ -157,12 +160,14 @@ function ControleEstoque() {
                 <td>{m.origem_tipo ?? "—"}</td>
                 <td>{m.destino_tipo ?? "—"}</td>
                 <td>{m.usuarios?.nome_completo ?? "—"}</td>
+                <td><span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{st}</span></td>
                 <td className="whitespace-nowrap">
                   <Button variant="ghost" size="icon" onClick={() => startEdit(m)}><Pencil className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => excluir(m.id)}><Trash2 className="h-4 w-4" /></Button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </Card>
