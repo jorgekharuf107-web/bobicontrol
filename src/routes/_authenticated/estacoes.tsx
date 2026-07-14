@@ -58,9 +58,19 @@ function EstacoesPage() {
           <BackButton to="/dashboard" />
           <h1 className="text-2xl font-bold">Estações</h1>
         </div>
-        <Button onClick={() => { setEditingId(null); setForm({ nome: "", linha_id: "" }); setOpen(true); }}>
-          <Plus className="h-4 w-4" /> Nova Estação
-        </Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={estacoes}
+            columns={[
+              { header: "Nome", accessor: (e: any) => e.nome },
+              { header: "Linha", accessor: (e: any) => e.linhas?.nome ?? "" },
+            ]}
+            filename="estacoes"
+          />
+          <Button onClick={() => { setEditingId(null); setForm({ nome: "", linha_id: "" }); setOpen(true); }}>
+            <Plus className="h-4 w-4" /> Nova Estação
+          </Button>
+        </div>
       </div>
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
