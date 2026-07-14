@@ -16,8 +16,15 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { BackButton } from "@/components/back-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 
-type Papel = "Administrador" | "Gestor" | "Operador";
-const PAPEIS: Papel[] = ["Administrador", "Gestor", "Operador"];
+type Papel = "admin_geral" | "supervisor_linha" | "tecnico_estacao" | "dispatcher";
+const PAPEIS: Papel[] = ["admin_geral", "supervisor_linha", "tecnico_estacao", "dispatcher"];
+const LABEL: Record<string, string> = {
+  admin_geral: "Administrador",
+  supervisor_linha: "Supervisor de Linha",
+  tecnico_estacao: "Técnico de Estação",
+  dispatcher: "Dispatcher",
+  SUPER_ADMIN: "Administrador",
+};
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   beforeLoad: async () => {
@@ -32,10 +39,11 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
 });
 
 function badgeColor(p: string) {
-  if (p === "Administrador") return "bg-red-100 text-red-800 border-red-200";
-  if (p === "Gestor") return "bg-blue-100 text-blue-800 border-blue-200";
+  if (p === "admin_geral" || p === "SUPER_ADMIN") return "bg-red-100 text-red-800 border-red-200";
+  if (p === "supervisor_linha" || p === "dispatcher") return "bg-blue-100 text-blue-800 border-blue-200";
   return "bg-green-100 text-green-800 border-green-200";
 }
+
 
 function UsuariosPage() {
   const qc = useQueryClient();
