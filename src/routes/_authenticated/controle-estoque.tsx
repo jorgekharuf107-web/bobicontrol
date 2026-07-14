@@ -122,7 +122,23 @@ function ControleEstoque() {
           <BackButton to="/dashboard" />
           <h1 className="text-2xl font-bold">Controle de Estoque</h1>
         </div>
-        <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova Movimentação</Button>
+        <div className="flex items-center gap-2">
+          <CsvExportButton
+            rows={movs}
+            columns={[
+              { header: "Data", accessor: (m: any) => new Date(m.data).toLocaleString("pt-BR") },
+              { header: "Tipo", accessor: (m: any) => m.tipo },
+              { header: "Item", accessor: (m: any) => m.itens?.nome ?? "" },
+              { header: "Qtd", accessor: (m: any) => m.qtd },
+              { header: "Origem Tipo", accessor: (m: any) => m.origem_tipo ?? "" },
+              { header: "Destino Tipo", accessor: (m: any) => m.destino_tipo ?? "" },
+              { header: "Técnico", accessor: (m: any) => m.usuarios?.nome_completo ?? "" },
+              { header: "Observação", accessor: (m: any) => m.observacao ?? "" },
+            ]}
+            filename="movimentacoes"
+          />
+          <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova Movimentação</Button>
+        </div>
       </div>
 
       <Card className="p-0 overflow-hidden">
