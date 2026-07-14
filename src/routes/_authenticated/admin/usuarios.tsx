@@ -139,7 +139,7 @@ function UsuariosPage() {
                 <TableCell className="font-medium">{u.nome_completo}</TableCell>
                 <TableCell>{u.email}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={badgeColor(u.perfil)}>{u.perfil}</Badge>
+                  <Badge variant="outline" className={badgeColor(u.perfil)}>{LABEL[u.perfil] ?? u.perfil}</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className={u.ativo ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-700 border-gray-200"}>
