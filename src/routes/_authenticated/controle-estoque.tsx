@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/controle-estoque")({
   component: ControleEstoque,
 });
 
-const tipos = ["Entrada", "Saida", "Transferencia", "Ajuste", "Abastecimento"] as const;
+const tipos = ["Entrada", "Saida", "Transferencia", "Permuta", "Ajuste", "Abastecimento"] as const;
 const locais = ["CD", "ATM"] as const;
 
 const movSchema = z.object({
