@@ -151,9 +151,10 @@
     font-size: 11px;
     letter-spacing: 0.03em;
   }
-  .excel-table tbody tr:nth-child(odd) { background: #ffffff; }
-  .excel-table tbody tr:nth-child(even) { background: #f1f5f9; }
-  .excel-table tbody tr:hover { background: #dbeafe; }
+  .excel-table tbody tr:nth-child(odd) { background: var(--card); }
+  .excel-table tbody tr:nth-child(even) { background: var(--muted); }
+  .excel-table tbody tr:hover { background: var(--accent); color: var(--accent-foreground); }
+  .excel-table th, .excel-table td { border-color: var(--border); }
   @media (max-width: 767px) {
     .excel-table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
     .excel-table th, .excel-table td { padding: 8px; }
