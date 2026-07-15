@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
+import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   component: ControleEstoque,
