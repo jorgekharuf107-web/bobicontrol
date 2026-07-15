@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { LinhaBadge } from "@/lib/use-accessible-linhas";
 
 export const Route = createFileRoute("/_authenticated/permutas")({
   component: Permutas,
