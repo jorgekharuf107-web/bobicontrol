@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { LinhaBadge } from "@/lib/use-accessible-linhas";
 
 export const Route = createFileRoute("/_authenticated/permutas")({
   component: Permutas,
@@ -50,6 +51,11 @@ function Permutas() {
     if (!id) return "—";
     const l = linhaMap.get(id);
     return l?.nome ?? "—";
+  };
+  const linhaBadge = (id: string | null) => {
+    if (!id) return <span className="text-muted-foreground">—</span>;
+    const l = linhaMap.get(id);
+    return <LinhaBadge nome={l?.nome} cor={l?.cor_hex} />;
   };
 
   const badge = (st: string) => {
@@ -96,8 +102,8 @@ function Permutas() {
                   <td>{new Date(m.criado_em).toLocaleString("pt-BR")}</td>
                   <td>{m.itens?.nome ?? "—"}</td>
                   <td>{m.qtd}</td>
-                  <td>{linhaLabel(m.linha_origem_id)}</td>
-                  <td>{linhaLabel(m.linha_destino_id)}</td>
+                  <td>{linhaBadge(m.linha_origem_id)}</td>
+                  <td>{linhaBadge(m.linha_destino_id)}</td>
                   <td>{m.usuarios?.nome_completo ?? "—"}</td>
                   <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
                   <td className="whitespace-nowrap">
@@ -133,8 +139,8 @@ function Permutas() {
                   <td>{new Date(m.criado_em).toLocaleString("pt-BR")}</td>
                   <td>{m.itens?.nome ?? "—"}</td>
                   <td>{m.qtd}</td>
-                  <td>{linhaLabel(m.linha_origem_id)}</td>
-                  <td>{linhaLabel(m.linha_destino_id)}</td>
+                  <td>{linhaBadge(m.linha_origem_id)}</td>
+                  <td>{linhaBadge(m.linha_destino_id)}</td>
                   <td>{m.usuarios?.nome_completo ?? "—"}</td>
                   <td>{badge(m.status_aprovacao ?? "aprovado")}</td>
                 </tr>
