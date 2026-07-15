@@ -22,6 +22,7 @@ import { Route as AuthenticatedEstacoesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_authenticated/controle-estoque'
 import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
+import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAtmsRouteImport } from './routes/_authenticated/atms'
 import { Route as AuthenticatedFornecedoresIndexRouteImport } from './routes/_authenticated/fornecedores/index'
 import { Route as AuthenticatedFornecedoresNovoRouteImport } from './routes/_authenticated/fornecedores/novo'
@@ -100,6 +101,11 @@ const AuthenticatedCdsRoute = AuthenticatedCdsRouteImport.update({
   path: '/cds',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAtmsRoute = AuthenticatedAtmsRouteImport.update({
   id: '/atms',
   path: '/atms',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/atms': typeof AuthenticatedAtmsRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/cds': typeof AuthenticatedCdsRoute
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/atms': typeof AuthenticatedAtmsRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/cds': typeof AuthenticatedCdsRoute
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/atms': typeof AuthenticatedAtmsRoute
+  '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/cds': typeof AuthenticatedCdsRoute
   '/_authenticated/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/atms'
+    | '/auditoria'
     | '/cds'
     | '/controle-estoque'
     | '/dashboard'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/atms'
+    | '/auditoria'
     | '/cds'
     | '/controle-estoque'
     | '/dashboard'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/atms'
+    | '/_authenticated/auditoria'
     | '/_authenticated/cds'
     | '/_authenticated/controle-estoque'
     | '/_authenticated/dashboard'
@@ -397,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCdsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/auditoria': {
+      id: '/_authenticated/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/atms': {
       id: '/_authenticated/atms'
       path: '/atms'
@@ -465,6 +484,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAtmsRoute: typeof AuthenticatedAtmsRoute
+  AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
   AuthenticatedControleEstoqueRoute: typeof AuthenticatedControleEstoqueRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -486,6 +506,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAtmsRoute: AuthenticatedAtmsRoute,
+  AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedCdsRoute: AuthenticatedCdsRoute,
   AuthenticatedControleEstoqueRoute: AuthenticatedControleEstoqueRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
