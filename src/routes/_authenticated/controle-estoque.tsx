@@ -45,6 +45,9 @@ function ControleEstoque() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MovForm>(empty);
+  const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
+  const { data: linhas = [] } = useAccessibleLinhas();
+  const linhaMap = new Map(linhas.map((l) => [l.id, l]));
 
   const { data: movs = [] } = useQuery({
     queryKey: ["movs-all"],
