@@ -52,6 +52,11 @@ function Permutas() {
     const l = linhaMap.get(id);
     return l?.nome ?? "—";
   };
+  const linhaBadge = (id: string | null) => {
+    if (!id) return <span className="text-muted-foreground">—</span>;
+    const l = linhaMap.get(id);
+    return <LinhaBadge nome={l?.nome} cor={l?.cor_hex} />;
+  };
 
   const badge = (st: string) => {
     const cls = st === "pendente" ? "bg-yellow-100 text-yellow-800"
