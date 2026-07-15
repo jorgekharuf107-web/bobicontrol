@@ -29,7 +29,7 @@ function AuditoriaPage() {
   });
 
   const linhaDoLog = (l: any): string | null => {
-    const d = l.dados_novos ?? l.dados_anteriores ?? {};
+    const d = l.dados_depois ?? l.dados_antes ?? {};
     return d.linha_id ?? d.linha_origem_id ?? d.linha_destino_id ?? null;
   };
 
