@@ -102,8 +102,8 @@ function Permutas() {
                   <td>{new Date(m.criado_em).toLocaleString("pt-BR")}</td>
                   <td>{m.itens?.nome ?? "—"}</td>
                   <td>{m.qtd}</td>
-                  <td>{linhaLabel(m.linha_origem_id)}</td>
-                  <td>{linhaLabel(m.linha_destino_id)}</td>
+                  <td>{linhaBadge(m.linha_origem_id)}</td>
+                  <td>{linhaBadge(m.linha_destino_id)}</td>
                   <td>{m.usuarios?.nome_completo ?? "—"}</td>
                   <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
                   <td className="whitespace-nowrap">
@@ -139,8 +139,8 @@ function Permutas() {
                   <td>{new Date(m.criado_em).toLocaleString("pt-BR")}</td>
                   <td>{m.itens?.nome ?? "—"}</td>
                   <td>{m.qtd}</td>
-                  <td>{linhaLabel(m.linha_origem_id)}</td>
-                  <td>{linhaLabel(m.linha_destino_id)}</td>
+                  <td>{linhaBadge(m.linha_origem_id)}</td>
+                  <td>{linhaBadge(m.linha_destino_id)}</td>
                   <td>{m.usuarios?.nome_completo ?? "—"}</td>
                   <td>{badge(m.status_aprovacao ?? "aprovado")}</td>
                 </tr>
