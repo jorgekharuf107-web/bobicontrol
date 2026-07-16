@@ -19,6 +19,7 @@ import { Route as AuthenticatedPermutasRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
 import { Route as AuthenticatedItensEstoqueRouteImport } from './routes/_authenticated/itens-estoque'
 import { Route as AuthenticatedImportarDadosRouteImport } from './routes/_authenticated/importar-dados'
+import { Route as AuthenticatedImportadorCorporativoRouteImport } from './routes/_authenticated/importador-corporativo'
 import { Route as AuthenticatedEstacoesRouteImport } from './routes/_authenticated/estacoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_authenticated/controle-estoque'
@@ -85,6 +86,12 @@ const AuthenticatedImportarDadosRoute =
   AuthenticatedImportarDadosRouteImport.update({
     id: '/importar-dados',
     path: '/importar-dados',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImportadorCorporativoRoute =
+  AuthenticatedImportadorCorporativoRouteImport.update({
+    id: '/importador-corporativo',
+    path: '/importador-corporativo',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedEstacoesRoute = AuthenticatedEstacoesRouteImport.update({
@@ -175,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estacoes': typeof AuthenticatedEstacoesRoute
+  '/importador-corporativo': typeof AuthenticatedImportadorCorporativoRoute
   '/importar-dados': typeof AuthenticatedImportarDadosRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
@@ -200,6 +208,7 @@ export interface FileRoutesByTo {
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estacoes': typeof AuthenticatedEstacoesRoute
+  '/importador-corporativo': typeof AuthenticatedImportadorCorporativoRoute
   '/importar-dados': typeof AuthenticatedImportarDadosRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
@@ -227,6 +236,7 @@ export interface FileRoutesById {
   '/_authenticated/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/estacoes': typeof AuthenticatedEstacoesRoute
+  '/_authenticated/importador-corporativo': typeof AuthenticatedImportadorCorporativoRoute
   '/_authenticated/importar-dados': typeof AuthenticatedImportarDadosRoute
   '/_authenticated/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/controle-estoque'
     | '/dashboard'
     | '/estacoes'
+    | '/importador-corporativo'
     | '/importar-dados'
     | '/itens-estoque'
     | '/linhas'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/controle-estoque'
     | '/dashboard'
     | '/estacoes'
+    | '/importador-corporativo'
     | '/importar-dados'
     | '/itens-estoque'
     | '/linhas'
@@ -305,6 +317,7 @@ export interface FileRouteTypes {
     | '/_authenticated/controle-estoque'
     | '/_authenticated/dashboard'
     | '/_authenticated/estacoes'
+    | '/_authenticated/importador-corporativo'
     | '/_authenticated/importar-dados'
     | '/_authenticated/itens-estoque'
     | '/_authenticated/linhas'
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/importar-dados'
       fullPath: '/importar-dados'
       preLoaderRoute: typeof AuthenticatedImportarDadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/importador-corporativo': {
+      id: '/_authenticated/importador-corporativo'
+      path: '/importador-corporativo'
+      fullPath: '/importador-corporativo'
+      preLoaderRoute: typeof AuthenticatedImportadorCorporativoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/estacoes': {
@@ -509,6 +529,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedControleEstoqueRoute: typeof AuthenticatedControleEstoqueRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEstacoesRoute: typeof AuthenticatedEstacoesRoute
+  AuthenticatedImportadorCorporativoRoute: typeof AuthenticatedImportadorCorporativoRoute
   AuthenticatedImportarDadosRoute: typeof AuthenticatedImportarDadosRoute
   AuthenticatedItensEstoqueRoute: typeof AuthenticatedItensEstoqueRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
@@ -532,6 +553,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedControleEstoqueRoute: AuthenticatedControleEstoqueRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEstacoesRoute: AuthenticatedEstacoesRoute,
+  AuthenticatedImportadorCorporativoRoute:
+    AuthenticatedImportadorCorporativoRoute,
   AuthenticatedImportarDadosRoute: AuthenticatedImportarDadosRoute,
   AuthenticatedItensEstoqueRoute: AuthenticatedItensEstoqueRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
