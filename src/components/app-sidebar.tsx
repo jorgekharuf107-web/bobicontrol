@@ -2,7 +2,7 @@ import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
   Banknote, Truck, Train, Building2, MapPin,
-  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload,
+  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload, Cloud,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -33,6 +33,7 @@ const admin: Item[] = [
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
   { title: "Importar Dados", to: "/importar-dados", icon: Upload },
+  { title: "Importador Corporativo", to: "/importador-corporativo", icon: Cloud },
   { title: "Sobre", to: "/admin/sobre", icon: Info },
 ];
 
@@ -85,8 +86,8 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6 text-sidebar-primary-foreground" />
           <div>
-            <p className="font-semibold leading-tight text-[13px]">Controle de Estoque</p>
-            <p className="text-[11px] text-sidebar-foreground/60">de Bobinas</p>
+            <p className="font-semibold leading-tight text-[13px]">Bobi Control</p>
+            <p className="text-[11px] text-sidebar-foreground/60">Sistema Interno</p>
           </div>
         </div>
       </div>
