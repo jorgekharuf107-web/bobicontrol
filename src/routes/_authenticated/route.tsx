@@ -91,17 +91,20 @@ function TopHeader() {
 
 function AuthenticatedLayout() {
   return (
-    <div className="min-h-screen flex w-full bg-background">
-      <AppSidebar />
-      <main className="flex-1 overflow-x-hidden flex flex-col">
-        <TopHeader />
-        <div className="max-w-7xl mx-auto p-6 w-full flex-1">
-          <Outlet />
-        </div>
-        <footer className="border-t bg-card py-3 px-6 text-center text-xs text-muted-foreground">
-          {APP_FOOTER}
-        </footer>
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar />
+        <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col">
+          <TopHeader />
+          <div className="max-w-7xl mx-auto p-6 w-full flex-1">
+            <Outlet />
+          </div>
+          <footer className="border-t bg-card py-3 px-6 text-center text-xs text-muted-foreground">
+            {APP_FOOTER}
+          </footer>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }
+
