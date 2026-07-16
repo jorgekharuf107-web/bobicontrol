@@ -8,9 +8,11 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User as UserIcon, Moon, Sun } from "lucide-react";
+import { LogOut, User as UserIcon, Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
 import { APP_FOOTER } from "@/lib/app-config";
+import { SidebarProvider, useSidebar } from "@/lib/use-sidebar";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
