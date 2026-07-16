@@ -43,9 +43,21 @@ function TopHeader() {
 
   const { theme, toggle } = useTheme();
 
+  const { isMobile, desktopOpen, toggleDesktop, toggleMobile } = useSidebar();
+
   return (
-    <header className="h-14 border-b bg-card flex items-center justify-end px-6 gap-3">
+    <header className="h-14 border-b bg-card flex items-center px-4 sm:px-6 gap-3">
+      <button
+        type="button"
+        onClick={isMobile ? toggleMobile : toggleDesktop}
+        aria-label={isMobile ? "Abrir menu" : desktopOpen ? "Recolher menu" : "Expandir menu"}
+        className="h-9 w-9 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
+      >
+        <Menu className="h-4 w-4" />
+      </button>
+      <div className="flex-1" />
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
+
       {perfil && <Badge variant="outline" className={papelBadge(perfil === "SUPER_ADMIN" ? "Administrador" : perfil)}>{perfil === "SUPER_ADMIN" ? "Administrador" : perfil}</Badge>}
       <button
         type="button"
