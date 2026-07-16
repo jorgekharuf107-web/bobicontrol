@@ -397,7 +397,7 @@ function ImportarDadosPage() {
       <div className="flex items-center gap-3">
         <BackButton to="/dashboard" />
         <div>
-          <h1 className="text-2xl font-semibold">Importar Dados (Base44)</h1>
+          <h1 className="text-2xl font-semibold">Importar Dados (CSV)</h1>
           <p className="text-sm text-muted-foreground">Somente Administradores. CSV com separador <code>;</code>.</p>
         </div>
       </div>

@@ -67,7 +67,7 @@ function AuthPage() {
             <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
               <Shield className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="text-2xl font-semibold">Gestão de ATMs</h1>
+            <h1 className="text-2xl font-semibold">Bobi Control</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Entre com sua conta corporativa para continuar
             </p>

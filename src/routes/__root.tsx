@@ -49,8 +49,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Gestão de ATMs" },
-      { name: "description", content: "Sistema de gestão de ATMs, CDs, linhas e fornecedores." },
+      { title: "Bobi Control" },
+      { name: "description", content: "Bobi Control - Sistema Interno de gestão de ATMs, CDs, linhas e fornecedores." },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
