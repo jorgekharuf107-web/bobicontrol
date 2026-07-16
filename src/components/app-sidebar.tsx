@@ -2,11 +2,12 @@ import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
   Banknote, Truck, Train, Building2, MapPin,
-  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload, Cloud,
+  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload, Cloud, X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/lib/use-sidebar";
 
 type Item = { title: string; to: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -41,11 +42,11 @@ const adminSuper: Item[] = [
   { title: "Backup", to: "/admin/backup", icon: Database },
 ];
 
-
 export function AppSidebar() {
   const router = useRouter();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { isAdmin, isSuperAdmin, perfil, nome } = useCurrentUser();
+  const { isMobile, desktopOpen, mobileOpen, closeMobile } = useSidebar();
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -64,6 +65,7 @@ export function AppSidebar() {
             <Link
               key={item.to}
               to={item.to}
+              onClick={() => isMobile && closeMobile()}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                 active
@@ -80,9 +82,13 @@ export function AppSidebar() {
     </div>
   );
 
-  return (
-    <aside className="w-64 shrink-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
-      <div className="px-4 py-4 border-b border-sidebar-border">
+  const content = (
+    <aside
+      className={cn(
+        "w-64 shrink-0 h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col",
+      )}
+    >
+      <div className="px-4 py-4 border-b border-sidebar-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6 text-sidebar-primary-foreground" />
           <div>
@@ -90,6 +96,15 @@ export function AppSidebar() {
             <p className="text-[11px] text-sidebar-foreground/60">Sistema Interno</p>
           </div>
         </div>
+        {isMobile && (
+          <button
+            onClick={closeMobile}
+            aria-label="Fechar menu"
+            className="p-1 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto py-4">
         <NavGroup label="Principal" items={principal} />
@@ -97,7 +112,7 @@ export function AppSidebar() {
         <NavGroup label="Cadastros" items={cadastros} />
         {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...admin, ...adminSuper] : admin} />}
       </div>
-      <div className="border-t border-sidebar-border p-3">
+      <div className="border-t border-sidebar-border p-3 shrink-0">
         <div className="px-2 mb-2">
           <p className="text-sm font-medium truncate">{nome ?? "Usuário"}</p>
           <p className="text-[11px] text-sidebar-foreground/60 truncate">{perfil === "SUPER_ADMIN" ? "Administrador" : (perfil ?? "")}</p>
@@ -110,5 +125,38 @@ export function AppSidebar() {
         </button>
       </div>
     </aside>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <div
+          onClick={closeMobile}
+          className={cn(
+            "fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 lg:hidden",
+            mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none",
+          )}
+        />
+        <div
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:hidden",
+            mobileOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+        >
+          {content}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "hidden lg:block h-screen sticky top-0 overflow-hidden transition-[width] duration-200",
+        desktopOpen ? "w-64" : "w-0",
+      )}
+    >
+      {content}
+    </div>
   );
 }
