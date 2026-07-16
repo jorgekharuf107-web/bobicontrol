@@ -2,7 +2,7 @@ import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
   Banknote, Truck, Train, Building2, MapPin,
-  Bell, ClipboardList, Users, Info, LogOut, Shield, Database,
+  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -32,8 +32,10 @@ const admin: Item[] = [
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
+  { title: "Importar Dados", to: "/importar-dados", icon: Upload },
   { title: "Sobre", to: "/admin/sobre", icon: Info },
 ];
+
 const adminSuper: Item[] = [
   { title: "Backup", to: "/admin/backup", icon: Database },
 ];

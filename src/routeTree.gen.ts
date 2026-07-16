@@ -18,6 +18,7 @@ import { Route as AuthenticatedRelatorioGerencialRouteImport } from './routes/_a
 import { Route as AuthenticatedPermutasRouteImport } from './routes/_authenticated/permutas'
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
 import { Route as AuthenticatedItensEstoqueRouteImport } from './routes/_authenticated/itens-estoque'
+import { Route as AuthenticatedImportarDadosRouteImport } from './routes/_authenticated/importar-dados'
 import { Route as AuthenticatedEstacoesRouteImport } from './routes/_authenticated/estacoes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_authenticated/controle-estoque'
@@ -78,6 +79,12 @@ const AuthenticatedItensEstoqueRoute =
   AuthenticatedItensEstoqueRouteImport.update({
     id: '/itens-estoque',
     path: '/itens-estoque',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedImportarDadosRoute =
+  AuthenticatedImportarDadosRouteImport.update({
+    id: '/importar-dados',
+    path: '/importar-dados',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedEstacoesRoute = AuthenticatedEstacoesRouteImport.update({
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estacoes': typeof AuthenticatedEstacoesRoute
+  '/importar-dados': typeof AuthenticatedImportarDadosRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/permutas': typeof AuthenticatedPermutasRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estacoes': typeof AuthenticatedEstacoesRoute
+  '/importar-dados': typeof AuthenticatedImportarDadosRoute
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/permutas': typeof AuthenticatedPermutasRoute
@@ -218,6 +227,7 @@ export interface FileRoutesById {
   '/_authenticated/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/estacoes': typeof AuthenticatedEstacoesRoute
+  '/_authenticated/importar-dados': typeof AuthenticatedImportarDadosRoute
   '/_authenticated/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
   '/_authenticated/permutas': typeof AuthenticatedPermutasRoute
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/controle-estoque'
     | '/dashboard'
     | '/estacoes'
+    | '/importar-dados'
     | '/itens-estoque'
     | '/linhas'
     | '/permutas'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/controle-estoque'
     | '/dashboard'
     | '/estacoes'
+    | '/importar-dados'
     | '/itens-estoque'
     | '/linhas'
     | '/permutas'
@@ -293,6 +305,7 @@ export interface FileRouteTypes {
     | '/_authenticated/controle-estoque'
     | '/_authenticated/dashboard'
     | '/_authenticated/estacoes'
+    | '/_authenticated/importar-dados'
     | '/_authenticated/itens-estoque'
     | '/_authenticated/linhas'
     | '/_authenticated/permutas'
@@ -379,6 +392,13 @@ declare module '@tanstack/react-router' {
       path: '/itens-estoque'
       fullPath: '/itens-estoque'
       preLoaderRoute: typeof AuthenticatedItensEstoqueRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/importar-dados': {
+      id: '/_authenticated/importar-dados'
+      path: '/importar-dados'
+      fullPath: '/importar-dados'
+      preLoaderRoute: typeof AuthenticatedImportarDadosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/estacoes': {
@@ -489,6 +509,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedControleEstoqueRoute: typeof AuthenticatedControleEstoqueRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEstacoesRoute: typeof AuthenticatedEstacoesRoute
+  AuthenticatedImportarDadosRoute: typeof AuthenticatedImportarDadosRoute
   AuthenticatedItensEstoqueRoute: typeof AuthenticatedItensEstoqueRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
   AuthenticatedPermutasRoute: typeof AuthenticatedPermutasRoute
@@ -511,6 +532,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedControleEstoqueRoute: AuthenticatedControleEstoqueRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEstacoesRoute: AuthenticatedEstacoesRoute,
+  AuthenticatedImportarDadosRoute: AuthenticatedImportarDadosRoute,
   AuthenticatedItensEstoqueRoute: AuthenticatedItensEstoqueRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
   AuthenticatedPermutasRoute: AuthenticatedPermutasRoute,
