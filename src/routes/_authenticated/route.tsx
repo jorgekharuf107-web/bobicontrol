@@ -8,9 +8,11 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User as UserIcon, Moon, Sun } from "lucide-react";
+import { LogOut, User as UserIcon, Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
 import { APP_FOOTER } from "@/lib/app-config";
+import { SidebarProvider, useSidebar } from "@/lib/use-sidebar";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -41,9 +43,21 @@ function TopHeader() {
 
   const { theme, toggle } = useTheme();
 
+  const { isMobile, desktopOpen, toggleDesktop, toggleMobile } = useSidebar();
+
   return (
-    <header className="h-14 border-b bg-card flex items-center justify-end px-6 gap-3">
+    <header className="h-14 border-b bg-card flex items-center px-4 sm:px-6 gap-3">
+      <button
+        type="button"
+        onClick={isMobile ? toggleMobile : toggleDesktop}
+        aria-label={isMobile ? "Abrir menu" : desktopOpen ? "Recolher menu" : "Expandir menu"}
+        className="h-9 w-9 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
+      >
+        <Menu className="h-4 w-4" />
+      </button>
+      <div className="flex-1" />
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
+
       {perfil && <Badge variant="outline" className={papelBadge(perfil === "SUPER_ADMIN" ? "Administrador" : perfil)}>{perfil === "SUPER_ADMIN" ? "Administrador" : perfil}</Badge>}
       <button
         type="button"
@@ -77,17 +91,20 @@ function TopHeader() {
 
 function AuthenticatedLayout() {
   return (
-    <div className="min-h-screen flex w-full bg-background">
-      <AppSidebar />
-      <main className="flex-1 overflow-x-hidden flex flex-col">
-        <TopHeader />
-        <div className="max-w-7xl mx-auto p-6 w-full flex-1">
-          <Outlet />
-        </div>
-        <footer className="border-t bg-card py-3 px-6 text-center text-xs text-muted-foreground">
-          {APP_FOOTER}
-        </footer>
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar />
+        <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col">
+          <TopHeader />
+          <div className="max-w-7xl mx-auto p-6 w-full flex-1">
+            <Outlet />
+          </div>
+          <footer className="border-t bg-card py-3 px-6 text-center text-xs text-muted-foreground">
+            {APP_FOOTER}
+          </footer>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }
+
