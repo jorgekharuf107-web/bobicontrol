@@ -111,10 +111,10 @@ function AlertasPage() {
             <div className="space-y-2"><Label>Tipo de alerta</Label>
               <Input value={form.tipo_alerta} onChange={(e) => setForm({ ...form, tipo_alerta: e.target.value })} /></div>
             <div className="space-y-2"><Label>Nível (%)</Label>
-              <Input type="number" value={form.nivel_alerta_percentual}
+              <Input type="number" className="h-9 w-28" value={form.nivel_alerta_percentual}
                 onChange={(e) => setForm({ ...form, nivel_alerta_percentual: +e.target.value })} /></div>
             <div className="space-y-2"><Label>Frequência (horas)</Label>
-              <Input type="number" min={0} value={form.frequencia_envio_horas}
+              <Input type="number" min={0} className="h-9 w-28" value={form.frequencia_envio_horas}
                 onChange={(e) => setForm({ ...form, frequencia_envio_horas: Math.max(0, +e.target.value || 0) })} /></div>
             <div className="space-y-2"><Label>Destinatários (separados por vírgula)</Label>
               <Input value={form.destinatarios_email}
