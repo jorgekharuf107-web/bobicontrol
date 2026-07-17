@@ -18,20 +18,32 @@ export type Database = {
         Row: {
           agendamento_id: string
           id: string
-          quantidade: number
-          tipo_bobina: string
+          item_id: string | null
+          qtd_bobina_100: number
+          qtd_bobina_50: number
+          qtd_caixas: number
+          quantidade: number | null
+          tipo_bobina: string | null
         }
         Insert: {
           agendamento_id: string
           id?: string
-          quantidade: number
-          tipo_bobina: string
+          item_id?: string | null
+          qtd_bobina_100?: number
+          qtd_bobina_50?: number
+          qtd_caixas?: number
+          quantidade?: number | null
+          tipo_bobina?: string | null
         }
         Update: {
           agendamento_id?: string
           id?: string
-          quantidade?: number
-          tipo_bobina?: string
+          item_id?: string | null
+          qtd_bobina_100?: number
+          qtd_bobina_50?: number
+          qtd_caixas?: number
+          quantidade?: number | null
+          tipo_bobina?: string | null
         }
         Relationships: [
           {
@@ -39,6 +51,13 @@ export type Database = {
             columns: ["agendamento_id"]
             isOneToOne: false
             referencedRelation: "agendamentos_entrega"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamento_itens_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
             referencedColumns: ["id"]
           },
         ]
@@ -50,6 +69,7 @@ export type Database = {
           data_hora_entrega: string
           estacao_cd_id: string
           id: string
+          modo_offline: boolean
           nome_motorista: string
           numero_nf: string | null
           observacao: string | null
@@ -63,6 +83,7 @@ export type Database = {
           data_hora_entrega: string
           estacao_cd_id: string
           id?: string
+          modo_offline?: boolean
           nome_motorista: string
           numero_nf?: string | null
           observacao?: string | null
@@ -76,6 +97,7 @@ export type Database = {
           data_hora_entrega?: string
           estacao_cd_id?: string
           id?: string
+          modo_offline?: boolean
           nome_motorista?: string
           numero_nf?: string | null
           observacao?: string | null
@@ -367,6 +389,33 @@ export type Database = {
           perfil_convidado?: string
           status?: Database["public"]["Enums"]["convite_status"]
           token?: string
+        }
+        Relationships: []
+      }
+      email_config: {
+        Row: {
+          app_password: string | null
+          ativo: boolean
+          atualizado_em: string
+          atualizado_por: string | null
+          id: string
+          sender_email: string
+        }
+        Insert: {
+          app_password?: string | null
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: string
+          sender_email?: string
+        }
+        Update: {
+          app_password?: string | null
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          id?: string
+          sender_email?: string
         }
         Relationships: []
       }
