@@ -161,4 +161,8 @@
     [role="dialog"] .grid { gap: 8px; }
     [role="dialog"] .grid > div { margin-bottom: 2px; }
   }
+  @media (max-width: 400px) {
+    .excel-table { font-size: 11px; }
+    .excel-table th, .excel-table td { padding: 6px; }
+  }
 }
