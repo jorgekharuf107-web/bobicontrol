@@ -61,7 +61,26 @@ function TopList({
 function Dashboard() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
-  const { isAdmin, isGestor } = useCurrentUser();
+  const { user, isAdmin, isGestor } = useCurrentUser();
+  const podeAprovar = isAdmin || isGestor;
+  const { data: linhas = [] } = useAccessibleLinhas();
+
+  const hojeIni = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString(); }, []);
+  const hojeFim = useMemo(() => { const d = new Date(); d.setHours(23,59,59,999); return d.toISOString(); }, []);
+  const { data: entregasHoje = [] } = useQuery({
+    queryKey: ["entregas-hoje", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("agendamentos_entrega")
+        .select("id, data_hora_entrega, nome_motorista, status, cds(nome_cd, estacoes(nome))")
+        .eq("tecnico_id", user!.id)
+        .gte("data_hora_entrega", hojeIni)
+        .lte("data_hora_entrega", hojeFim)
+        .order("data_hora_entrega");
+      return data ?? [];
+    },
+  });
   const podeAprovar = isAdmin || isGestor;
   const { data: linhas = [] } = useAccessibleLinhas();
 
