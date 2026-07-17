@@ -33,6 +33,7 @@ import { Route as AuthenticatedFornecedoresIdRouteImport } from './routes/_authe
 import { Route as AuthenticatedEstoqueMovimentacoesRouteImport } from './routes/_authenticated/estoque.movimentacoes'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminSobreRouteImport } from './routes/_authenticated/admin/sobre'
+import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
 import { Route as AuthenticatedAdminBackupRouteImport } from './routes/_authenticated/admin/backup'
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminAlertasRouteImport } from './routes/_authenticated/admin/alertas'
@@ -168,6 +169,12 @@ const AuthenticatedAdminSobreRoute = AuthenticatedAdminSobreRouteImport.update({
   path: '/admin/sobre',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminConfiguracoesRoute =
+  AuthenticatedAdminConfiguracoesRouteImport.update({
+    id: '/admin/configuracoes',
+    path: '/admin/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminBackupRoute =
   AuthenticatedAdminBackupRouteImport.update({
     id: '/admin/backup',
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/backup': typeof AuthenticatedAdminBackupRoute
+  '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -236,6 +244,7 @@ export interface FileRoutesByTo {
   '/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/backup': typeof AuthenticatedAdminBackupRoute
+  '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -266,6 +275,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/alertas': typeof AuthenticatedAdminAlertasRoute
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/backup': typeof AuthenticatedAdminBackupRoute
+  '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
   '/_authenticated/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/admin/alertas'
     | '/admin/auditoria'
     | '/admin/backup'
+    | '/admin/configuracoes'
     | '/admin/sobre'
     | '/admin/usuarios'
     | '/estoque/movimentacoes'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '/admin/alertas'
     | '/admin/auditoria'
     | '/admin/backup'
+    | '/admin/configuracoes'
     | '/admin/sobre'
     | '/admin/usuarios'
     | '/estoque/movimentacoes'
@@ -353,6 +365,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/alertas'
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/backup'
+    | '/_authenticated/admin/configuracoes'
     | '/_authenticated/admin/sobre'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/estoque/movimentacoes'
@@ -538,6 +551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSobreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/configuracoes': {
+      id: '/_authenticated/admin/configuracoes'
+      path: '/admin/configuracoes'
+      fullPath: '/admin/configuracoes'
+      preLoaderRoute: typeof AuthenticatedAdminConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/backup': {
       id: '/_authenticated/admin/backup'
       path: '/admin/backup'
@@ -580,6 +600,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAlertasRoute: typeof AuthenticatedAdminAlertasRoute
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminBackupRoute: typeof AuthenticatedAdminBackupRoute
+  AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
   AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedEstoqueMovimentacoesRoute: typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -607,6 +628,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAlertasRoute: AuthenticatedAdminAlertasRoute,
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminBackupRoute: AuthenticatedAdminBackupRoute,
+  AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
   AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedEstoqueMovimentacoesRoute:

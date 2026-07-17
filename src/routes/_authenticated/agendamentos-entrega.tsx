@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Plus, Pencil, Trash2, Search, Check, X } from "lucide-react";
+import { useState } from "react";
+import { Plus, Pencil, Trash2, Check, X, CloudOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,12 +16,19 @@ import { Badge } from "@/components/ui/badge";
 import { BackButton } from "@/components/back-button";
 import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { useServerFn } from "@tanstack/react-start";
+import { sendEmail } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/_authenticated/agendamentos-entrega")({
   component: AgendamentosEntregaPage,
 });
 
-type ItemForm = { tipo_bobina: string; quantidade: number };
+type ItemForm = {
+  item_id: string;
+  qtd_caixas: number;
+  qtd_bobina_100: number;
+  qtd_bobina_50: number;
+};
 type Header = {
   estacao_cd_id: string;
   data_hora_entrega: string;
@@ -30,12 +38,15 @@ type Header = {
   numero_nf: string;
   tecnico_id: string;
   status: "Agendado" | "Recebido" | "Cancelado";
+  modo_offline: boolean;
   observacao: string;
 };
 const emptyHeader: Header = {
   estacao_cd_id: "", data_hora_entrega: "", nome_motorista: "", celular_motorista: "",
-  transportadora: "", numero_nf: "", tecnico_id: "", status: "Agendado", observacao: "",
+  transportadora: "", numero_nf: "", tecnico_id: "", status: "Agendado",
+  modo_offline: false, observacao: "",
 };
+const emptyItem: ItemForm = { item_id: "", qtd_caixas: 0, qtd_bobina_100: 0, qtd_bobina_50: 0 };
 
 const STATUS_TONE: Record<string, string> = {
   Agendado: "bg-blue-100 text-blue-900",
@@ -46,17 +57,19 @@ const STATUS_TONE: Record<string, string> = {
 function AgendamentosEntregaPage() {
   const qc = useQueryClient();
   const { user, canManageEstoque } = useCurrentUser();
+  const send = useServerFn(sendEmail);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [header, setHeader] = useState<Header>(emptyHeader);
   const [itens, setItens] = useState<ItemForm[]>([]);
-  const [novoItem, setNovoItem] = useState<ItemForm>({ tipo_bobina: "", quantidade: 1 });
+  const [novoItem, setNovoItem] = useState<ItemForm>(emptyItem);
 
   const [fCd, setFCd] = useState("todos");
   const [fData, setFData] = useState("");
   const [fTecnico, setFTecnico] = useState("todos");
   const [fStatus, setFStatus] = useState("todos");
 
+  // Só CDs vinculados a estações (todo CD já pertence a uma estação, portanto lista todos)
   const { data: cds = [] } = useQuery({
     queryKey: ["cds-agend"],
     queryFn: async () =>
@@ -65,16 +78,12 @@ function AgendamentosEntregaPage() {
   const { data: tecnicos = [] } = useQuery({
     queryKey: ["tecnicos-agend"],
     queryFn: async () =>
-      (await supabase.from("usuarios").select("id, nome_completo").eq("ativo", true).order("nome_completo")).data ?? [],
+      (await supabase.from("usuarios").select("id, nome_completo, email").eq("ativo", true).order("nome_completo")).data ?? [],
   });
-  const { data: tiposBobina = [] } = useQuery({
-    queryKey: ["tipos-bobina-agend"],
-    queryFn: async () => {
-      const { data } = await supabase.from("itens").select("tipo_bobina").not("tipo_bobina", "is", null);
-      const set = new Set<string>();
-      (data ?? []).forEach((r: any) => r.tipo_bobina && set.add(r.tipo_bobina));
-      return Array.from(set).sort();
-    },
+  const { data: itensCatalogo = [] } = useQuery({
+    queryKey: ["itens-agend"],
+    queryFn: async () =>
+      (await supabase.from("itens").select("id, tipo_bobina, descricao").order("tipo_bobina")).data ?? [],
   });
 
   const { data: agendamentos = [] } = useQuery({
@@ -82,7 +91,7 @@ function AgendamentosEntregaPage() {
     queryFn: async () => {
       let q = supabase
         .from("agendamentos_entrega")
-        .select("*, cds(nome_cd, estacoes(nome)), agendamento_itens(id, tipo_bobina, quantidade)")
+        .select("*, cds(nome_cd, estacoes(nome)), agendamento_itens(id, item_id, qtd_caixas, qtd_bobina_100, qtd_bobina_50, tipo_bobina, quantidade, itens(tipo_bobina))")
         .order("data_hora_entrega", { ascending: false });
       if (fCd !== "todos") q = q.eq("estacao_cd_id", fCd);
       if (fTecnico !== "todos") q = q.eq("tecnico_id", fTecnico);
@@ -95,16 +104,14 @@ function AgendamentosEntregaPage() {
   });
 
   function resetForm() {
-    setHeader(emptyHeader); setItens([]); setNovoItem({ tipo_bobina: "", quantidade: 1 }); setEditingId(null);
+    setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null);
   }
-
   function abrirNovo() {
     resetForm();
     if (user?.id) setHeader((h) => ({ ...h, tecnico_id: user.id }));
     setOpen(true);
   }
-
-  async function abrirEditar(row: any) {
+  function abrirEditar(row: any) {
     resetForm();
     setEditingId(row.id);
     setHeader({
@@ -116,45 +123,75 @@ function AgendamentosEntregaPage() {
       numero_nf: row.numero_nf ?? "",
       tecnico_id: row.tecnico_id ?? "",
       status: row.status,
+      modo_offline: !!row.modo_offline,
       observacao: row.observacao ?? "",
     });
-    setItens((row.agendamento_itens ?? []).map((i: any) => ({ tipo_bobina: i.tipo_bobina, quantidade: i.quantidade })));
+    setItens((row.agendamento_itens ?? []).map((i: any) => ({
+      item_id: i.item_id ?? "",
+      qtd_caixas: i.qtd_caixas ?? 0,
+      qtd_bobina_100: i.qtd_bobina_100 ?? 0,
+      qtd_bobina_50: i.qtd_bobina_50 ?? 0,
+    })));
     setOpen(true);
   }
 
   function addItem() {
-    if (!novoItem.tipo_bobina.trim() || novoItem.quantidade <= 0) {
-      toast.error("Informe tipo de bobina e quantidade > 0");
-      return;
-    }
+    if (!novoItem.item_id) return toast.error("Selecione o item");
+    const total = novoItem.qtd_caixas + novoItem.qtd_bobina_100 + novoItem.qtd_bobina_50;
+    if (total <= 0) return toast.error("Informe pelo menos uma quantidade");
     setItens((arr) => [...arr, novoItem]);
-    setNovoItem({ tipo_bobina: "", quantidade: 1 });
+    setNovoItem(emptyItem);
   }
-  function removeItem(idx: number) {
-    setItens((arr) => arr.filter((_, i) => i !== idx));
-  }
+  function removeItem(idx: number) { setItens((arr) => arr.filter((_, i) => i !== idx)); }
 
-  async function criarMovimentacaoEntrada(agId: string, cdId: string, itensList: ItemForm[]) {
-    const tipos = Array.from(new Set(itensList.map((i) => i.tipo_bobina)));
-    const { data: itensDb } = await supabase.from("itens").select("id, tipo_bobina").in("tipo_bobina", tipos);
-    const mapa = new Map<string, string>();
-    (itensDb ?? []).forEach((it: any) => { if (it.tipo_bobina) mapa.set(it.tipo_bobina, it.id); });
-
-    const rows = itensList.map((i) => ({
-      tipo: "Entrada" as const,
-      item_id: mapa.get(i.tipo_bobina) ?? null,
-      qtd: i.quantidade,
-      destino_tipo: "CD" as const,
-      destino_id: cdId,
-      tecnico_id: user?.id ?? null,
-      observacao: `Recebimento agendamento #${agId.slice(0, 8)} — ${i.tipo_bobina}`,
-      data: new Date().toISOString(),
-      status_aprovacao: "aprovado",
-    }));
+  async function criarMovimentacoesRecebimento(agId: string, cdId: string, itensList: ItemForm[]) {
+    const rows = itensList.map((i) => {
+      const qtd = i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50;
+      return {
+        tipo: "Recebimento" as const,
+        item_id: i.item_id,
+        qtd,
+        qtd_caixas: i.qtd_caixas,
+        qtd_bobina_100: i.qtd_bobina_100,
+        qtd_bobina_50: i.qtd_bobina_50,
+        destino_tipo: "CD" as const,
+        destino_id: cdId,
+        tecnico_id: user?.id ?? null,
+        observacao: `Recebimento agendamento #${agId.slice(0, 8)}`,
+        data: new Date().toISOString(),
+        status_aprovacao: "aprovado",
+      };
+    });
     if (rows.length) {
       const { error } = await supabase.from("movimentacoes").insert(rows as any);
       if (error) throw error;
     }
+  }
+
+  async function enviarEmailSeguro(to: string | null | undefined, subject: string, html: string) {
+    if (!to) return;
+    try { await send({ data: { to, subject, html } }); } catch { /* silencioso */ }
+  }
+
+  function emailTecnico(id: string | null | undefined): string | null {
+    if (!id) return null;
+    const t = (tecnicos as any[]).find((x) => x.id === id);
+    return t?.email ?? null;
+  }
+
+  function htmlAgendamento(h: Header, tituloExtra = "") {
+    const cd = (cds as any[]).find((c) => c.id === h.estacao_cd_id);
+    const totalItens = itens.reduce((s, i) => s + i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50, 0);
+    return `
+      <div style="font-family:Arial,sans-serif">
+        <h2>Bobi Control — Agendamento de Entrega ${tituloExtra}</h2>
+        <p><b>CD/Estação:</b> ${cd?.nome_cd ?? "—"} / ${cd?.estacoes?.nome ?? "—"}</p>
+        <p><b>Data/Hora:</b> ${new Date(h.data_hora_entrega).toLocaleString("pt-BR")}</p>
+        <p><b>Motorista:</b> ${h.nome_motorista} ${h.celular_motorista ? "(" + h.celular_motorista + ")" : ""}</p>
+        <p><b>Transportadora:</b> ${h.transportadora || "—"} · <b>NF:</b> ${h.numero_nf || "—"}</p>
+        <p><b>Status:</b> ${h.status} ${h.modo_offline ? " · Técnico offline em campo" : ""}</p>
+        <p><b>Total (bobinas):</b> ${totalItens}</p>
+      </div>`;
   }
 
   async function salvar() {
@@ -172,33 +209,36 @@ function AgendamentosEntregaPage() {
       numero_nf: header.numero_nf || null,
       tecnico_id: header.tecnico_id || null,
       status: header.status,
+      modo_offline: header.modo_offline,
       observacao: header.observacao || null,
     };
 
     let previous: any = null;
+    let currentId = editingId;
     if (editingId) {
       const { data: prev } = await supabase.from("agendamentos_entrega").select("status").eq("id", editingId).maybeSingle();
       previous = prev;
       const { error } = await supabase.from("agendamentos_entrega").update(payload).eq("id", editingId);
       if (error) return toast.error(error.message);
       await supabase.from("agendamento_itens").delete().eq("agendamento_id", editingId);
-      const itRows = itens.map((i) => ({ agendamento_id: editingId, tipo_bobina: i.tipo_bobina, quantidade: i.quantidade }));
+      const itRows = itens.map((i) => ({ agendamento_id: editingId, ...i }));
       if (itRows.length) await supabase.from("agendamento_itens").insert(itRows);
     } else {
       const { data: ins, error } = await supabase.from("agendamentos_entrega").insert(payload).select("id").maybeSingle();
       if (error || !ins) return toast.error(error?.message ?? "Erro ao criar");
-      const itRows = itens.map((i) => ({ agendamento_id: ins.id, tipo_bobina: i.tipo_bobina, quantidade: i.quantidade }));
+      currentId = ins.id;
+      const itRows = itens.map((i) => ({ agendamento_id: ins.id, ...i }));
       if (itRows.length) await supabase.from("agendamento_itens").insert(itRows);
       previous = { status: "Agendado" };
-      if (header.status === "Recebido") {
-        try { await criarMovimentacaoEntrada(ins.id, header.estacao_cd_id, itens); }
-        catch (e: any) { toast.error("Agendamento criado, mas falha ao gerar entrada: " + e.message); }
-      }
+      // e-mail: criação
+      enviarEmailSeguro(emailTecnico(header.tecnico_id), "Novo agendamento de entrega", htmlAgendamento(header, "— Novo"));
     }
 
-    if (editingId && previous?.status !== "Recebido" && header.status === "Recebido") {
-      try { await criarMovimentacaoEntrada(editingId, header.estacao_cd_id, itens); }
-      catch (e: any) { toast.error("Status atualizado, mas falha ao gerar entrada: " + e.message); }
+    const virouRecebido = previous?.status !== "Recebido" && header.status === "Recebido";
+    if (virouRecebido && currentId) {
+      try { await criarMovimentacoesRecebimento(currentId, header.estacao_cd_id, itens); }
+      catch (e: any) { toast.error("Falha ao gerar entrada: " + e.message); }
+      enviarEmailSeguro(emailTecnico(header.tecnico_id), "Entrega confirmada como recebida", htmlAgendamento(header, "— Recebido"));
     }
 
     toast.success(editingId ? "Agendamento atualizado" : "Agendamento criado");
@@ -210,10 +250,16 @@ function AgendamentosEntregaPage() {
   async function marcarRecebido(row: any) {
     const { error } = await supabase.from("agendamentos_entrega").update({ status: "Recebido" }).eq("id", row.id);
     if (error) return toast.error(error.message);
-    try {
-      await criarMovimentacaoEntrada(row.id, row.estacao_cd_id,
-        (row.agendamento_itens ?? []).map((i: any) => ({ tipo_bobina: i.tipo_bobina, quantidade: i.quantidade })));
-    } catch (e: any) { toast.error("Falha ao gerar entrada: " + e.message); }
+    const itensList: ItemForm[] = (row.agendamento_itens ?? []).map((i: any) => ({
+      item_id: i.item_id,
+      qtd_caixas: i.qtd_caixas ?? 0,
+      qtd_bobina_100: i.qtd_bobina_100 ?? 0,
+      qtd_bobina_50: i.qtd_bobina_50 ?? 0,
+    })).filter((i: ItemForm) => i.item_id);
+    try { await criarMovimentacoesRecebimento(row.id, row.estacao_cd_id, itensList); }
+    catch (e: any) { toast.error("Falha ao gerar entrada: " + e.message); }
+    enviarEmailSeguro(emailTecnico(row.tecnico_id), "Entrega confirmada como recebida",
+      `<p>Agendamento <b>#${row.id.slice(0,8)}</b> marcado como <b>Recebido</b>.</p>`);
     toast.success("Marcado como Recebido e entrada gerada no CD");
     qc.invalidateQueries({ queryKey: ["agendamentos"] });
   }
@@ -226,6 +272,13 @@ function AgendamentosEntregaPage() {
     qc.invalidateQueries({ queryKey: ["agendamentos"] });
   }
 
+  function totalBobinas(r: any) {
+    return (r.agendamento_itens ?? []).reduce((s: number, i: any) => {
+      const legado = i.quantidade ?? 0;
+      return s + (i.qtd_caixas ?? 0) * 3 + (i.qtd_bobina_100 ?? 0) + (i.qtd_bobina_50 ?? 0) + legado;
+    }, 0);
+  }
+
   const colunas: Coluna<any>[] = [
     { header: "Data/Hora", cell: (r) => new Date(r.data_hora_entrega).toLocaleString("pt-BR"),
       csv: (r) => new Date(r.data_hora_entrega).toLocaleString("pt-BR") },
@@ -234,8 +287,9 @@ function AgendamentosEntregaPage() {
     { header: "Motorista", cell: (r) => r.nome_motorista, csv: (r) => r.nome_motorista },
     { header: "Transportadora", cell: (r) => r.transportadora ?? "—", csv: (r) => r.transportadora ?? "" },
     { header: "NF", cell: (r) => r.numero_nf ?? "—", csv: (r) => r.numero_nf ?? "" },
-    { header: "Itens", cell: (r) => (r.agendamento_itens ?? []).reduce((s: number, i: any) => s + i.quantidade, 0),
-      csv: (r) => (r.agendamento_itens ?? []).reduce((s: number, i: any) => s + i.quantidade, 0) },
+    { header: "Total Bobinas", cell: (r) => totalBobinas(r), csv: (r) => totalBobinas(r) },
+    { header: "Offline", cell: (r) => r.modo_offline ? <CloudOff className="h-4 w-4 text-slate-600" /> : "—",
+      csv: (r) => (r.modo_offline ? "Sim" : "Não") },
     { header: "Status", cell: (r) => (
         <Badge className={STATUS_TONE[r.status] ?? ""} variant="secondary">{r.status}</Badge>
       ), csv: (r) => r.status },
@@ -382,6 +436,13 @@ function AgendamentosEntregaPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="sm:col-span-2 flex items-center gap-2">
+              <Checkbox id="offline" checked={header.modo_offline}
+                onCheckedChange={(c) => setHeader({ ...header, modo_offline: !!c })} />
+              <Label htmlFor="offline" className="cursor-pointer flex items-center gap-1">
+                <CloudOff className="h-4 w-4" /> Técnico estará Offline em campo
+              </Label>
+            </div>
             <div className="sm:col-span-2">
               <Label>Observação</Label>
               <Textarea rows={2} value={header.observacao}
@@ -391,47 +452,68 @@ function AgendamentosEntregaPage() {
 
           <div className="border-t pt-3 space-y-2">
             <p className="text-sm font-semibold">Itens do Agendamento</p>
-            <div className="grid grid-cols-[1fr_120px_auto] gap-2 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_90px_90px_90px_auto] gap-2 items-end">
               <div>
-                <Label>Tipo de Bobina</Label>
-                <Select value={novoItem.tipo_bobina} onValueChange={(v) => setNovoItem({ ...novoItem, tipo_bobina: v })}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="Selecione ou digite" /></SelectTrigger>
+                <Label>Item</Label>
+                <Select value={novoItem.item_id} onValueChange={(v) => setNovoItem({ ...novoItem, item_id: v })}>
+                  <SelectTrigger className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
-                    {tiposBobina.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    {itensCatalogo.map((t: any) => (
+                      <SelectItem key={t.id} value={t.id}>{t.tipo_bobina ?? t.descricao}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Quantidade</Label>
-                <Input type="number" min={1} className="h-9" value={novoItem.quantidade}
-                  onChange={(e) => setNovoItem({ ...novoItem, quantidade: Number(e.target.value) })} />
+                <Label>Caixas</Label>
+                <Input type="number" min={0} className="h-9" value={novoItem.qtd_caixas}
+                  onChange={(e) => setNovoItem({ ...novoItem, qtd_caixas: Number(e.target.value) || 0 })} />
+              </div>
+              <div>
+                <Label>Bob. 100%</Label>
+                <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_100}
+                  onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_100: Number(e.target.value) || 0 })} />
+              </div>
+              <div>
+                <Label>Bob. &lt;50%</Label>
+                <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_50}
+                  onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_50: Number(e.target.value) || 0 })} />
               </div>
               <Button type="button" onClick={addItem}><Plus className="h-4 w-4" /></Button>
             </div>
             <Card className="p-0 overflow-hidden">
               <table className="excel-table">
-                <thead><tr><th>Tipo de Bobina</th><th>Qtd</th><th>Ações</th></tr></thead>
+                <thead>
+                  <tr><th>Item</th><th>Caixas</th><th>Bob. 100%</th><th>Bob. &lt;50%</th><th>Total</th><th>Ações</th></tr>
+                </thead>
                 <tbody>
                   {itens.length === 0 && (
-                    <tr><td colSpan={3} className="text-center py-4 text-muted-foreground">Nenhum item</td></tr>
+                    <tr><td colSpan={6} className="text-center py-4 text-muted-foreground">Nenhum item</td></tr>
                   )}
-                  {itens.map((i, idx) => (
-                    <tr key={idx}>
-                      <td>{i.tipo_bobina}</td>
-                      <td>{i.quantidade}</td>
-                      <td>
-                        <Button size="sm" variant="ghost" onClick={() => removeItem(idx)}>
-                          <X className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                  {itens.map((i, idx) => {
+                    const item = (itensCatalogo as any[]).find((x) => x.id === i.item_id);
+                    const total = i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50;
+                    return (
+                      <tr key={idx}>
+                        <td>{item?.tipo_bobina ?? item?.descricao ?? "—"}</td>
+                        <td>{i.qtd_caixas}</td>
+                        <td>{i.qtd_bobina_100}</td>
+                        <td>{i.qtd_bobina_50}</td>
+                        <td><b>{total}</b></td>
+                        <td>
+                          <Button size="sm" variant="ghost" onClick={() => removeItem(idx)}>
+                            <X className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </Card>
             {header.status === "Recebido" && (
               <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">
-                Ao salvar como "Recebido", será gerada uma Entrada no estoque do CD com a soma das quantidades.
+                Ao salvar como "Recebido", será gerada uma Movimentação de <b>Recebimento</b> no CD para cada item.
               </p>
             )}
           </div>
