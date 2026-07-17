@@ -14,6 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      agendamento_itens: {
+        Row: {
+          agendamento_id: string
+          id: string
+          quantidade: number
+          tipo_bobina: string
+        }
+        Insert: {
+          agendamento_id: string
+          id?: string
+          quantidade: number
+          tipo_bobina: string
+        }
+        Update: {
+          agendamento_id?: string
+          id?: string
+          quantidade?: number
+          tipo_bobina?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamento_itens_agendamento_id_fkey"
+            columns: ["agendamento_id"]
+            isOneToOne: false
+            referencedRelation: "agendamentos_entrega"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agendamentos_entrega: {
+        Row: {
+          celular_motorista: string | null
+          created_at: string
+          data_hora_entrega: string
+          estacao_cd_id: string
+          id: string
+          nome_motorista: string
+          numero_nf: string | null
+          observacao: string | null
+          status: string
+          tecnico_id: string | null
+          transportadora: string | null
+        }
+        Insert: {
+          celular_motorista?: string | null
+          created_at?: string
+          data_hora_entrega: string
+          estacao_cd_id: string
+          id?: string
+          nome_motorista: string
+          numero_nf?: string | null
+          observacao?: string | null
+          status?: string
+          tecnico_id?: string | null
+          transportadora?: string | null
+        }
+        Update: {
+          celular_motorista?: string | null
+          created_at?: string
+          data_hora_entrega?: string
+          estacao_cd_id?: string
+          id?: string
+          nome_motorista?: string
+          numero_nf?: string | null
+          observacao?: string | null
+          status?: string
+          tecnico_id?: string | null
+          transportadora?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamentos_entrega_estacao_cd_id_fkey"
+            columns: ["estacao_cd_id"]
+            isOneToOne: false
+            referencedRelation: "cds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alerta_destinatarios: {
         Row: {
           alerta_id: string
