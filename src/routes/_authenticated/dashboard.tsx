@@ -81,8 +81,8 @@ function Dashboard() {
       return data ?? [];
     },
   });
-  const podeAprovar = isAdmin || isGestor;
-  const { data: linhas = [] } = useAccessibleLinhas();
+
+
 
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
