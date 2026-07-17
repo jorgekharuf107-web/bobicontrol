@@ -136,18 +136,17 @@ function ItensPage() {
         </div>
         <div><Label>Ordenar</Label>
           <Select value={ordenar} onValueChange={setOrdenar}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-44 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="nome">Nome</SelectItem>
               <SelectItem value="codigo">Código</SelectItem>
-              <SelectItem value="medida">Medida</SelectItem>
               <SelectItem value="criado_em">Data Criação</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div><Label>Direção</Label>
           <Select value={direcao} onValueChange={(v: any) => setDirecao(v)}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="asc">Ascendente ↑</SelectItem>
               <SelectItem value="desc">Descendente ↓</SelectItem>
