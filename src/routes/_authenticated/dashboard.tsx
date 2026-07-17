@@ -399,37 +399,3 @@ function PesquisaAvancada() {
     </DialogContent>
   );
 }
-
-function PesquisaAvancada() {
-  return (
-    <DialogContent className="max-w-4xl">
-      <DialogHeader><DialogTitle>Pesquisa Avançada de Movimentações</DialogTitle></DialogHeader>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div><Label>Data Início</Label><Input type="date" /></div>
-        <div><Label>Data Fim</Label><Input type="date" /></div>
-        <div><Label>Local</Label>
-          <Select defaultValue="todos"><SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="cd">CD</SelectItem>
-              <SelectItem value="atm">ATM</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div><Label>Tipo</Label>
-          <Select defaultValue="todos"><SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="Entrada">Entrada</SelectItem>
-              <SelectItem value="Saida">Saída</SelectItem>
-              <SelectItem value="Permuta">Permuta</SelectItem>
-              <SelectItem value="Ajuste">Ajuste</SelectItem>
-              <SelectItem value="Abastecimento">Abastecimento</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className="flex justify-end"><Button variant="outline">Limpar Filtros</Button></div>
-    </DialogContent>
-  );
-}
