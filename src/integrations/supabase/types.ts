@@ -657,6 +657,9 @@ export type Database = {
           origem_id: string | null
           origem_tipo: Database["public"]["Enums"]["local_tipo"] | null
           qtd: number
+          qtd_bobina_100: number
+          qtd_bobina_50: number
+          qtd_caixas: number
           status_aprovacao: string
           tecnico_id: string | null
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
@@ -677,6 +680,9 @@ export type Database = {
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           qtd: number
+          qtd_bobina_100?: number
+          qtd_bobina_50?: number
+          qtd_caixas?: number
           status_aprovacao?: string
           tecnico_id?: string | null
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
@@ -697,6 +703,9 @@ export type Database = {
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           qtd?: number
+          qtd_bobina_100?: number
+          qtd_bobina_50?: number
+          qtd_caixas?: number
           status_aprovacao?: string
           tecnico_id?: string | null
           tipo?: Database["public"]["Enums"]["movimentacao_tipo"]
@@ -888,6 +897,8 @@ export type Database = {
         | "Ajuste"
         | "Abastecimento"
         | "Permuta"
+        | "Recebimento"
+        | "Retirada"
       status_geral: "ativo" | "inativo"
       status_operacional: "operacional" | "manutencao" | "desativado"
       tipo_contato_motorista: "motorista1" | "motorista2"
@@ -1029,6 +1040,8 @@ export const Constants = {
         "Ajuste",
         "Abastecimento",
         "Permuta",
+        "Recebimento",
+        "Retirada",
       ],
       status_geral: ["ativo", "inativo"],
       status_operacional: ["operacional", "manutencao", "desativado"],

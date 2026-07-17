@@ -17,6 +17,7 @@ const principal: Item[] = [
   { title: "Reposição de Bobinas", to: "/reposicao-bobinas", icon: PackagePlus },
 ];
 const estoque: Item[] = [
+  { title: "Movimentação", to: "/estoque/movimentacoes", icon: PackagePlus },
   { title: "Controle de Estoque", to: "/controle-estoque", icon: Boxes },
   { title: "Agendamentos de Entrega", to: "/agendamentos-entrega", icon: CalendarClock },
   { title: "Permutas entre Linhas", to: "/permutas", icon: PackagePlus },

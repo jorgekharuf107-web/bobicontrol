@@ -30,6 +30,7 @@ import { Route as AuthenticatedAgendamentosEntregaRouteImport } from './routes/_
 import { Route as AuthenticatedFornecedoresIndexRouteImport } from './routes/_authenticated/fornecedores/index'
 import { Route as AuthenticatedFornecedoresNovoRouteImport } from './routes/_authenticated/fornecedores/novo'
 import { Route as AuthenticatedFornecedoresIdRouteImport } from './routes/_authenticated/fornecedores/$id'
+import { Route as AuthenticatedEstoqueMovimentacoesRouteImport } from './routes/_authenticated/estoque.movimentacoes'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminSobreRouteImport } from './routes/_authenticated/admin/sobre'
 import { Route as AuthenticatedAdminBackupRouteImport } from './routes/_authenticated/admin/backup'
@@ -150,6 +151,12 @@ const AuthenticatedFornecedoresIdRoute =
     path: '/fornecedores/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEstoqueMovimentacoesRoute =
+  AuthenticatedEstoqueMovimentacoesRouteImport.update({
+    id: '/estoque/movimentacoes',
+    path: '/estoque/movimentacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUsuariosRoute =
   AuthenticatedAdminUsuariosRouteImport.update({
     id: '/admin/usuarios',
@@ -203,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
   '/fornecedores/': typeof AuthenticatedFornecedoresIndexRoute
@@ -230,6 +238,7 @@ export interface FileRoutesByTo {
   '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
   '/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
   '/fornecedores': typeof AuthenticatedFornecedoresIndexRoute
@@ -259,6 +268,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/_authenticated/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
+  '/_authenticated/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
   '/_authenticated/fornecedores/$id': typeof AuthenticatedFornecedoresIdRoute
   '/_authenticated/fornecedores/novo': typeof AuthenticatedFornecedoresNovoRoute
   '/_authenticated/fornecedores/': typeof AuthenticatedFornecedoresIndexRoute
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin/backup'
     | '/admin/sobre'
     | '/admin/usuarios'
+    | '/estoque/movimentacoes'
     | '/fornecedores/$id'
     | '/fornecedores/novo'
     | '/fornecedores/'
@@ -315,6 +326,7 @@ export interface FileRouteTypes {
     | '/admin/backup'
     | '/admin/sobre'
     | '/admin/usuarios'
+    | '/estoque/movimentacoes'
     | '/fornecedores/$id'
     | '/fornecedores/novo'
     | '/fornecedores'
@@ -343,6 +355,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/backup'
     | '/_authenticated/admin/sobre'
     | '/_authenticated/admin/usuarios'
+    | '/_authenticated/estoque/movimentacoes'
     | '/_authenticated/fornecedores/$id'
     | '/_authenticated/fornecedores/novo'
     | '/_authenticated/fornecedores/'
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFornecedoresIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/estoque/movimentacoes': {
+      id: '/_authenticated/estoque/movimentacoes'
+      path: '/estoque/movimentacoes'
+      fullPath: '/estoque/movimentacoes'
+      preLoaderRoute: typeof AuthenticatedEstoqueMovimentacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/usuarios': {
       id: '/_authenticated/admin/usuarios'
       path: '/admin/usuarios'
@@ -562,6 +582,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminBackupRoute: typeof AuthenticatedAdminBackupRoute
   AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
+  AuthenticatedEstoqueMovimentacoesRoute: typeof AuthenticatedEstoqueMovimentacoesRoute
   AuthenticatedFornecedoresIdRoute: typeof AuthenticatedFornecedoresIdRoute
   AuthenticatedFornecedoresNovoRoute: typeof AuthenticatedFornecedoresNovoRoute
   AuthenticatedFornecedoresIndexRoute: typeof AuthenticatedFornecedoresIndexRoute
@@ -588,6 +609,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminBackupRoute: AuthenticatedAdminBackupRoute,
   AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
+  AuthenticatedEstoqueMovimentacoesRoute:
+    AuthenticatedEstoqueMovimentacoesRoute,
   AuthenticatedFornecedoresIdRoute: AuthenticatedFornecedoresIdRoute,
   AuthenticatedFornecedoresNovoRoute: AuthenticatedFornecedoresNovoRoute,
   AuthenticatedFornecedoresIndexRoute: AuthenticatedFornecedoresIndexRoute,
