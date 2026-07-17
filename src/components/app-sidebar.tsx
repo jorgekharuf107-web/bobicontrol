@@ -2,7 +2,7 @@ import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
   Banknote, Truck, Train, Building2, MapPin,
-  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload, Cloud, X,
+  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload, Cloud, X, CalendarClock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -18,6 +18,7 @@ const principal: Item[] = [
 ];
 const estoque: Item[] = [
   { title: "Controle de Estoque", to: "/controle-estoque", icon: Boxes },
+  { title: "Agendamentos de Entrega", to: "/agendamentos-entrega", icon: CalendarClock },
   { title: "Permutas entre Linhas", to: "/permutas", icon: PackagePlus },
   { title: "Itens de Estoque", to: "/itens-estoque", icon: Layers },
   { title: "Auditoria", to: "/auditoria", icon: ClipboardList },

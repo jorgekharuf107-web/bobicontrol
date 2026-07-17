@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { Search, AlertTriangle } from "lucide-react";
+import { Search, AlertTriangle, CalendarClock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,9 +61,28 @@ function TopList({
 function Dashboard() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
-  const { isAdmin, isGestor } = useCurrentUser();
+  const { user, isAdmin, isGestor } = useCurrentUser();
   const podeAprovar = isAdmin || isGestor;
   const { data: linhas = [] } = useAccessibleLinhas();
+
+  const hojeIni = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d.toISOString(); }, []);
+  const hojeFim = useMemo(() => { const d = new Date(); d.setHours(23,59,59,999); return d.toISOString(); }, []);
+  const { data: entregasHoje = [] } = useQuery({
+    queryKey: ["entregas-hoje", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("agendamentos_entrega")
+        .select("id, data_hora_entrega, nome_motorista, status, cds(nome_cd, estacoes(nome))")
+        .eq("tecnico_id", user!.id)
+        .gte("data_hora_entrega", hojeIni)
+        .lte("data_hora_entrega", hojeFim)
+        .order("data_hora_entrega");
+      return data ?? [];
+    },
+  });
+
+
 
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
@@ -165,6 +184,27 @@ function Dashboard() {
             <p className="text-xs text-amber-800">Aprovar ou rejeitar em /permutas</p>
           </div>
           <a href="/permutas" className="text-sm font-medium text-amber-900 underline">Abrir</a>
+        </Card>
+      )}
+
+      {entregasHoje.length > 0 && (
+        <Card className="p-4 border-blue-300 bg-blue-50">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarClock className="h-5 w-5 text-blue-800" />
+            <p className="font-semibold text-blue-900">Entregas de Hoje ({entregasHoje.length})</p>
+            <a href="/agendamentos-entrega" className="ml-auto text-sm font-medium text-blue-900 underline">Ver todos</a>
+          </div>
+          <ul className="text-sm text-blue-900 space-y-1">
+            {entregasHoje.map((e: any) => (
+              <li key={e.id} className="flex justify-between gap-2">
+                <span>
+                  <b>{new Date(e.data_hora_entrega).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</b>
+                  {" — "}{e.cds?.nome_cd ?? "—"} / {e.cds?.estacoes?.nome ?? "—"} · {e.nome_motorista}
+                </span>
+                <span className="text-xs opacity-80">{e.status}</span>
+              </li>
+            ))}
+          </ul>
         </Card>
       )}
 

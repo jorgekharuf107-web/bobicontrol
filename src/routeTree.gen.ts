@@ -26,6 +26,7 @@ import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_auth
 import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedAtmsRouteImport } from './routes/_authenticated/atms'
+import { Route as AuthenticatedAgendamentosEntregaRouteImport } from './routes/_authenticated/agendamentos-entrega'
 import { Route as AuthenticatedFornecedoresIndexRouteImport } from './routes/_authenticated/fornecedores/index'
 import { Route as AuthenticatedFornecedoresNovoRouteImport } from './routes/_authenticated/fornecedores/novo'
 import { Route as AuthenticatedFornecedoresIdRouteImport } from './routes/_authenticated/fornecedores/$id'
@@ -125,6 +126,12 @@ const AuthenticatedAtmsRoute = AuthenticatedAtmsRouteImport.update({
   path: '/atms',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAgendamentosEntregaRoute =
+  AuthenticatedAgendamentosEntregaRouteImport.update({
+    id: '/agendamentos-entrega',
+    path: '/agendamentos-entrega',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedFornecedoresIndexRoute =
   AuthenticatedFornecedoresIndexRouteImport.update({
     id: '/fornecedores/',
@@ -176,6 +183,7 @@ const AuthenticatedAdminAlertasRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/agendamentos-entrega': typeof AuthenticatedAgendamentosEntregaRoute
   '/atms': typeof AuthenticatedAtmsRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/cds': typeof AuthenticatedCdsRoute
@@ -202,6 +210,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/agendamentos-entrega': typeof AuthenticatedAgendamentosEntregaRoute
   '/atms': typeof AuthenticatedAtmsRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/cds': typeof AuthenticatedCdsRoute
@@ -230,6 +239,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/agendamentos-entrega': typeof AuthenticatedAgendamentosEntregaRoute
   '/_authenticated/atms': typeof AuthenticatedAtmsRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/cds': typeof AuthenticatedCdsRoute
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/agendamentos-entrega'
     | '/atms'
     | '/auditoria'
     | '/cds'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/agendamentos-entrega'
     | '/atms'
     | '/auditoria'
     | '/cds'
@@ -311,6 +323,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/agendamentos-entrega'
     | '/_authenticated/atms'
     | '/_authenticated/auditoria'
     | '/_authenticated/cds'
@@ -463,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAtmsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/agendamentos-entrega': {
+      id: '/_authenticated/agendamentos-entrega'
+      path: '/agendamentos-entrega'
+      fullPath: '/agendamentos-entrega'
+      preLoaderRoute: typeof AuthenticatedAgendamentosEntregaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/fornecedores/': {
       id: '/_authenticated/fornecedores/'
       path: '/fornecedores'
@@ -523,6 +543,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAgendamentosEntregaRoute: typeof AuthenticatedAgendamentosEntregaRoute
   AuthenticatedAtmsRoute: typeof AuthenticatedAtmsRoute
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
@@ -547,6 +568,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAgendamentosEntregaRoute: AuthenticatedAgendamentosEntregaRoute,
   AuthenticatedAtmsRoute: AuthenticatedAtmsRoute,
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedCdsRoute: AuthenticatedCdsRoute,
