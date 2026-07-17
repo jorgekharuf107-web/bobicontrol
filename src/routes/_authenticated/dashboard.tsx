@@ -187,6 +187,27 @@ function Dashboard() {
         </Card>
       )}
 
+      {entregasHoje.length > 0 && (
+        <Card className="p-4 border-blue-300 bg-blue-50">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarClock className="h-5 w-5 text-blue-800" />
+            <p className="font-semibold text-blue-900">Entregas de Hoje ({entregasHoje.length})</p>
+            <a href="/agendamentos-entrega" className="ml-auto text-sm font-medium text-blue-900 underline">Ver todos</a>
+          </div>
+          <ul className="text-sm text-blue-900 space-y-1">
+            {entregasHoje.map((e: any) => (
+              <li key={e.id} className="flex justify-between gap-2">
+                <span>
+                  <b>{new Date(e.data_hora_entrega).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</b>
+                  {" — "}{e.cds?.nome_cd ?? "—"} / {e.cds?.estacoes?.nome ?? "—"} · {e.nome_motorista}
+                </span>
+                <span className="text-xs opacity-80">{e.status}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard tone="blue" label="Total Estoque" value={totalEstoque} sublabel="bobinas" />
         <StatCard tone="blue" label="Alto Volume" value={altoVolume} sublabel="ATMs ≥80%" />
