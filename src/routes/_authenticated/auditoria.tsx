@@ -84,7 +84,14 @@ function AuditoriaPage() {
             <SelectTrigger className="h-9"><SelectValue placeholder="Todas" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas as linhas</SelectItem>
-              {linhas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>)}
+              {linhas.map((l) => (
+                <SelectItem key={l.id} value={l.id}>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: l.cor_hex ?? "#94a3b8" }} />
+                    {l.nome}
+                  </span>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
