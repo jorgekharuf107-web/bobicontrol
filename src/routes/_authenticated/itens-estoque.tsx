@@ -115,7 +115,6 @@ function ItensPage() {
             columns={[
               { header: "Código", accessor: (i: any) => i.codigo },
               { header: "Nome", accessor: (i: any) => i.nome },
-              { header: "Medida", accessor: (i: any) => i.medida ?? "" },
               { header: "Unidade", accessor: (i: any) => i.unidade },
               { header: "Qtd por Unidade", accessor: (i: any) => i.qtd_por_unidade },
               { header: "Estoque Mínimo", accessor: (i: any) => i.estoque_minimo },
