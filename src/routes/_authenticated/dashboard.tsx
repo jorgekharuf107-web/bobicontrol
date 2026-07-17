@@ -241,10 +241,162 @@ function Dashboard() {
         <TopList title="Top Usuários que Abasteceram CDs e ATMs" items={[]} fg="#0f172a" bg="#f8fafc" />
       </div>
 
+      <AssistenteReposicao />
+
       <p className="text-center text-xs text-muted-foreground">
         Nenhum ATM crítico · Nenhum ATM com baixo volume · Nenhum ATM com alto volume · Nenhum abastecimento registrado
       </p>
     </div>
+  );
+}
+
+function PesquisaAvancada() {
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const [local, setLocal] = useState("todos");
+  const [tipo, setTipo] = useState("todos");
+  const [tecnicoId, setTecnicoId] = useState("todos");
+  const [linhaId, setLinhaId] = useState("todas");
+  const [estacaoId, setEstacaoId] = useState("todas");
+  const [buscar, setBuscar] = useState(false);
+
+  const { data: tecnicos = [] } = useQuery({
+    queryKey: ["tecnicos-select"],
+    queryFn: async () =>
+      (await supabase.from("usuarios").select("id, nome_completo").eq("perfil", "tecnico_estacao").eq("ativo", true).order("nome_completo")).data ?? [],
+  });
+  const { data: linhas = [] } = useQuery({
+    queryKey: ["linhas-select"],
+    queryFn: async () => (await supabase.from("linhas").select("id, nome, cor_hex").order("nome")).data ?? [],
+  });
+  const { data: estacoes = [] } = useQuery({
+    queryKey: ["estacoes-select"],
+    queryFn: async () => (await supabase.from("estacoes").select("id, nome").order("nome")).data ?? [],
+  });
+
+  const { data: resultados = [], isFetching } = useQuery({
+    queryKey: ["pesquisa-mov", dataInicio, dataFim, local, tipo, tecnicoId, linhaId, estacaoId, buscar],
+    enabled: buscar,
+    queryFn: async () => {
+      let q = supabase.from("movimentacoes").select("id, data, tipo, qtd, origem_tipo, destino_tipo, origem_id, destino_id, linha_origem_id, linha_destino_id, tecnico_id").order("data", { ascending: false }).limit(200);
+      if (dataInicio) q = q.gte("data", dataInicio);
+      if (dataFim) q = q.lte("data", `${dataFim}T23:59:59`);
+      if (tipo !== "todos") q = q.eq("tipo", tipo as any);
+      if (local === "cd") q = q.or("origem_tipo.eq.CD,destino_tipo.eq.CD");
+      if (local === "atm") q = q.or("origem_tipo.eq.ATM,destino_tipo.eq.ATM");
+      if (tecnicoId !== "todos") q = q.eq("tecnico_id", tecnicoId);
+      if (linhaId !== "todas") q = q.or(`linha_origem_id.eq.${linhaId},linha_destino_id.eq.${linhaId}`);
+      if (estacaoId !== "todas") {
+        const [atmsRes, cdsRes] = await Promise.all([
+          supabase.from("atms").select("id").eq("estacao_id", estacaoId),
+          supabase.from("cds").select("id").eq("estacao_id", estacaoId),
+        ]);
+        const ids = [...(atmsRes.data ?? []), ...(cdsRes.data ?? [])].map((r: any) => r.id);
+        if (ids.length === 0) return [];
+        q = q.or(`origem_id.in.(${ids.join(",")}),destino_id.in.(${ids.join(",")})`);
+      }
+      const { data } = await q;
+      return data ?? [];
+    },
+  });
+
+  function limpar() {
+    setDataInicio(""); setDataFim(""); setLocal("todos"); setTipo("todos");
+    setTecnicoId("todos"); setLinhaId("todas"); setEstacaoId("todas"); setBuscar(false);
+  }
+
+  return (
+    <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogHeader><DialogTitle>Pesquisa Avançada de Movimentações</DialogTitle></DialogHeader>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div><Label>Data Início</Label><Input type="date" className="h-9" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} /></div>
+        <div><Label>Data Fim</Label><Input type="date" className="h-9" value={dataFim} onChange={(e) => setDataFim(e.target.value)} /></div>
+        <div><Label>Local</Label>
+          <Select value={local} onValueChange={setLocal}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="cd">CD</SelectItem>
+              <SelectItem value="atm">ATM</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div><Label>Tipo</Label>
+          <Select value={tipo} onValueChange={setTipo}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="Entrada">Entrada</SelectItem>
+              <SelectItem value="Saida">Saída</SelectItem>
+              <SelectItem value="Permuta">Permuta</SelectItem>
+              <SelectItem value="Ajuste">Ajuste</SelectItem>
+              <SelectItem value="Abastecimento">Abastecimento</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div><Label>Técnico</Label>
+          <Select value={tecnicoId} onValueChange={setTecnicoId}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div><Label>Linha</Label>
+          <Select value={linhaId} onValueChange={setLinhaId}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas</SelectItem>
+              {linhas.map((l: any) => (
+                <SelectItem key={l.id} value={l.id}>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: l.cor_hex ?? "#94a3b8" }} />
+                    {l.nome}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div><Label>Estação</Label>
+          <Select value={estacaoId} onValueChange={setEstacaoId}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas</SelectItem>
+              {estacoes.map((e: any) => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={limpar}>Limpar Filtros</Button>
+        <Button onClick={() => setBuscar(true)}>Pesquisar</Button>
+      </div>
+      {buscar && (
+        <div className="mt-3 border-t pt-3">
+          <p className="text-xs text-muted-foreground mb-2">
+            {isFetching ? "Buscando..." : `${resultados.length} resultado(s)`}
+          </p>
+          <div className="overflow-x-auto max-h-[40vh] overflow-y-auto">
+            <table className="excel-table">
+              <thead><tr><th>Data</th><th>Tipo</th><th>Qtd</th><th>Origem</th><th>Destino</th></tr></thead>
+              <tbody>
+                {resultados.map((r: any) => (
+                  <tr key={r.id}>
+                    <td>{new Date(r.data).toLocaleString("pt-BR")}</td>
+                    <td>{r.tipo}</td>
+                    <td>{r.qtd}</td>
+                    <td>{r.origem_tipo ?? "—"}</td>
+                    <td>{r.destino_tipo ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </DialogContent>
   );
 }
 
