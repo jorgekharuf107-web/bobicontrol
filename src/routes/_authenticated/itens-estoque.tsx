@@ -189,7 +189,7 @@ function ItensPage() {
             </div>
             <div><Label>Unidade</Label>
               <Select value={form.unidade} onValueChange={(v: any) => setForm({ ...form, unidade: v, qtd_por_unidade: v === "Unidade" ? 1 : form.qtd_por_unidade })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>{unidades.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -208,9 +208,6 @@ function ItensPage() {
               {form.unidade === "Unidade" && (
                 <p className="text-xs text-muted-foreground mt-1">Travado em 1 quando a unidade é "Unidade".</p>
               )}
-            </div>
-            <div><Label>Medida</Label>
-              <Input placeholder="Ex: 80mm" value={form.medida} onChange={(e) => setForm({ ...form, medida: e.target.value })} />
             </div>
             <div><Label>Estoque Mínimo</Label>
               <Input type="number" min={0} value={form.estoque_minimo} onChange={(e) => setForm({ ...form, estoque_minimo: Math.max(0, +e.target.value || 0) })} />
