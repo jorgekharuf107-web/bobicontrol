@@ -167,9 +167,11 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
                   <Input value={forn.bairro} onChange={(e) => setForn({ ...forn, bairro: e.target.value })} /></div>
                 <div className="space-y-2"><Label>CEP</Label>
                   <Input value={forn.cep} onChange={(e) => setForn({ ...forn, cep: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Cidade (endereço)</Label>
-                  <Input value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Estado (UF)</Label>
+                <div className="space-y-2"><Label>Cidade</Label>
+                  <Input value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value, cidade: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Estado</Label>
+                  <Input value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
+                <div className="space-y-2"><Label>UF</Label>
                   <Input maxLength={2} value={forn.estado_uf} onChange={(e) => setForn({ ...forn, estado_uf: e.target.value.toUpperCase() })} /></div>
                 <div className="space-y-2"><Label>Cidade (cadastro)</Label>
                   <Input value={forn.cidade} onChange={(e) => setForn({ ...forn, cidade: e.target.value })} /></div>
