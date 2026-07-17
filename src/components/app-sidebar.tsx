@@ -2,7 +2,7 @@ import { Link, useRouterState, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
   Banknote, Truck, Train, Building2, MapPin,
-  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload, Cloud, X, CalendarClock,
+  Bell, ClipboardList, Users, Info, LogOut, Shield, Database, Upload, Cloud, X, CalendarClock, Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -33,6 +33,7 @@ const cadastros: Item[] = [
 ];
 const admin: Item[] = [
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
+  { title: "Configurações", to: "/admin/configuracoes", icon: Settings },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
   { title: "Importar Dados", to: "/importar-dados", icon: Upload },

@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { Search, AlertTriangle, CalendarClock } from "lucide-react";
+import { Search, AlertTriangle, CalendarClock, CloudOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,7 +73,7 @@ function Dashboard() {
     queryFn: async () => {
       const { data } = await supabase
         .from("agendamentos_entrega")
-        .select("id, data_hora_entrega, nome_motorista, status, cds(nome_cd, estacoes(nome))")
+        .select("id, data_hora_entrega, nome_motorista, status, modo_offline, cds(nome_cd, estacoes(nome))")
         .eq("tecnico_id", user!.id)
         .gte("data_hora_entrega", hojeIni)
         .lte("data_hora_entrega", hojeFim)
@@ -196,8 +196,9 @@ function Dashboard() {
           </div>
           <ul className="text-sm text-blue-900 space-y-1">
             {entregasHoje.map((e: any) => (
-              <li key={e.id} className="flex justify-between gap-2">
-                <span>
+              <li key={e.id} className="flex justify-between gap-2 items-center">
+                <span className="flex items-center gap-1">
+                  {e.modo_offline && <CloudOff className="h-4 w-4 text-slate-500" aria-label="Técnico offline" />}
                   <b>{new Date(e.data_hora_entrega).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</b>
                   {" — "}{e.cds?.nome_cd ?? "—"} / {e.cds?.estacoes?.nome ?? "—"} · {e.nome_motorista}
                 </span>
