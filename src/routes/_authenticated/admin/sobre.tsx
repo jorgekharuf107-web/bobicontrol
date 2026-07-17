@@ -6,8 +6,8 @@ export const Route = createFileRoute("/_authenticated/admin/sobre")({
   component: SobrePage,
 });
 
-const AZUL_CLARO = "#ADD8E6";
-const AZUL_ESCURO = "#00008B";
+const AZUL_CLARO = "#000000";
+const AZUL_ESCURO = "#000000";
 const SKY_BLUE = "#87CEEB";
 
 function Linha({ label, valor, cor = AZUL_CLARO, bold = false }: { label: string; valor: string; cor?: string; bold?: boolean }) {
