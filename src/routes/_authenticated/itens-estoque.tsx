@@ -156,15 +156,15 @@ function ItensPage() {
       </div>
 
       <Card className="p-0 overflow-hidden">
-        <table className="excel-table">
+        <table className="excel-table text-[14px]">
           <thead><tr>
-            <th>Código</th><th>Nome</th><th>Medida</th><th>Unidade</th><th>Qtd por Unidade</th><th>Estoque Mínimo</th><th>Status</th><th>Ações</th>
+            <th>Código</th><th>Nome</th><th>Unidade</th><th>Qtd por Unidade</th><th>Estoque Mínimo</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody>
-            {filtrados.length === 0 && <tr><td colSpan={8} className="text-center py-8 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {filtrados.length === 0 && <tr><td colSpan={7} className="text-center py-8 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
             {filtrados.map((i: any) => (
               <tr key={i.id}>
-                <td>{i.codigo}</td><td>{i.nome}</td><td>{i.medida ?? "—"}</td>
+                <td>{i.codigo}</td><td>{i.nome}</td>
                 <td>{i.unidade}</td><td>{i.qtd_por_unidade}</td><td>{i.estoque_minimo}</td>
                 <td>{i.ativo ? "Ativo" : "Inativo"}</td>
                 <td className="whitespace-nowrap">
