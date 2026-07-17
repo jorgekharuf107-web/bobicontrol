@@ -81,7 +81,7 @@ function AuditoriaPage() {
         <div className="md:col-span-2">
           <Label>Linha</Label>
           <Select value={linhaFiltro} onValueChange={setLinhaFiltro}>
-            <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Todas" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todas">Todas as linhas</SelectItem>
               {linhas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>)}
