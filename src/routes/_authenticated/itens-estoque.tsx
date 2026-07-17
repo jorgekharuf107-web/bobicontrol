@@ -115,7 +115,6 @@ function ItensPage() {
             columns={[
               { header: "Código", accessor: (i: any) => i.codigo },
               { header: "Nome", accessor: (i: any) => i.nome },
-              { header: "Medida", accessor: (i: any) => i.medida ?? "" },
               { header: "Unidade", accessor: (i: any) => i.unidade },
               { header: "Qtd por Unidade", accessor: (i: any) => i.qtd_por_unidade },
               { header: "Estoque Mínimo", accessor: (i: any) => i.estoque_minimo },
@@ -137,18 +136,17 @@ function ItensPage() {
         </div>
         <div><Label>Ordenar</Label>
           <Select value={ordenar} onValueChange={setOrdenar}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-44 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="nome">Nome</SelectItem>
               <SelectItem value="codigo">Código</SelectItem>
-              <SelectItem value="medida">Medida</SelectItem>
               <SelectItem value="criado_em">Data Criação</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div><Label>Direção</Label>
           <Select value={direcao} onValueChange={(v: any) => setDirecao(v)}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-40 h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="asc">Ascendente ↑</SelectItem>
               <SelectItem value="desc">Descendente ↓</SelectItem>
@@ -158,15 +156,15 @@ function ItensPage() {
       </div>
 
       <Card className="p-0 overflow-hidden">
-        <table className="excel-table">
+        <table className="excel-table text-[14px]">
           <thead><tr>
-            <th>Código</th><th>Nome</th><th>Medida</th><th>Unidade</th><th>Qtd por Unidade</th><th>Estoque Mínimo</th><th>Status</th><th>Ações</th>
+            <th>Código</th><th>Nome</th><th>Unidade</th><th>Qtd por Unidade</th><th>Estoque Mínimo</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody>
-            {filtrados.length === 0 && <tr><td colSpan={8} className="text-center py-8 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {filtrados.length === 0 && <tr><td colSpan={7} className="text-center py-8 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
             {filtrados.map((i: any) => (
               <tr key={i.id}>
-                <td>{i.codigo}</td><td>{i.nome}</td><td>{i.medida ?? "—"}</td>
+                <td>{i.codigo}</td><td>{i.nome}</td>
                 <td>{i.unidade}</td><td>{i.qtd_por_unidade}</td><td>{i.estoque_minimo}</td>
                 <td>{i.ativo ? "Ativo" : "Inativo"}</td>
                 <td className="whitespace-nowrap">
@@ -191,7 +189,7 @@ function ItensPage() {
             </div>
             <div><Label>Unidade</Label>
               <Select value={form.unidade} onValueChange={(v: any) => setForm({ ...form, unidade: v, qtd_por_unidade: v === "Unidade" ? 1 : form.qtd_por_unidade })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>{unidades.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -210,9 +208,6 @@ function ItensPage() {
               {form.unidade === "Unidade" && (
                 <p className="text-xs text-muted-foreground mt-1">Travado em 1 quando a unidade é "Unidade".</p>
               )}
-            </div>
-            <div><Label>Medida</Label>
-              <Input placeholder="Ex: 80mm" value={form.medida} onChange={(e) => setForm({ ...form, medida: e.target.value })} />
             </div>
             <div><Label>Estoque Mínimo</Label>
               <Input type="number" min={0} value={form.estoque_minimo} onChange={(e) => setForm({ ...form, estoque_minimo: Math.max(0, +e.target.value || 0) })} />

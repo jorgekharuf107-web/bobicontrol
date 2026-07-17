@@ -639,6 +639,36 @@ export type Database = {
           },
         ]
       }
+      solicitacoes_reposicao: {
+        Row: {
+          atm_id: string
+          criado_em: string
+          id: string
+          observacao: string | null
+          solicitado_por: string | null
+          status: string
+          tipo_bobina: string
+        }
+        Insert: {
+          atm_id: string
+          criado_em?: string
+          id?: string
+          observacao?: string | null
+          solicitado_por?: string | null
+          status?: string
+          tipo_bobina: string
+        }
+        Update: {
+          atm_id?: string
+          criado_em?: string
+          id?: string
+          observacao?: string | null
+          solicitado_por?: string | null
+          status?: string
+          tipo_bobina?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           criado_em: string

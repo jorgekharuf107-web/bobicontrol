@@ -147,17 +147,13 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
                 <div className="space-y-2"><Label>Email</Label>
                   <Input type="email" value={forn.email} onChange={(e) => setForn({ ...forn, email: e.target.value })} /></div>
                 <div className="space-y-2"><Label>Status</Label>
-                  <Select value={forn.status} onValueChange={(v: any) => setForn({ ...forn, status: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ativo">Ativo</SelectItem>
-                      <SelectItem value="inativo">Inativo</SelectItem>
-                    </SelectContent>
-                  </Select></div>
-                <div className="flex items-center gap-2 mt-7">
-                  <Switch checked={forn.fornecedor_ativo_sim_nao}
-                    onCheckedChange={(v) => setForn({ ...forn, fornecedor_ativo_sim_nao: v })} />
-                  <Label>Fornecedor ativo</Label>
+                  <div className="flex items-center gap-2 h-9">
+                    <Switch
+                      checked={forn.status === "ativo"}
+                      onCheckedChange={(v) => setForn({ ...forn, status: v ? "ativo" : "inativo", fornecedor_ativo_sim_nao: v })}
+                    />
+                    <span className="text-sm">{forn.status === "ativo" ? "Ativo" : "Inativo"}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -171,9 +167,11 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
                   <Input value={forn.bairro} onChange={(e) => setForn({ ...forn, bairro: e.target.value })} /></div>
                 <div className="space-y-2"><Label>CEP</Label>
                   <Input value={forn.cep} onChange={(e) => setForn({ ...forn, cep: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Cidade (endereço)</Label>
-                  <Input value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Estado (UF)</Label>
+                <div className="space-y-2"><Label>Cidade</Label>
+                  <Input value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value, cidade: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Estado</Label>
+                  <Input value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
+                <div className="space-y-2"><Label>UF</Label>
                   <Input maxLength={2} value={forn.estado_uf} onChange={(e) => setForn({ ...forn, estado_uf: e.target.value.toUpperCase() })} /></div>
                 <div className="space-y-2"><Label>Cidade (cadastro)</Label>
                   <Input value={forn.cidade} onChange={(e) => setForn({ ...forn, cidade: e.target.value })} /></div>
