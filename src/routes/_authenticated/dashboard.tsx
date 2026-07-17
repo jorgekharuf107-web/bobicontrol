@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAccessibleLinhas } from "@/lib/use-accessible-linhas";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { AssistenteReposicao } from "@/components/assistente-reposicao";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
