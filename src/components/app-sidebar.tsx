@@ -33,7 +33,6 @@ const cadastros: Item[] = [
 ];
 const admin: Item[] = [
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
-  { title: "Configurações", to: "/admin/configuracoes", icon: Settings },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
   { title: "Importar Dados", to: "/importar-dados", icon: Upload },
