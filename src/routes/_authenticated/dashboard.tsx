@@ -87,11 +87,14 @@ function Dashboard() {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [atms, movs] = await Promise.all([
+      const [atms, movs, tecnicos] = await Promise.all([
         supabase.from("atms").select("id, id_atm, capacidade_bobinas, nivel_minimo, linha_id"),
-        supabase.from("movimentacoes").select("tipo, qtd, data, linha_origem_id, linha_destino_id, status_aprovacao").order("data", { ascending: false }).limit(500),
+        supabase.from("movimentacoes")
+          .select("id, tipo, qtd, data, linha_origem_id, linha_destino_id, status_aprovacao, tecnico_id, origem_id, destino_id, origem_tipo, destino_tipo")
+          .order("data", { ascending: false }).limit(1000),
+        supabase.from("usuarios").select("id, nome_completo").eq("ativo", true),
       ]);
-      return { atms: atms.data ?? [], movs: movs.data ?? [] };
+      return { atms: atms.data ?? [], movs: movs.data ?? [], tecnicos: tecnicos.data ?? [] };
     },
   });
 
@@ -118,24 +121,106 @@ function Dashboard() {
     return all.filter((m: any) => m.linha_origem_id === linhaFiltro || m.linha_destino_id === linhaFiltro);
   }, [stats, linhaFiltro]);
 
-  const totalEstoque = 0;
-  const altoVolume = 0;
-  const baixoVolume = 0;
-  const critico = 0;
+  // Nomes de técnicos
+  const nomesTec = useMemo(() => {
+    const m: Record<string, string> = {};
+    (stats?.tecnicos ?? []).forEach((t: any) => { m[t.id] = t.nome_completo ?? t.id; });
+    return m;
+  }, [stats]);
 
-  const movPorPeriodo = movsFiltradas.slice(0, 7).reverse().map((m: any, i: number) => ({
-    dia: `D${i + 1}`,
-    entradas: m.tipo === "Entrada" ? m.qtd : 0,
-    saidas: m.tipo === "Saida" ? m.qtd : 0,
-    abastecimentos: m.tipo === "Abastecimento" ? m.qtd : 0,
-  }));
+  // Nomes de ATMs
+  const nomesAtm = useMemo(() => {
+    const m: Record<string, string> = {};
+    (stats?.atms ?? []).forEach((a: any) => { m[a.id] = a.id_atm ?? a.id; });
+    return m;
+  }, [stats]);
 
-  const distribuicaoAtm = atmsFiltradas.slice(0, 6).map((a: any) => ({
-    name: a.id_atm, value: a.capacidade_bobinas || 1,
-  }));
+  // Métricas
+  const totalMovs = movsFiltradas.length;
+  const totalPermutas = movsFiltradas.filter((m: any) => m.tipo === "Permuta").length;
+  const totalAbastecimentos = movsFiltradas.filter((m: any) => m.tipo === "Abastecimento").length;
+  const totalEntradas = movsFiltradas.filter((m: any) => m.tipo === "Entrada" || m.tipo === "Recebimento").length;
 
-  const evolucaoEstoque = Array.from({ length: 7 }, (_, i) => ({ dia: `Dia ${i + 1}`, total: 0 }));
-  const nivelAtms = atmsFiltradas.slice(0, 10).map((a: any) => ({ atm: a.id_atm, nivel: 0 }));
+  // Nível estimado por ATM: soma abastecimentos (destino=ATM) - saídas (origem=ATM) nos últimos 30 dias
+  const nivelPorAtm = useMemo(() => {
+    const agora = Date.now();
+    const cutoff = agora - 30 * 24 * 60 * 60 * 1000;
+    const acc: Record<string, number> = {};
+    movsFiltradas.forEach((m: any) => {
+      if (new Date(m.data).getTime() < cutoff) return;
+      if (m.destino_tipo === "ATM" && m.destino_id) acc[m.destino_id] = (acc[m.destino_id] ?? 0) + (m.qtd ?? 0);
+      if (m.origem_tipo === "ATM" && m.origem_id) acc[m.origem_id] = (acc[m.origem_id] ?? 0) - (m.qtd ?? 0);
+    });
+    return acc;
+  }, [movsFiltradas]);
+
+  const atmsComNivel = useMemo(() => {
+    return atmsFiltradas.map((a: any) => {
+      const cap = a.capacidade_bobinas || 1;
+      const saldo = Math.max(0, nivelPorAtm[a.id] ?? 0);
+      const pct = Math.min(100, Math.round((saldo / cap) * 100));
+      return { id: a.id, id_atm: a.id_atm, cap, saldo, pct, min: a.nivel_minimo ?? 20 };
+    });
+  }, [atmsFiltradas, nivelPorAtm]);
+
+  const altoVolume = atmsComNivel.filter((a) => a.pct >= 80).length;
+  const baixoVolume = atmsComNivel.filter((a) => a.pct >= 50 && a.pct < 80).length;
+  const critico = atmsComNivel.filter((a) => a.pct < 50).length;
+  const totalEstoque = atmsComNivel.reduce((s, a) => s + a.saldo, 0);
+
+  // TOP 10 ATMs com mais atendimento (contagem de movimentações envolvendo o ATM)
+  const topAtmsAtendimento = useMemo(() => {
+    const acc: Record<string, number> = {};
+    movsFiltradas.forEach((m: any) => {
+      if (m.origem_tipo === "ATM" && m.origem_id) acc[m.origem_id] = (acc[m.origem_id] ?? 0) + 1;
+      if (m.destino_tipo === "ATM" && m.destino_id) acc[m.destino_id] = (acc[m.destino_id] ?? 0) + 1;
+    });
+    return Object.entries(acc)
+      .sort((a, b) => b[1] - a[1]).slice(0, 10)
+      .map(([id, n]) => `${nomesAtm[id] ?? id.slice(0, 8)} · ${n} atend.`);
+  }, [movsFiltradas, nomesAtm]);
+
+  // Atuações por técnico
+  const atuacoesPorTecnico = useMemo(() => {
+    const acc: Record<string, number> = {};
+    movsFiltradas.forEach((m: any) => {
+      if (m.tecnico_id) acc[m.tecnico_id] = (acc[m.tecnico_id] ?? 0) + 1;
+    });
+    return Object.entries(acc)
+      .sort((a, b) => b[1] - a[1]).slice(0, 10)
+      .map(([id, n]) => `${nomesTec[id] ?? id.slice(0, 8)} · ${n} mov.`);
+  }, [movsFiltradas, nomesTec]);
+
+  const topCriticos = atmsComNivel.filter((a) => a.pct < 50).sort((a, b) => a.pct - b.pct).slice(0, 10)
+    .map((a) => `${a.id_atm} · ${a.pct}%`);
+  const topBaixos = atmsComNivel.filter((a) => a.pct >= 50 && a.pct < 80).sort((a, b) => a.pct - b.pct).slice(0, 10)
+    .map((a) => `${a.id_atm} · ${a.pct}%`);
+  const topAltos = atmsComNivel.filter((a) => a.pct >= 80).sort((a, b) => b.pct - a.pct).slice(0, 10)
+    .map((a) => `${a.id_atm} · ${a.pct}%`);
+
+  const movPorPeriodo = useMemo(() => {
+    // Últimos 7 dias
+    const dias: Array<{ dia: string; entradas: number; saidas: number; abastecimentos: number }> = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      const start = d.getTime(); const end = start + 86400000;
+      const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+      let e = 0, s = 0, ab = 0;
+      movsFiltradas.forEach((m: any) => {
+        const t = new Date(m.data).getTime();
+        if (t < start || t >= end) return;
+        if (m.tipo === "Entrada" || m.tipo === "Recebimento") e += m.qtd ?? 0;
+        else if (m.tipo === "Saida" || m.tipo === "Retirada") s += m.qtd ?? 0;
+        else if (m.tipo === "Abastecimento") ab += m.qtd ?? 0;
+      });
+      dias.push({ dia: label, entradas: e, saidas: s, abastecimentos: ab });
+    }
+    return dias;
+  }, [movsFiltradas]);
+
+  const distribuicaoAtm = atmsComNivel.slice(0, 6).map((a) => ({ name: a.id_atm, value: a.saldo || 1 }));
+  const evolucaoEstoque = movPorPeriodo.map((d) => ({ dia: d.dia, total: d.entradas + d.abastecimentos - d.saidas }));
+  const nivelAtms = atmsComNivel.slice(0, 10).map((a) => ({ atm: a.id_atm, nivel: a.pct }));
 
   return (
     <div className="space-y-6">
@@ -209,10 +294,12 @@ function Dashboard() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard tone="blue" label="Total Estoque" value={totalEstoque} sublabel="bobinas" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCard tone="blue" label="Movimentações" value={totalMovs} sublabel="últimas 1000" />
+        <StatCard tone="amber" label="Permutas" value={totalPermutas} sublabel="do período" />
+        <StatCard tone="blue" label="Total Estoque" value={totalEstoque} sublabel="bobinas (30d)" />
         <StatCard tone="blue" label="Alto Volume" value={altoVolume} sublabel="ATMs ≥80%" />
-        <StatCard tone="yellow" label="Baixo Volume" value={baixoVolume} sublabel="ATMs 50-80%" />
+        <StatCard tone="yellow" label="Baixo Volume" value={baixoVolume} sublabel="ATMs 50–80%" />
         <StatCard tone="red" label="Crítico" value={critico} sublabel="ATMs <50%" />
       </div>
 
@@ -275,17 +362,24 @@ function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <TopList title="TOP 10 ATMs Críticos" items={[]} fg="#b91c1c" bg="#fee2e2" />
-        <TopList title="TOP 10 ATMs Baixo Volume" items={[]} fg="#c2410c" bg="#ffedd5" />
-        <TopList title="TOP 10 ATMs Alto Volume" items={[]} fg="#1e3a8a" bg="#dbeafe" />
-        <TopList title="Top Usuários que Abasteceram CDs e ATMs" items={[]} fg="#0f172a" bg="#f8fafc" />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <TopList title="TOP 10 ATMs Críticos" items={topCriticos} fg="#b91c1c" bg="#fee2e2" />
+        <TopList title="TOP 10 ATMs Baixo Volume" items={topBaixos} fg="#c2410c" bg="#ffedd5" />
+        <TopList title="TOP 10 ATMs Alto Volume" items={topAltos} fg="#1e3a8a" bg="#dbeafe" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TopList title="TOP 10 ATMs com mais atendimento" items={topAtmsAtendimento} fg="#0f172a" bg="#f1f5f9" />
+        <TopList title="Atuações por Técnico" items={atuacoesPorTecnico} fg="#0f172a" bg="#f8fafc" />
       </div>
 
       <AssistenteReposicao />
 
       <p className="text-center text-xs text-muted-foreground">
-        Nenhum ATM crítico · Nenhum ATM com baixo volume · Nenhum ATM com alto volume · Nenhum abastecimento registrado
+        {critico === 0 ? "Nenhum ATM crítico" : `${critico} ATM(s) crítico(s)`}
+        {" · "}{baixoVolume === 0 ? "Nenhum ATM com baixo volume" : `${baixoVolume} baixo volume`}
+        {" · "}{altoVolume === 0 ? "Nenhum ATM com alto volume" : `${altoVolume} alto volume`}
+        {" · "}{totalAbastecimentos} abastecimento(s) · {totalEntradas} entrada(s)
       </p>
     </div>
   );

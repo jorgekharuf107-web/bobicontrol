@@ -1,9 +1,11 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Shield } from "lucide-react";
+import { Shield, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -38,6 +40,8 @@ function MicrosoftIcon() {
 function AuthPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -59,9 +63,28 @@ function AuthPage() {
     router.navigate({ to: "/dashboard", replace: true });
   }
 
+  async function signInEmail(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim() || !senha) {
+      toast.error("Informe email e senha");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password: senha,
+    });
+    if (error) {
+      toast.error("Falha no login", { description: error.message });
+      setLoading(false);
+      return;
+    }
+    router.navigate({ to: "/dashboard", replace: true });
+  }
+
   return (
     <TooltipProvider>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/30 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/30 px-4 py-6">
         <Card className="w-full max-w-md p-8 shadow-lg">
           <div className="flex flex-col items-center text-center">
             <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
@@ -69,15 +92,52 @@ function AuthPage() {
             </div>
             <h1 className="text-2xl font-semibold">Bobi Control</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Entre com sua conta corporativa para continuar
+              Entre com sua conta para continuar
             </p>
           </div>
 
-          <div className="mt-8 space-y-3">
+          <form className="mt-6 space-y-3" onSubmit={signInEmail}>
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email" type="email" autoComplete="email"
+                  className="h-10 pl-9"
+                  value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="senha">Senha</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="senha" type="password" autoComplete="current-password"
+                  className="h-10 pl-9"
+                  value={senha} onChange={(e) => setSenha(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+            <Button type="submit" disabled={loading} className="w-full h-11">
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-[11px] uppercase text-muted-foreground">ou</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="space-y-3">
             <Button
               onClick={signInGoogle}
               disabled={loading}
               variant="outline"
+              type="button"
               className="w-full h-11 font-normal"
             >
               <GoogleIcon /> Entrar com Google
@@ -103,7 +163,7 @@ function AuthPage() {
           </div>
 
           <p className="mt-6 text-[11px] text-center text-muted-foreground">
-            Apenas usuários convidados conseguem acessar o sistema.
+            Apenas usuários autorizados conseguem acessar o sistema.
           </p>
         </Card>
       </div>
