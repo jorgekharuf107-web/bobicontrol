@@ -294,10 +294,12 @@ function Dashboard() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard tone="blue" label="Total Estoque" value={totalEstoque} sublabel="bobinas" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <StatCard tone="blue" label="Movimentações" value={totalMovs} sublabel="últimas 1000" />
+        <StatCard tone="amber" label="Permutas" value={totalPermutas} sublabel="do período" />
+        <StatCard tone="blue" label="Total Estoque" value={totalEstoque} sublabel="bobinas (30d)" />
         <StatCard tone="blue" label="Alto Volume" value={altoVolume} sublabel="ATMs ≥80%" />
-        <StatCard tone="yellow" label="Baixo Volume" value={baixoVolume} sublabel="ATMs 50-80%" />
+        <StatCard tone="yellow" label="Baixo Volume" value={baixoVolume} sublabel="ATMs 50–80%" />
         <StatCard tone="red" label="Crítico" value={critico} sublabel="ATMs <50%" />
       </div>
 
@@ -360,17 +362,24 @@ function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <TopList title="TOP 10 ATMs Críticos" items={[]} fg="#b91c1c" bg="#fee2e2" />
-        <TopList title="TOP 10 ATMs Baixo Volume" items={[]} fg="#c2410c" bg="#ffedd5" />
-        <TopList title="TOP 10 ATMs Alto Volume" items={[]} fg="#1e3a8a" bg="#dbeafe" />
-        <TopList title="Top Usuários que Abasteceram CDs e ATMs" items={[]} fg="#0f172a" bg="#f8fafc" />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <TopList title="TOP 10 ATMs Críticos" items={topCriticos} fg="#b91c1c" bg="#fee2e2" />
+        <TopList title="TOP 10 ATMs Baixo Volume" items={topBaixos} fg="#c2410c" bg="#ffedd5" />
+        <TopList title="TOP 10 ATMs Alto Volume" items={topAltos} fg="#1e3a8a" bg="#dbeafe" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TopList title="TOP 10 ATMs com mais atendimento" items={topAtmsAtendimento} fg="#0f172a" bg="#f1f5f9" />
+        <TopList title="Atuações por Técnico" items={atuacoesPorTecnico} fg="#0f172a" bg="#f8fafc" />
       </div>
 
       <AssistenteReposicao />
 
       <p className="text-center text-xs text-muted-foreground">
-        Nenhum ATM crítico · Nenhum ATM com baixo volume · Nenhum ATM com alto volume · Nenhum abastecimento registrado
+        {critico === 0 ? "Nenhum ATM crítico" : `${critico} ATM(s) crítico(s)`}
+        {" · "}{baixoVolume === 0 ? "Nenhum ATM com baixo volume" : `${baixoVolume} baixo volume`}
+        {" · "}{altoVolume === 0 ? "Nenhum ATM com alto volume" : `${altoVolume} alto volume`}
+        {" · "}{totalAbastecimentos} abastecimento(s) · {totalEntradas} entrada(s)
       </p>
     </div>
   );
