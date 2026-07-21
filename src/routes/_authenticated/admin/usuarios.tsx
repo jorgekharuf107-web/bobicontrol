@@ -36,8 +36,12 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return;
-    const { data: isAdmin } = await supabase.rpc("e_admin", { _user_id: data.user.id });
-    if (!isAdmin) throw redirect({ to: "/dashboard" });
+    const [{ data: isAdmin }, { data: isGestor }, { data: isDispatcher }] = await Promise.all([
+      supabase.rpc("e_admin", { _user_id: data.user.id }),
+      supabase.rpc("e_gestor", { _user_id: data.user.id }),
+      supabase.rpc("e_dispatcher", { _user_id: data.user.id }),
+    ]);
+    if (!isAdmin && !isGestor && !isDispatcher) throw redirect({ to: "/dashboard" });
   },
   component: UsuariosPage,
 });
