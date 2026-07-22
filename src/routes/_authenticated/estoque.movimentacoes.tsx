@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { BackButton } from "@/components/back-button";
 import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -20,23 +21,21 @@ export const Route = createFileRoute("/_authenticated/estoque/movimentacoes")({
 
 const TIPOS = ["Recebimento", "Retirada", "Abastecimento", "Permuta"] as const;
 type Tipo = (typeof TIPOS)[number];
-const LOCAIS = ["CD", "ATM", "Linha"] as const;
-type Local = (typeof LOCAIS)[number];
+const LOCAIS_ORIG_DEST = ["CD", "ATM"] as const;
+const LOCAIS_TIPO = ["CD", "ATM", "Linha"] as const;
+type LocalTipo = (typeof LOCAIS_TIPO)[number];
 const BOBINAS_POR_CAIXA = 6;
-
-type Modo = "caixa" | "avulsa";
 
 const schema = z.object({
   tipo: z.enum(TIPOS),
   data: z.string().min(1),
   item_id: z.string().uuid("Selecione o item"),
-  modo: z.enum(["caixa", "avulsa"]),
   qtd_caixas: z.number().int().min(0),
   qtd_bobina_100: z.number().int().min(0),
   qtd_bobina_50: z.number().int().min(0),
-  origem_tipo: z.enum(LOCAIS).optional().or(z.literal("")),
+  origem_tipo: z.enum(LOCAIS_TIPO).optional().or(z.literal("")),
   origem_id: z.string().uuid().optional().or(z.literal("")),
-  destino_tipo: z.enum(LOCAIS).optional().or(z.literal("")),
+  destino_tipo: z.enum(LOCAIS_TIPO).optional().or(z.literal("")),
   destino_id: z.string().uuid().optional().or(z.literal("")),
   observacao: z.string().max(500).optional().or(z.literal("")),
 });
@@ -50,7 +49,6 @@ function nowLocal() {
 
 const empty: Form = {
   tipo: "Recebimento", data: nowLocal(), item_id: "",
-  modo: "caixa",
   qtd_caixas: 0, qtd_bobina_100: 0, qtd_bobina_50: 0,
   origem_tipo: "", origem_id: "", destino_tipo: "CD", destino_id: "",
   observacao: "",
@@ -60,10 +58,15 @@ function MovimentacoesPage() {
   const qc = useQueryClient();
   const { user, isAdmin, isGestor } = useCurrentUser();
   const [form, setForm] = useState<Form>(empty);
+  const [tCaixa, setTCaixa] = useState(true);
+  const [t100, setT100] = useState(false);
+  const [t50, setT50] = useState(false);
   const [fTipo, setFTipo] = useState<string>("todos");
   const [fItem, setFItem] = useState<string>("todos");
   const [fTec, setFTec] = useState<string>("todos");
   const [fData, setFData] = useState<string>("");
+  const [fOrig, setFOrig] = useState<string>("todos");
+  const [fDest, setFDest] = useState<string>("todos");
 
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-mov"],
@@ -100,7 +103,7 @@ function MovimentacoesPage() {
     : t === "Linha" ? linhas.map((l: any) => ({ id: l.id, label: l.nome }))
     : [];
 
-  const bloqueiaOrigem = form.tipo === "Recebimento" || form.tipo === "Abastecimento";
+  const bloqueiaOrigem = form.tipo === "Recebimento";
   const bloqueiaDestino = form.tipo === "Retirada";
 
   function onTipo(v: Tipo) {
@@ -108,37 +111,29 @@ function MovimentacoesPage() {
       const next = { ...f, tipo: v };
       if (v === "Recebimento") { next.origem_tipo = ""; next.origem_id = ""; next.destino_tipo = "CD"; }
       if (v === "Retirada") { next.destino_tipo = ""; next.destino_id = ""; next.origem_tipo = "CD"; }
-      if (v === "Abastecimento") { next.origem_tipo = ""; next.origem_id = ""; next.destino_tipo = "ATM"; }
+      if (v === "Abastecimento") { next.origem_tipo = "CD"; next.destino_tipo = "ATM"; }
       if (v === "Permuta") { next.origem_tipo = "ATM"; next.destino_tipo = "ATM"; }
       return next;
     });
   }
 
-  function setModo(m: Modo) {
-    setForm((f) => ({
-      ...f, modo: m,
-      qtd_caixas: m === "caixa" ? f.qtd_caixas : 0,
-      qtd_bobina_100: m === "avulsa" ? f.qtd_bobina_100 : 0,
-      qtd_bobina_50: m === "avulsa" ? f.qtd_bobina_50 : 0,
-    }));
-  }
-
-  const totalBobinas = form.modo === "caixa"
-    ? form.qtd_caixas * BOBINAS_POR_CAIXA
-    : form.qtd_bobina_100 + form.qtd_bobina_50;
+  const qCaixas = tCaixa ? form.qtd_caixas : 0;
+  const q100 = t100 ? form.qtd_bobina_100 : 0;
+  const q50 = t50 ? form.qtd_bobina_50 : 0;
+  const totalBobinas = qCaixas * BOBINAS_POR_CAIXA + q100 + q50;
 
   async function registrar() {
-    const p = schema.safeParse(form);
+    const payload = { ...form, qtd_caixas: qCaixas, qtd_bobina_100: q100, qtd_bobina_50: q50 };
+    const p = schema.safeParse(payload);
     if (!p.success) return toast.error(p.error.issues[0].message);
     if (totalBobinas <= 0) return toast.error("Informe alguma quantidade");
+    if (!tCaixa && !t100 && !t50) return toast.error("Selecione ao menos um tipo de bobina");
     if (!bloqueiaOrigem && !p.data.origem_id) return toast.error("Selecione a origem");
     if (!bloqueiaDestino && !p.data.destino_id) return toast.error("Selecione o destino");
 
-    // Movimentacao core: origem_tipo/destino_tipo aceita 'ATM'|'CD'; para 'Linha'
-    // gravamos direto em linha_origem_id/linha_destino_id e mantemos *_tipo/_id nulos.
     const destinoLinha = p.data.destino_tipo === "Linha";
     const origemLinha = p.data.origem_tipo === "Linha";
-    const payload: any = {
+    const dbPayload: any = {
       tipo: p.data.tipo,
       data: new Date(p.data.data).toISOString(),
       item_id: p.data.item_id,
@@ -155,11 +150,14 @@ function MovimentacoesPage() {
       observacao: p.data.observacao || null,
       tecnico_id: user?.id ?? null,
     };
-    const { error } = await supabase.from("movimentacoes").insert(payload);
+    const { error } = await supabase.from("movimentacoes").insert(dbPayload);
     if (error) return toast.error(error.message);
     toast.success("Movimentação registrada");
     setForm({ ...empty, data: nowLocal() });
+    setTCaixa(true); setT100(false); setT50(false);
     qc.invalidateQueries({ queryKey: ["movs-page"] });
+    qc.invalidateQueries({ queryKey: ["movs-all"] });
+    qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
   }
 
   const podeVerTudo = isAdmin || isGestor;
@@ -169,37 +167,34 @@ function MovimentacoesPage() {
       if (fTipo !== "todos" && m.tipo !== fTipo) return false;
       if (fItem !== "todos" && m.item_id !== fItem) return false;
       if (fTec !== "todos" && m.tecnico_id !== fTec) return false;
+      if (fOrig !== "todos" && m.origem_tipo !== fOrig) return false;
+      if (fDest !== "todos" && m.destino_tipo !== fDest) return false;
       if (fData && !m.data?.startsWith(fData)) return false;
       return true;
     })
-  , [movs, fTipo, fItem, fTec, fData, podeVerTudo, user?.id]);
+  , [movs, fTipo, fItem, fTec, fData, fOrig, fDest, podeVerTudo, user?.id]);
 
   const colunas: Coluna<any>[] = [
     { header: "Data", cell: (m) => new Date(m.data).toLocaleString("pt-BR"), csv: (m) => new Date(m.data).toLocaleString("pt-BR") },
-    { header: "Tipo", cell: (m) => m.tipo, csv: (m) => m.tipo },
-    { header: "Item", cell: (m) => m.itens?.nome ?? "—", csv: (m) => m.itens?.nome ?? "" },
-    { header: "Caixas", cell: (m) => m.qtd_caixas ?? 0, csv: (m) => m.qtd_caixas ?? 0 },
-    { header: "Bob. 100%", cell: (m) => m.qtd_bobina_100 ?? 0, csv: (m) => m.qtd_bobina_100 ?? 0 },
-    { header: "Bob. <50%", cell: (m) => m.qtd_bobina_50 ?? 0, csv: (m) => m.qtd_bobina_50 ?? 0 },
-    { header: "Total", cell: (m) => m.qtd, csv: (m) => m.qtd },
     { header: "Origem", cell: (m) => m.origem_tipo ?? (m.linha_origem_id ? "Linha" : "—"), csv: (m) => m.origem_tipo ?? "" },
     { header: "Destino", cell: (m) => m.destino_tipo ?? (m.linha_destino_id ? "Linha" : "—"), csv: (m) => m.destino_tipo ?? "" },
+    { header: "Item", cell: (m) => m.itens?.nome ?? "—", csv: (m) => m.itens?.nome ?? "" },
+    { header: "Qtd", cell: (m) => m.qtd, csv: (m) => m.qtd },
     { header: "Técnico", cell: (m) => m.usuarios?.nome_completo ?? "—", csv: (m) => m.usuarios?.nome_completo ?? "" },
   ];
 
   const inputH = "h-8 text-sm";
-  const labelC = "text-xs mb-1 block";
+  const labelC = "text-[11px] mb-0.5 block font-medium";
 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <BackButton to="/dashboard" />
-        <h1 className="text-xl font-bold">Movimentação de Estoque</h1>
+        <h1 className="text-xl font-bold">Nova Movimentação</h1>
       </div>
 
-      <Card className="p-3 space-y-3">
-        <h2 className="text-sm font-semibold">Nova Movimentação</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <Card className="p-3 space-y-3 border-blue-200" style={{ background: "#eff6ff" }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <div>
             <Label className={labelC}>Tipo *</Label>
             <Select value={form.tipo} onValueChange={(v) => onTipo(v as Tipo)}>
@@ -212,7 +207,7 @@ function MovimentacoesPage() {
             <Input type="datetime-local" className={inputH} value={form.data}
               onChange={(e) => setForm({ ...form, data: e.target.value })} />
           </div>
-          <div>
+          <div className="col-span-2">
             <Label className={labelC}>Item *</Label>
             <Select value={form.item_id || undefined} onValueChange={(v) => setForm({ ...form, item_id: v })}>
               <SelectTrigger className={inputH}><SelectValue placeholder="Selecione o item" /></SelectTrigger>
@@ -221,52 +216,20 @@ function MovimentacoesPage() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label className={labelC}>Modo de contagem *</Label>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => setModo("caixa")}
-              className={`px-3 py-1.5 rounded-md border text-xs font-medium transition ${form.modo === "caixa" ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-accent"}`}>
-              Bobina em Caixa (6 bobinas / caixa)
-            </button>
-            <button type="button" onClick={() => setModo("avulsa")}
-              className={`px-3 py-1.5 rounded-md border text-xs font-medium transition ${form.modo === "avulsa" ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-accent"}`}>
-              Bobina Avulsa
-            </button>
-          </div>
-          {form.modo === "caixa" ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div><Label className={labelC}>Caixas</Label>
-                <Input type="number" min={0} className={inputH} value={form.qtd_caixas}
-                  onChange={(e) => setForm({ ...form, qtd_caixas: Math.max(0, +e.target.value || 0) })} />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <div><Label className={labelC}>Bobina 100%</Label>
-                <Input type="number" min={0} className={inputH} value={form.qtd_bobina_100}
-                  onChange={(e) => setForm({ ...form, qtd_bobina_100: Math.max(0, +e.target.value || 0) })} />
-              </div>
-              <div><Label className={labelC}>Bobina &lt; 50%</Label>
-                <Input type="number" min={0} className={inputH} value={form.qtd_bobina_50}
-                  onChange={(e) => setForm({ ...form, qtd_bobina_50: Math.max(0, +e.target.value || 0) })} />
-              </div>
-            </div>
-          )}
-          <p className="text-xs text-muted-foreground">Total: {totalBobinas} bobinas</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <fieldset disabled={bloqueiaOrigem} className={bloqueiaOrigem ? "opacity-50" : ""}>
-            <legend className="text-xs font-semibold mb-1">Origem</legend>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <fieldset disabled={bloqueiaOrigem} className={`rounded border bg-white/60 p-2 ${bloqueiaOrigem ? "opacity-50" : ""}`}>
+            <legend className="text-[11px] font-semibold px-1">Origem</legend>
             <div className="grid grid-cols-2 gap-2">
-              <div><Label className={labelC}>Tipo de Local</Label>
+              <div>
+                <Label className={labelC}>Tipo</Label>
                 <Select value={form.origem_tipo || undefined}
-                  onValueChange={(v) => setForm({ ...form, origem_tipo: v as Local, origem_id: "" })}>
+                  onValueChange={(v) => setForm({ ...form, origem_tipo: v as LocalTipo, origem_id: "" })}>
                   <SelectTrigger className={inputH}><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>{LOCAIS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                  <SelectContent>{LOCAIS_ORIG_DEST.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label className={labelC}>Local</Label>
+              <div>
+                <Label className={labelC}>Local</Label>
                 <Select value={form.origem_id || undefined}
                   onValueChange={(v) => setForm({ ...form, origem_id: v })}
                   disabled={!form.origem_tipo}>
@@ -276,17 +239,19 @@ function MovimentacoesPage() {
               </div>
             </div>
           </fieldset>
-          <fieldset disabled={bloqueiaDestino} className={bloqueiaDestino ? "opacity-50" : ""}>
-            <legend className="text-xs font-semibold mb-1">Destino</legend>
+          <fieldset disabled={bloqueiaDestino} className={`rounded border bg-white/60 p-2 ${bloqueiaDestino ? "opacity-50" : ""}`}>
+            <legend className="text-[11px] font-semibold px-1">Destino</legend>
             <div className="grid grid-cols-2 gap-2">
-              <div><Label className={labelC}>Tipo de Local</Label>
+              <div>
+                <Label className={labelC}>Tipo</Label>
                 <Select value={form.destino_tipo || undefined}
-                  onValueChange={(v) => setForm({ ...form, destino_tipo: v as Local, destino_id: "" })}>
+                  onValueChange={(v) => setForm({ ...form, destino_tipo: v as LocalTipo, destino_id: "" })}>
                   <SelectTrigger className={inputH}><SelectValue placeholder="—" /></SelectTrigger>
-                  <SelectContent>{LOCAIS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                  <SelectContent>{LOCAIS_TIPO.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label className={labelC}>Local</Label>
+              <div>
+                <Label className={labelC}>Local</Label>
                 <Select value={form.destino_id || undefined}
                   onValueChange={(v) => setForm({ ...form, destino_id: v })}
                   disabled={!form.destino_tipo}>
@@ -298,19 +263,81 @@ function MovimentacoesPage() {
           </fieldset>
         </div>
 
+        <div className="rounded border bg-white/70 p-2 space-y-2">
+          <p className="text-[11px] font-semibold">Bobinas</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="flex items-center justify-between gap-2 border rounded p-2">
+              <div>
+                <p className="text-xs font-medium">Bobina Caixa</p>
+                <p className="text-[10px] text-muted-foreground">6 bobinas / caixa</p>
+              </div>
+              <Switch checked={tCaixa} onCheckedChange={setTCaixa} />
+            </div>
+            <div className="flex items-center justify-between gap-2 border rounded p-2">
+              <div>
+                <p className="text-xs font-medium">Bobina Avulsa 100%</p>
+                <p className="text-[10px] text-muted-foreground">unidade cheia</p>
+              </div>
+              <Switch checked={t100} onCheckedChange={setT100} />
+            </div>
+            <div className="flex items-center justify-between gap-2 border rounded p-2">
+              <div>
+                <p className="text-xs font-medium">Bobina Avulsa &lt; 50%</p>
+                <p className="text-[10px] text-muted-foreground">parcial</p>
+              </div>
+              <Switch checked={t50} onCheckedChange={setT50} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {tCaixa && (
+              <div>
+                <Label className={labelC}>Caixas</Label>
+                <Input type="number" min={0} className={inputH} value={form.qtd_caixas}
+                  onChange={(e) => setForm({ ...form, qtd_caixas: Math.max(0, +e.target.value || 0) })} />
+              </div>
+            )}
+            {t100 && (
+              <div>
+                <Label className={labelC}>Avulsas 100%</Label>
+                <Input type="number" min={0} className={inputH} value={form.qtd_bobina_100}
+                  onChange={(e) => setForm({ ...form, qtd_bobina_100: Math.max(0, +e.target.value || 0) })} />
+              </div>
+            )}
+            {t50 && (
+              <div>
+                <Label className={labelC}>Avulsas &lt; 50%</Label>
+                <Input type="number" min={0} className={inputH} value={form.qtd_bobina_50}
+                  onChange={(e) => setForm({ ...form, qtd_bobina_50: Math.max(0, +e.target.value || 0) })} />
+              </div>
+            )}
+          </div>
+          <div className="rounded bg-blue-600 text-white p-2 text-sm">
+            <p className="font-bold">Total a movimentar: {totalBobinas} bobina(s)</p>
+            <ul className="text-xs mt-1 space-y-0.5 opacity-95">
+              {tCaixa && <li>{qCaixas} caixa(s) = {qCaixas * BOBINAS_POR_CAIXA} bobinas</li>}
+              {t100 && <li>+ {q100} bobina(s) avulsa(s) 100%</li>}
+              {t50 && <li>+ {q50} bobina(s) avulsa(s) &lt; 50%</li>}
+            </ul>
+          </div>
+        </div>
+
         <div>
           <Label className={labelC}>Observações</Label>
-          <Textarea rows={2} className="text-sm" value={form.observacao}
+          <Textarea rows={2} className="text-sm bg-white" value={form.observacao}
             onChange={(e) => setForm({ ...form, observacao: e.target.value })} />
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={() => setForm({ ...empty, data: nowLocal() })}>Cancelar</Button>
+          <Button variant="outline" size="sm" onClick={() => { setForm({ ...empty, data: nowLocal() }); setTCaixa(true); setT100(false); setT50(false); }}>Cancelar</Button>
           <Button size="sm" onClick={registrar}>Registrar</Button>
         </div>
       </Card>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="flex items-center gap-2 pt-2">
+        <h2 className="text-lg font-semibold">Histórico de Movimentações</h2>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
         <div>
           <Label className={labelC}>Data</Label>
           <Input type="date" className={inputH} value={fData} onChange={(e) => setFData(e.target.value)} />
@@ -322,6 +349,26 @@ function MovimentacoesPage() {
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               {TIPOS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className={labelC}>Origem</Label>
+          <Select value={fOrig} onValueChange={setFOrig}>
+            <SelectTrigger className={inputH}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {LOCAIS_ORIG_DEST.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className={labelC}>Destino</Label>
+          <Select value={fDest} onValueChange={setFDest}>
+            <SelectTrigger className={inputH}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {LOCAIS_TIPO.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

@@ -13,12 +13,12 @@ type Item = { title: string; to: string; icon: React.ComponentType<{ className?:
 
 const principal: Item[] = [
   { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { title: "Nova Movimentação", to: "/estoque/movimentacoes", icon: PackagePlus },
   { title: "Relatório Gerencial", to: "/relatorio-gerencial", icon: FileBarChart },
   { title: "Reposição de Bobinas", to: "/reposicao-bobinas", icon: PackagePlus },
 ];
 const estoque: Item[] = [
-  { title: "Movimentação", to: "/estoque/movimentacoes", icon: PackagePlus },
-  { title: "Controle de Estoque", to: "/controle-estoque", icon: Boxes },
+  { title: "Histórico de Movimentações", to: "/controle-estoque", icon: Boxes },
   { title: "Agendamentos de Entrega", to: "/agendamentos-entrega", icon: CalendarClock },
   { title: "Permutas entre Linhas", to: "/permutas", icon: PackagePlus },
   { title: "Itens de Estoque", to: "/itens-estoque", icon: Layers },
