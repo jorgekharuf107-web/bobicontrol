@@ -297,13 +297,17 @@ function Dashboard() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard tone="blue" label="Estoque Total" value={totalEstoque} sublabel="bobinas (30d)" />
+        <StatCard tone="red" label="Alertas Nível Baixo" value={critico} sublabel="ATMs <50%" />
+        <StatCard tone="amber" label="Nível Alto" value={altoVolume} sublabel="ATMs ≥80%" />
+        <StatCard tone="blue" label="Movimentações do Dia" value={movsHoje} sublabel="hoje" />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard tone="blue" label="Movimentações" value={totalMovs} sublabel="últimas 1000" />
         <StatCard tone="amber" label="Permutas" value={totalPermutas} sublabel="do período" />
-        <StatCard tone="blue" label="Total Estoque" value={totalEstoque} sublabel="bobinas (30d)" />
-        <StatCard tone="blue" label="Alto Volume" value={altoVolume} sublabel="ATMs ≥80%" />
         <StatCard tone="yellow" label="Baixo Volume" value={baixoVolume} sublabel="ATMs 50–80%" />
-        <StatCard tone="red" label="Crítico" value={critico} sublabel="ATMs <50%" />
+        <StatCard tone="blue" label="Abastecimentos" value={totalAbastecimentos} sublabel="do período" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
