@@ -222,13 +222,16 @@ function Dashboard() {
   const evolucaoEstoque = movPorPeriodo.map((d) => ({ dia: d.dia, total: d.entradas + d.abastecimentos - d.saidas }));
   const nivelAtms = atmsComNivel.slice(0, 10).map((a) => ({ atm: a.id_atm, nivel: a.pct }));
 
+  const hojeStart = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d.getTime(); }, []);
+  const movsHoje = movsFiltradas.filter((m: any) => new Date(m.data).getTime() >= hojeStart).length;
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard de Controle</h1>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard BobiControl</h1>
           <p className="text-sm text-muted-foreground">
-            Visão geral do sistema de bobinas
+            Visão geral do sistema de bobinas <span className="ml-2 inline-block rounded bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">v2.1.4</span>
             {linhaFiltro !== "todas" && linhas.find((l) => l.id === linhaFiltro) &&
               ` · Filtrado por: ${linhas.find((l) => l.id === linhaFiltro)?.nome}`}
           </p>
