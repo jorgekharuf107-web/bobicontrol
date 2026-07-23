@@ -33,13 +33,14 @@ function StatCard({
     red: "bg-red-600 text-white",
   }[tone];
   return (
-    <Card className={`p-5 ${styles}`}>
-      <p className="text-xs uppercase tracking-wide opacity-90">{label}</p>
-      <p className="text-4xl font-bold mt-2">{value}</p>
-      <p className="text-xs mt-1 opacity-90">{sublabel}</p>
+    <Card className={`p-2.5 ${styles}`}>
+      <p className="text-[10px] uppercase tracking-wide opacity-90 leading-tight">{label}</p>
+      <p className="text-xl font-bold mt-0.5 leading-none">{value}</p>
+      <p className="text-[10px] mt-0.5 opacity-90 leading-tight">{sublabel}</p>
     </Card>
   );
 }
+
 
 function TopList({
   title, items, fg, bg,
