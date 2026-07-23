@@ -114,6 +114,7 @@
 }
 
 @layer base {
+  html { font-size: 12px; }
   * { border-color: var(--color-border); }
   body {
     background-color: var(--color-background);
@@ -121,6 +122,7 @@
     font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   }
 }
+
 
 @layer components {
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
