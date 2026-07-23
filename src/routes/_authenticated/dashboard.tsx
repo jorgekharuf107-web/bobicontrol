@@ -33,13 +33,14 @@ function StatCard({
     red: "bg-red-600 text-white",
   }[tone];
   return (
-    <Card className={`p-5 ${styles}`}>
-      <p className="text-xs uppercase tracking-wide opacity-90">{label}</p>
-      <p className="text-4xl font-bold mt-2">{value}</p>
-      <p className="text-xs mt-1 opacity-90">{sublabel}</p>
+    <Card className={`p-2.5 ${styles}`}>
+      <p className="text-[10px] uppercase tracking-wide opacity-90 leading-tight">{label}</p>
+      <p className="text-xl font-bold mt-0.5 leading-none">{value}</p>
+      <p className="text-[10px] mt-0.5 opacity-90 leading-tight">{sublabel}</p>
     </Card>
   );
 }
+
 
 function TopList({
   title, items, fg, bg,
@@ -297,18 +298,19 @@ function Dashboard() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <StatCard tone="blue" label="Estoque Total" value={totalEstoque} sublabel="bobinas (30d)" />
         <StatCard tone="red" label="Alertas Nível Baixo" value={critico} sublabel="ATMs <50%" />
         <StatCard tone="amber" label="Nível Alto" value={altoVolume} sublabel="ATMs ≥80%" />
         <StatCard tone="blue" label="Movimentações do Dia" value={movsHoje} sublabel="hoje" />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <StatCard tone="blue" label="Movimentações" value={totalMovs} sublabel="últimas 1000" />
         <StatCard tone="amber" label="Permutas" value={totalPermutas} sublabel="do período" />
         <StatCard tone="yellow" label="Baixo Volume" value={baixoVolume} sublabel="ATMs 50–80%" />
         <StatCard tone="blue" label="Abastecimentos" value={totalAbastecimentos} sublabel="do período" />
       </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="p-5">

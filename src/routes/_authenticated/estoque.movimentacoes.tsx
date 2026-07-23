@@ -263,24 +263,24 @@ function MovimentacoesPage() {
           </fieldset>
         </div>
 
-        <div className="rounded border bg-white/70 p-2 space-y-2">
-          <p className="text-[11px] font-semibold">Bobinas</p>
+        <div className="rounded-xl border-2 border-sky-300 p-3 space-y-2 [&_input]:bg-white [&_[role=combobox]]:bg-white" style={{ background: "#87CEEB" }}>
+          <p className="text-sm font-bold text-slate-900">Quantidade a Movimentar</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <div className="flex items-center justify-between gap-2 border rounded p-2">
+            <div className="flex items-center justify-between gap-2 rounded bg-white/90 p-2">
               <div>
                 <p className="text-xs font-medium">Bobina Caixa</p>
                 <p className="text-[10px] text-muted-foreground">6 bobinas / caixa</p>
               </div>
               <Switch checked={tCaixa} onCheckedChange={setTCaixa} />
             </div>
-            <div className="flex items-center justify-between gap-2 border rounded p-2">
+            <div className="flex items-center justify-between gap-2 rounded bg-white/90 p-2">
               <div>
                 <p className="text-xs font-medium">Bobina Avulsa 100%</p>
                 <p className="text-[10px] text-muted-foreground">unidade cheia</p>
               </div>
               <Switch checked={t100} onCheckedChange={setT100} />
             </div>
-            <div className="flex items-center justify-between gap-2 border rounded p-2">
+            <div className="flex items-center justify-between gap-2 rounded bg-white/90 p-2">
               <div>
                 <p className="text-xs font-medium">Bobina Avulsa &lt; 50%</p>
                 <p className="text-[10px] text-muted-foreground">parcial</p>
@@ -288,30 +288,30 @@ function MovimentacoesPage() {
               <Switch checked={t50} onCheckedChange={setT50} />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {tCaixa && (
               <div>
                 <Label className={labelC}>Caixas</Label>
-                <Input type="number" min={0} className={inputH} value={form.qtd_caixas}
+                <Input type="number" min={0} className={`${inputH} w-20`} value={form.qtd_caixas}
                   onChange={(e) => setForm({ ...form, qtd_caixas: Math.max(0, +e.target.value || 0) })} />
               </div>
             )}
             {t100 && (
               <div>
                 <Label className={labelC}>Avulsas 100%</Label>
-                <Input type="number" min={0} className={inputH} value={form.qtd_bobina_100}
+                <Input type="number" min={0} className={`${inputH} w-20`} value={form.qtd_bobina_100}
                   onChange={(e) => setForm({ ...form, qtd_bobina_100: Math.max(0, +e.target.value || 0) })} />
               </div>
             )}
             {t50 && (
               <div>
                 <Label className={labelC}>Avulsas &lt; 50%</Label>
-                <Input type="number" min={0} className={inputH} value={form.qtd_bobina_50}
+                <Input type="number" min={0} className={`${inputH} w-20`} value={form.qtd_bobina_50}
                   onChange={(e) => setForm({ ...form, qtd_bobina_50: Math.max(0, +e.target.value || 0) })} />
               </div>
             )}
           </div>
-          <div className="rounded bg-blue-600 text-white p-2 text-sm">
+          <div className="rounded bg-blue-700 text-white p-2 text-sm">
             <p className="font-bold">Total a movimentar: {totalBobinas} bobina(s)</p>
             <ul className="text-xs mt-1 space-y-0.5 opacity-95">
               {tCaixa && <li>{qCaixas} caixa(s) = {qCaixas * BOBINAS_POR_CAIXA} bobinas</li>}
@@ -320,6 +320,7 @@ function MovimentacoesPage() {
             </ul>
           </div>
         </div>
+
 
         <div>
           <Label className={labelC}>Observações</Label>
