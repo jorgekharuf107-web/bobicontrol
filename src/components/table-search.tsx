@@ -12,11 +12,12 @@ type Props = {
   dataFim?: string;
   onDataFim?: (v: string) => void;
   extra?: ReactNode;
+  children?: ReactNode;
 };
 
 export function TableSearch({
   search, onSearch, placeholder = "Pesquisar…",
-  dataInicio, onDataInicio, dataFim, onDataFim, extra,
+  dataInicio, onDataInicio, dataFim, onDataFim, extra, children,
 }: Props) {
   return (
     <div className="flex flex-wrap items-end gap-2 p-2 rounded border bg-muted/40">
@@ -47,6 +48,7 @@ export function TableSearch({
         </div>
       )}
       {extra}
+      {children}
     </div>
   );
 }
