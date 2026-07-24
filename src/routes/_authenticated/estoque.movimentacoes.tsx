@@ -353,6 +353,10 @@ function MovimentacoesPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+        <div className="col-span-2">
+          <Label className={labelC}>🔎 Pesquisar</Label>
+          <Input className={inputH} value={fSearch} onChange={(e) => setFSearch(e.target.value)} placeholder="Tipo, item, origem/destino, técnico…" />
+        </div>
         <div>
           <Label className={labelC}>Data</Label>
           <Input type="date" className={inputH} value={fData} onChange={(e) => setFData(e.target.value)} />
