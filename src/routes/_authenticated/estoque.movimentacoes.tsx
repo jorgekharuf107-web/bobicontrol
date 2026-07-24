@@ -14,6 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { BackButton } from "@/components/back-button";
 import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { enqueue } from "@/lib/offline-queue";
+import { useOnlineStatus } from "@/lib/use-online-status";
 
 export const Route = createFileRoute("/_authenticated/estoque/movimentacoes")({
   component: MovimentacoesPage,
@@ -67,6 +69,8 @@ function MovimentacoesPage() {
   const [fData, setFData] = useState<string>("");
   const [fOrig, setFOrig] = useState<string>("todos");
   const [fDest, setFDest] = useState<string>("todos");
+  const [fSearch, setFSearch] = useState<string>("");
+  const online = useOnlineStatus();
 
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-mov"],
@@ -150,9 +154,14 @@ function MovimentacoesPage() {
       observacao: p.data.observacao || null,
       tecnico_id: user?.id ?? null,
     };
-    const { error } = await supabase.from("movimentacoes").insert(dbPayload);
-    if (error) return toast.error(error.message);
-    toast.success("Movimentação registrada");
+    if (!online) {
+      enqueue({ table: "movimentacoes", payload: dbPayload });
+      toast.success("Sem conexão — salvo localmente. Sincronizará ao voltar online.");
+    } else {
+      const { error } = await supabase.from("movimentacoes").insert(dbPayload);
+      if (error) return toast.error(error.message);
+      toast.success("Movimentação registrada");
+    }
     setForm({ ...empty, data: nowLocal() });
     setTCaixa(true); setT100(false); setT50(false);
     qc.invalidateQueries({ queryKey: ["movs-page"] });
@@ -170,9 +179,14 @@ function MovimentacoesPage() {
       if (fOrig !== "todos" && m.origem_tipo !== fOrig) return false;
       if (fDest !== "todos" && m.destino_tipo !== fDest) return false;
       if (fData && !m.data?.startsWith(fData)) return false;
+      if (fSearch.trim()) {
+        const s = fSearch.trim().toLowerCase();
+        const hay = [m.tipo, m.itens?.nome, m.origem_tipo, m.destino_tipo, m.usuarios?.nome_completo, m.observacao].filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(s)) return false;
+      }
       return true;
     })
-  , [movs, fTipo, fItem, fTec, fData, fOrig, fDest, podeVerTudo, user?.id]);
+  , [movs, fTipo, fItem, fTec, fData, fOrig, fDest, fSearch, podeVerTudo, user?.id]);
 
   const colunas: Coluna<any>[] = [
     { header: "Data", cell: (m) => new Date(m.data).toLocaleString("pt-BR"), csv: (m) => new Date(m.data).toLocaleString("pt-BR") },
@@ -339,6 +353,10 @@ function MovimentacoesPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+        <div className="col-span-2">
+          <Label className={labelC}>🔎 Pesquisar</Label>
+          <Input className={inputH} value={fSearch} onChange={(e) => setFSearch(e.target.value)} placeholder="Tipo, item, origem/destino, técnico…" />
+        </div>
         <div>
           <Label className={labelC}>Data</Label>
           <Input type="date" className={inputH} value={fData} onChange={(e) => setFData(e.target.value)} />

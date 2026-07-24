@@ -15,9 +15,12 @@ export const Route = createFileRoute("/_authenticated/auditoria")({
 });
 
 function AuditoriaPage() {
+  const [q, setQ] = useState("");
+  const [tecFiltro, setTecFiltro] = useState<string>("todos");
   const [dataInicio, setDataInicio] = useState<string>("");
   const [dataFim, setDataFim] = useState<string>("");
   const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
+
   const { data: linhas = [] } = useAccessibleLinhas();
   const linhaMap = new Map(linhas.map((l) => [l.id, l]));
 
@@ -33,7 +36,16 @@ function AuditoriaPage() {
     return d.linha_id ?? d.linha_origem_id ?? d.linha_destino_id ?? null;
   };
 
+  const tecnicos = useMemo(() => {
+    const map = new Map<string, string>();
+    (logs as any[]).forEach((l) => {
+      if (l.usuario_id) map.set(l.usuario_id, l.usuarios?.nome_completo ?? l.usuario_id);
+    });
+    return Array.from(map.entries()).map(([id, nome]) => ({ id, nome }));
+  }, [logs]);
+
   const filtrados = useMemo(() => {
+    const s = q.trim().toLowerCase();
     return (logs as any[]).filter((l) => {
       const dt = new Date(l.criado_em);
       if (dataInicio && dt < new Date(dataInicio)) return false;
@@ -41,13 +53,19 @@ function AuditoriaPage() {
         const fim = new Date(dataFim); fim.setHours(23, 59, 59, 999);
         if (dt > fim) return false;
       }
+      if (tecFiltro !== "todos" && l.usuario_id !== tecFiltro) return false;
       if (linhaFiltro !== "todas") {
         const lid = linhaDoLog(l);
         if (lid !== linhaFiltro) return false;
       }
+      if (s) {
+        const hay = [l.acao, l.tabela, l.registro_id, l.usuarios?.nome_completo].filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(s)) return false;
+      }
       return true;
     });
-  }, [logs, dataInicio, dataFim, linhaFiltro]);
+  }, [logs, dataInicio, dataFim, linhaFiltro, tecFiltro, q]);
+
 
   const detalhes = (l: any) => {
     if (l.registro_id) return `Registro ${String(l.registro_id).slice(0, 8)}`;
@@ -75,10 +93,24 @@ function AuditoriaPage() {
         />
       </div>
 
-      <Card className="p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+      <Card className="p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div className="md:col-span-2">
+          <Label>Pesquisar</Label>
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ação, tabela, registro, usuário…" />
+        </div>
         <div><Label>Data início</Label><Input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} /></div>
         <div><Label>Data fim</Label><Input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} /></div>
-        <div className="md:col-span-2">
+        <div>
+          <Label>Técnico</Label>
+          <Select value={tecFiltro} onValueChange={setTecFiltro}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Todos" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {tecnicos.map((t) => <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="md:col-span-5">
           <Label>Linha</Label>
           <Select value={linhaFiltro} onValueChange={setLinhaFiltro}>
             <SelectTrigger className="h-9"><SelectValue placeholder="Todas" /></SelectTrigger>
@@ -96,6 +128,7 @@ function AuditoriaPage() {
           </Select>
         </div>
       </Card>
+
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">

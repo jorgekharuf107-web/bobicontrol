@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
+import { TableSearch } from "@/components/table-search";
 import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
@@ -46,6 +47,10 @@ function ControleEstoque() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MovForm>(empty);
   const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
+  const [q, setQ] = useState("");
+  const [dIni, setDIni] = useState("");
+  const [dFim, setDFim] = useState("");
+  const [tecFiltro, setTecFiltro] = useState<string>("todos");
   const { data: linhas = [] } = useAccessibleLinhas();
   const linhaMap = new Map(linhas.map((l) => [l.id, l]));
 
@@ -119,14 +124,30 @@ function ControleEstoque() {
     qc.invalidateQueries({ queryKey: ["movs-all"] });
   }
 
-  const movsFiltradas = linhaFiltro === "todas"
-    ? movs
-    : movs.filter((m: any) => m.linha_origem_id === linhaFiltro || m.linha_destino_id === linhaFiltro);
+  const tecnicos = (() => {
+    const map = new Map<string, string>();
+    (movs as any[]).forEach((m) => { if (m.tecnico_id) map.set(m.tecnico_id, m.usuarios?.nome_completo ?? m.tecnico_id); });
+    return Array.from(map.entries()).map(([id, nome]) => ({ id, nome }));
+  })();
+
+  const movsFiltradas = (movs as any[]).filter((m) => {
+    if (linhaFiltro !== "todas" && m.linha_origem_id !== linhaFiltro && m.linha_destino_id !== linhaFiltro) return false;
+    if (tecFiltro !== "todos" && m.tecnico_id !== tecFiltro) return false;
+    if (dIni && new Date(m.data) < new Date(dIni)) return false;
+    if (dFim) { const f = new Date(dFim); f.setHours(23,59,59,999); if (new Date(m.data) > f) return false; }
+    if (q.trim()) {
+      const s = q.trim().toLowerCase();
+      const hay = [m.tipo, m.itens?.nome, m.origem_tipo, m.destino_tipo, m.usuarios?.nome_completo, m.observacao, m.status_aprovacao].filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(s)) return false;
+    }
+    return true;
+  });
 
   const linhaAfetada = (m: any) => {
     const ids = Array.from(new Set([m.linha_origem_id, m.linha_destino_id].filter(Boolean)));
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
+
 
   return (
     <div className="space-y-4">
@@ -164,6 +185,24 @@ function ControleEstoque() {
           <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova Movimentação</Button>
         </div>
       </div>
+
+      <TableSearch
+        search={q} onSearch={setQ}
+        placeholder="Pesquisar tipo, item, origem/destino, observação…"
+        dataInicio={dIni} onDataInicio={setDIni}
+        dataFim={dFim} onDataFim={setDFim}
+      >
+        {tecnicos.length > 0 && (
+          <Select value={tecFiltro} onValueChange={setTecFiltro}>
+            <SelectTrigger className="w-48"><SelectValue placeholder="Técnico" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os técnicos</SelectItem>
+              {tecnicos.map((t) => <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
+      </TableSearch>
+
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
