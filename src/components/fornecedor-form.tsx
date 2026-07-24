@@ -103,84 +103,100 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
     value: string; m: Motorista; onChange: (m: Motorista) => void; title: string;
   }) => (
     <TabsContent value={value}>
-      <Card className="p-6">
-        <h3 className="font-medium mb-4">{title}</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2 col-span-2"><Label>Nome completo</Label>
-            <Input value={m.nome_completo} onChange={(e) => onChange({ ...m, nome_completo: e.target.value })} /></div>
-          <div className="space-y-2"><Label>CPF</Label>
-            <Input value={m.cpf} onChange={(e) => onChange({ ...m, cpf: e.target.value })} /></div>
-          <div className="space-y-2"><Label>Celular</Label>
-            <Input value={m.celular} onChange={(e) => onChange({ ...m, celular: e.target.value })} /></div>
-          <div className="space-y-2 col-span-2"><Label>Email</Label>
-            <Input type="email" value={m.email} onChange={(e) => onChange({ ...m, email: e.target.value })} /></div>
+      <Card className="p-3">
+        <h3 className="font-medium mb-2 text-[13px]">{title}</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1 col-span-2"><Label className="text-[11px]">Nome completo</Label>
+            <Input className="h-7 text-xs" value={m.nome_completo} onChange={(e) => onChange({ ...m, nome_completo: e.target.value })} /></div>
+          <div className="space-y-1"><Label className="text-[11px]">CPF</Label>
+            <Input className="h-7 text-xs" value={m.cpf} onChange={(e) => onChange({ ...m, cpf: e.target.value })} /></div>
+          <div className="space-y-1"><Label className="text-[11px]">Celular</Label>
+            <Input className="h-7 text-xs" value={m.celular} onChange={(e) => onChange({ ...m, celular: e.target.value })} /></div>
+          <div className="space-y-1 col-span-2"><Label className="text-[11px]">Email</Label>
+            <Input className="h-7 text-xs" type="email" value={m.email} onChange={(e) => onChange({ ...m, email: e.target.value })} /></div>
         </div>
       </Card>
     </TabsContent>
   );
 
+  const inp = "h-7 text-xs";
+  const lbl = "text-[11px]";
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 max-w-3xl">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <BackButton to="/fornecedores" />
-          <h1 className="text-2xl font-semibold">{isEdit ? "Editar fornecedor" : "Novo fornecedor"}</h1>
+          <h1 className="text-lg font-semibold">{isEdit ? "Editar fornecedor" : "Novo fornecedor"}</h1>
         </div>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="dados">Dados da Empresa</TabsTrigger>
-          <TabsTrigger value="m1">Motorista 1</TabsTrigger>
-          <TabsTrigger value="m2">Motorista 2</TabsTrigger>
+        <TabsList className="h-8">
+          <TabsTrigger value="dados" className="text-xs h-6">Dados da Empresa</TabsTrigger>
+          <TabsTrigger value="m1" className="text-xs h-6">Motorista 1</TabsTrigger>
+          <TabsTrigger value="m2" className="text-xs h-6">Motorista 2</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dados">
-          <Card className="p-6 space-y-6">
+          <Card className="p-3 space-y-3">
             <div>
-              <h3 className="font-medium mb-4">Identificação</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 col-span-2"><Label>Razão Social</Label>
-                  <Input value={forn.razao_social} onChange={(e) => setForn({ ...forn, razao_social: e.target.value })} /></div>
-                <div className="space-y-2"><Label>CNPJ</Label>
-                  <Input value={forn.cnpj} onChange={(e) => setForn({ ...forn, cnpj: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Contato principal</Label>
-                  <Input value={forn.contato_principal} onChange={(e) => setForn({ ...forn, contato_principal: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Telefone</Label>
-                  <Input value={forn.telefone} onChange={(e) => setForn({ ...forn, telefone: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Email</Label>
-                  <Input type="email" value={forn.email} onChange={(e) => setForn({ ...forn, email: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Status</Label>
-                  <div className="flex items-center gap-2 h-9">
+              <h3 className="font-medium mb-2 text-[13px]">Identificação</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1 col-span-2"><Label className={lbl}>Razão Social</Label>
+                  <Input className={inp} value={forn.razao_social} onChange={(e) => setForn({ ...forn, razao_social: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>CNPJ</Label>
+                  <Input className={inp} value={forn.cnpj} onChange={(e) => setForn({ ...forn, cnpj: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Contato principal</Label>
+                  <Input className={inp} value={forn.contato_principal} onChange={(e) => setForn({ ...forn, contato_principal: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Telefone</Label>
+                  <Input className={inp} value={forn.telefone} onChange={(e) => setForn({ ...forn, telefone: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Email</Label>
+                  <Input className={inp} type="email" value={forn.email} onChange={(e) => setForn({ ...forn, email: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Status</Label>
+                  <div className="flex items-center gap-2 h-7">
                     <Switch
                       checked={forn.status === "ativo"}
                       onCheckedChange={(v) => setForn({ ...forn, status: v ? "ativo" : "inativo", fornecedor_ativo_sim_nao: v })}
                     />
-                    <span className="text-sm">{forn.status === "ativo" ? "Ativo" : "Inativo"}</span>
+                    <span className="text-xs">{forn.status === "ativo" ? "Ativo" : "Inativo"}</span>
                   </div>
+                </div>
+                <div className="col-span-2 flex items-center gap-2 rounded border border-blue-200 bg-blue-50 px-2 py-1.5">
+                  <input
+                    id="fornecedor_padrao"
+                    type="checkbox"
+                    className="h-4 w-4 accent-blue-700"
+                    checked={forn.fornecedor_padrao}
+                    onChange={(e) => setForn({ ...forn, fornecedor_padrao: e.target.checked })}
+                  />
+                  <label htmlFor="fornecedor_padrao" className="text-xs">
+                    <span className="font-semibold">Fornecedor Padrão</span>
+                    <span className="text-muted-foreground"> — será pré-selecionado em todos os módulos com campo Fornecedor (pode ser alterado).</span>
+                  </label>
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="font-medium mb-4">Endereço</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 col-span-2"><Label>Endereço</Label>
-                  <Input value={forn.endereco} onChange={(e) => setForn({ ...forn, endereco: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Bairro</Label>
-                  <Input value={forn.bairro} onChange={(e) => setForn({ ...forn, bairro: e.target.value })} /></div>
-                <div className="space-y-2"><Label>CEP</Label>
-                  <Input value={forn.cep} onChange={(e) => setForn({ ...forn, cep: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Cidade</Label>
-                  <Input value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value, cidade: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Estado</Label>
-                  <Input value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
-                <div className="space-y-2"><Label>UF</Label>
-                  <Input maxLength={2} value={forn.estado_uf} onChange={(e) => setForn({ ...forn, estado_uf: e.target.value.toUpperCase() })} /></div>
-                <div className="space-y-2"><Label>Cidade (cadastro)</Label>
-                  <Input value={forn.cidade} onChange={(e) => setForn({ ...forn, cidade: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Estado (cadastro)</Label>
-                  <Input value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
+              <h3 className="font-medium mb-2 text-[13px]">Endereço</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1 col-span-2"><Label className={lbl}>Endereço</Label>
+                  <Input className={inp} value={forn.endereco} onChange={(e) => setForn({ ...forn, endereco: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Bairro</Label>
+                  <Input className={inp} value={forn.bairro} onChange={(e) => setForn({ ...forn, bairro: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>CEP</Label>
+                  <Input className={inp} value={forn.cep} onChange={(e) => setForn({ ...forn, cep: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Cidade</Label>
+                  <Input className={inp} value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value, cidade: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Estado</Label>
+                  <Input className={inp} value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>UF</Label>
+                  <Input className={inp} maxLength={2} value={forn.estado_uf} onChange={(e) => setForn({ ...forn, estado_uf: e.target.value.toUpperCase() })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Cidade (cadastro)</Label>
+                  <Input className={inp} value={forn.cidade} onChange={(e) => setForn({ ...forn, cidade: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Estado (cadastro)</Label>
+                  <Input className={inp} value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
               </div>
             </div>
           </Card>
@@ -191,9 +207,10 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
       </Tabs>
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => router.navigate({ to: "/fornecedores" })}>Cancelar</Button>
-        <Button onClick={save} disabled={saving}>{isEdit ? "Salvar" : "Criar"}</Button>
+        <Button variant="outline" size="sm" onClick={() => router.navigate({ to: "/fornecedores" })}>Cancelar</Button>
+        <Button size="sm" onClick={save} disabled={saving}>{isEdit ? "Salvar" : "Criar"}</Button>
       </div>
     </div>
   );
 }
+
