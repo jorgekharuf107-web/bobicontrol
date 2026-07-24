@@ -19,7 +19,7 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
-import { adminCreateUser, adminResetPassword } from "@/lib/admin.functions";
+import { adminCreateUser, adminResetPassword, adminDeleteUser } from "@/lib/admin.functions";
 
 type Papel = "admin_geral" | "supervisor_linha" | "tecnico_estacao" | "dispatcher";
 const PAPEIS: Papel[] = ["admin_geral", "supervisor_linha", "tecnico_estacao", "dispatcher"];
