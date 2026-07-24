@@ -67,3 +67,30 @@ export const adminResetPassword = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+type DeleteUserInput = { user_id: string };
+
+export const adminDeleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: DeleteUserInput) => {
+    if (!data?.user_id) throw new Error("user_id obrigatório");
+    return data;
+  })
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("e_admin", { _user_id: context.userId });
+    if (!isAdmin) throw new Error("Somente administradores podem excluir usuários");
+    if (data.user_id === context.userId) throw new Error("Você não pode excluir a si mesmo");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Bloquear exclusão de SUPER_ADMIN por não-super
+    const { data: alvo } = await supabaseAdmin.from("usuarios").select("perfil").eq("id", data.user_id).maybeSingle();
+    if (alvo?.perfil === "SUPER_ADMIN") {
+      const { data: isSuper } = await context.supabase.rpc("e_super_admin", { _user_id: context.userId });
+      if (!isSuper) throw new Error("Apenas SUPER_ADMIN pode excluir outro SUPER_ADMIN");
+    }
+    await supabaseAdmin.from("usuario_linhas").delete().eq("usuario_id", data.user_id);
+    await supabaseAdmin.from("usuarios").delete().eq("id", data.user_id);
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
