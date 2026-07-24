@@ -465,6 +465,7 @@ export type Database = {
           estado: string | null
           estado_uf: string | null
           fornecedor_ativo_sim_nao: boolean
+          fornecedor_padrao: boolean
           id: string
           motorista1: string | null
           motorista2: string | null
@@ -486,6 +487,7 @@ export type Database = {
           estado?: string | null
           estado_uf?: string | null
           fornecedor_ativo_sim_nao?: boolean
+          fornecedor_padrao?: boolean
           id?: string
           motorista1?: string | null
           motorista2?: string | null
@@ -507,6 +509,7 @@ export type Database = {
           estado?: string | null
           estado_uf?: string | null
           fornecedor_ativo_sim_nao?: boolean
+          fornecedor_padrao?: boolean
           id?: string
           motorista1?: string | null
           motorista2?: string | null

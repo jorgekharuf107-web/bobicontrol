@@ -1,0 +1,2 @@
+ALTER TABLE public.fornecedores ADD COLUMN IF NOT EXISTS fornecedor_padrao boolean NOT NULL DEFAULT false;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_fornecedor_padrao_unico ON public.fornecedores ((true)) WHERE fornecedor_padrao = true;

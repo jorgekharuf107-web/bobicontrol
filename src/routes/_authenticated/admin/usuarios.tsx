@@ -19,7 +19,7 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
-import { adminCreateUser, adminResetPassword } from "@/lib/admin.functions";
+import { adminCreateUser, adminResetPassword, adminDeleteUser } from "@/lib/admin.functions";
 
 type Papel = "admin_geral" | "supervisor_linha" | "tecnico_estacao" | "dispatcher";
 const PAPEIS: Papel[] = ["admin_geral", "supervisor_linha", "tecnico_estacao", "dispatcher"];
@@ -84,6 +84,7 @@ function UsuariosPage() {
 function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClient>; isSuperAdmin: boolean }) {
   const createUser = useServerFn(adminCreateUser);
   const resetPwd = useServerFn(adminResetPassword);
+  const deleteUser = useServerFn(adminDeleteUser);
 
   const [openCreate, setOpenCreate] = useState(false);
   const [novo, setNovo] = useState<{ nome: string; email: string; senha: string; perfil: Papel; ativo: boolean }>({
@@ -202,6 +203,16 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
     await supabase.from("convites").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["convites"] });
   }
+  async function excluirUsuario(u: any) {
+    if (!confirm(`Excluir o usuário "${u.nome_completo}"? Esta ação é irreversível.`)) return;
+    try {
+      await deleteUser({ data: { user_id: u.id } });
+      toast.success("Usuário excluído");
+      qc.invalidateQueries({ queryKey: ["usuarios"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Falha ao excluir usuário");
+    }
+  }
 
   return (
     <>
@@ -272,6 +283,9 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
                         <KeyRound className="h-4 w-4" />
                       </Button>
                     )}
+                    <Button variant="ghost" size="icon" title="Excluir usuário" onClick={() => excluirUsuario(u)}>
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
