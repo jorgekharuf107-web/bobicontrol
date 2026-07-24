@@ -1,4 +1,6 @@
+import { useEffect, useRef } from "react";
 import { Link, useRouterState, useRouter } from "@tanstack/react-router";
+
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
   Banknote, Truck, Train, Building2, MapPin,
@@ -52,6 +54,18 @@ export function AppSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { isAdmin, isSuperAdmin, perfil, nome } = useCurrentUser();
   const { isMobile, desktopOpen, mobileOpen, closeMobile } = useSidebar();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollPosRef = useRef(0);
+  useEffect(() => {
+    try {
+      const s = window.sessionStorage.getItem("bobi.sidebar.scroll");
+      if (s && scrollRef.current) scrollRef.current.scrollTop = Number(s) || 0;
+    } catch { /* noop */ }
+    return () => {
+      try { window.sessionStorage.setItem("bobi.sidebar.scroll", String(scrollPosRef.current)); } catch { /* noop */ }
+    };
+  }, []);
+
 
   async function signOut() {
     await supabase.auth.signOut();
