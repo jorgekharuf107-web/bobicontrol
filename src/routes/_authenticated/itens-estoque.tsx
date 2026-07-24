@@ -55,8 +55,9 @@ function ItensPage() {
   });
   const { data: fornecedores = [] } = useQuery({
     queryKey: ["fornecedores-select"],
-    queryFn: async () => (await supabase.from("fornecedores").select("id, razao_social").order("razao_social")).data ?? [],
+    queryFn: async () => (await supabase.from("fornecedores").select("id, razao_social, fornecedor_padrao").order("razao_social")).data ?? [],
   });
+  const fornecedorPadraoId = (fornecedores as any[]).find((f) => f.fornecedor_padrao)?.id ?? "";
 
   const filtrados = useMemo(() => {
     const f = busca.toLowerCase();
@@ -71,7 +72,7 @@ function ItensPage() {
     return arr;
   }, [itens, busca, ordenar, direcao]);
 
-  function startCreate() { setEditingId(null); setForm(empty); setOpen(true); }
+  function startCreate() { setEditingId(null); setForm({ ...empty, fornecedor_padrao_id: fornecedorPadraoId }); setOpen(true); }
   function startEdit(it: any) {
     setEditingId(it.id);
     setForm({
@@ -179,7 +180,12 @@ function ItensPage() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>{editingId ? "Editar Item" : "Novo Item"}</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>
+              <div className="text-sm text-muted-foreground font-normal">Controle de Estoque</div>
+              <div className="text-lg">{editingId ? "Editar Item" : "Novo Item"}</div>
+            </DialogTitle>
+          </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2"><Label>Nome do Item</Label>
               <Input placeholder="Ex: Bobina Térmica 80mm" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
