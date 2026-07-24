@@ -186,6 +186,24 @@ function ControleEstoque() {
         </div>
       </div>
 
+      <TableSearch
+        search={q} onSearch={setQ}
+        placeholder="Pesquisar tipo, item, origem/destino, observação…"
+        dataInicio={dIni} onDataInicio={setDIni}
+        dataFim={dFim} onDataFim={setDFim}
+      >
+        {tecnicos.length > 0 && (
+          <Select value={tecFiltro} onValueChange={setTecFiltro}>
+            <SelectTrigger className="w-48"><SelectValue placeholder="Técnico" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os técnicos</SelectItem>
+              {tecnicos.map((t) => <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        )}
+      </TableSearch>
+
+
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
           <thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th>Qtd</th><th>Origem</th><th>Destino</th><th>Linha</th><th>Técnico</th><th>Status</th><th>Ações</th></tr></thead>
