@@ -127,9 +127,14 @@ export function AppSidebar() {
       </div>
       <div
         ref={scrollRef}
-        onScroll={(e) => { scrollPosRef.current = (e.target as HTMLDivElement).scrollTop; }}
+        onScroll={(e) => {
+          const top = (e.target as HTMLDivElement).scrollTop;
+          scrollPosRef.current = top;
+          try { window.sessionStorage.setItem("bobi.sidebar.scroll", String(top)); } catch { /* noop */ }
+        }}
         className="flex-1 overflow-y-auto py-4"
       >
+
         <NavGroup label="Principal" items={principal} />
         <NavGroup label="Estoque" items={estoque} />
         <NavGroup label="Cadastros" items={cadastros} />
