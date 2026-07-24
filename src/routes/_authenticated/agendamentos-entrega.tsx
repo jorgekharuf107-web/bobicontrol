@@ -320,8 +320,18 @@ function AgendamentosEntregaPage() {
         )}
       </div>
 
+      <TableSearch
+        search={busca}
+        onSearch={setBusca}
+        placeholder="Pesquisar motorista, NF, transportadora, CD…"
+        dataInicio={fData}
+        onDataInicio={setFData}
+        dataFim={fDataFim}
+        onDataFim={setFDataFim}
+      />
+
       <Card className="p-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div>
             <Label>CD</Label>
             <Select value={fCd} onValueChange={setFCd}>
@@ -333,10 +343,6 @@ function AgendamentosEntregaPage() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div>
-            <Label>Data</Label>
-            <Input type="date" className="h-9" value={fData} onChange={(e) => setFData(e.target.value)} />
           </div>
           <div>
             <Label>Técnico</Label>
