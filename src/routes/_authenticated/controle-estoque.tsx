@@ -124,9 +124,6 @@ function ControleEstoque() {
     qc.invalidateQueries({ queryKey: ["movs-all"] });
   }
 
-  const movsFiltradas = linhaFiltro === "todas"
-    ? movs
-    : movs.filter((m: any) => m.linha_origem_id === linhaFiltro || m.linha_destino_id === linhaFiltro);
   const tecnicos = (() => {
     const map = new Map<string, string>();
     (movs as any[]).forEach((m) => { if (m.tecnico_id) map.set(m.tecnico_id, m.usuarios?.nome_completo ?? m.tecnico_id); });
@@ -146,8 +143,11 @@ function ControleEstoque() {
     return true;
   });
 
+  const linhaAfetada = (m: any) => {
+    const ids = Array.from(new Set([m.linha_origem_id, m.linha_destino_id].filter(Boolean)));
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
+
 
   return (
     <div className="space-y-4">
