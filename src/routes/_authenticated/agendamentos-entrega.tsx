@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Badge } from "@/components/ui/badge";
 import { BackButton } from "@/components/back-button";
 import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
+import { TableSearch } from "@/components/table-search";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
 import { sendEmail } from "@/lib/email.functions";
@@ -66,8 +67,10 @@ function AgendamentosEntregaPage() {
 
   const [fCd, setFCd] = useState("todos");
   const [fData, setFData] = useState("");
+  const [fDataFim, setFDataFim] = useState("");
   const [fTecnico, setFTecnico] = useState("todos");
   const [fStatus, setFStatus] = useState("todos");
+  const [busca, setBusca] = useState("");
 
   // Só CDs vinculados a estações (todo CD já pertence a uma estação, portanto lista todos)
   const { data: cds = [] } = useQuery({
@@ -87,7 +90,7 @@ function AgendamentosEntregaPage() {
   });
 
   const { data: agendamentos = [] } = useQuery({
-    queryKey: ["agendamentos", fCd, fData, fTecnico, fStatus],
+    queryKey: ["agendamentos", fCd, fData, fDataFim, fTecnico, fStatus],
     queryFn: async () => {
       let q = supabase
         .from("agendamentos_entrega")
@@ -96,12 +99,21 @@ function AgendamentosEntregaPage() {
       if (fCd !== "todos") q = q.eq("estacao_cd_id", fCd);
       if (fTecnico !== "todos") q = q.eq("tecnico_id", fTecnico);
       if (fStatus !== "todos") q = q.eq("status", fStatus);
-      if (fData) {
-        q = q.gte("data_hora_entrega", `${fData}T00:00:00`).lte("data_hora_entrega", `${fData}T23:59:59`);
-      }
+      if (fData) q = q.gte("data_hora_entrega", `${fData}T00:00:00`);
+      if (fDataFim) q = q.lte("data_hora_entrega", `${fDataFim}T23:59:59`);
       return (await q).data ?? [];
     },
   });
+
+  const agendamentosFiltrados = (() => {
+    const t = busca.trim().toLowerCase();
+    if (!t) return agendamentos;
+    return (agendamentos as any[]).filter((r) =>
+      [r.nome_motorista, r.celular_motorista, r.transportadora, r.numero_nf, r.observacao,
+       r.cds?.nome_cd, r.cds?.estacoes?.nome]
+        .filter(Boolean).some((v: string) => String(v).toLowerCase().includes(t))
+    );
+  })();
 
   function resetForm() {
     setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null);
@@ -308,8 +320,18 @@ function AgendamentosEntregaPage() {
         )}
       </div>
 
+      <TableSearch
+        search={busca}
+        onSearch={setBusca}
+        placeholder="Pesquisar motorista, NF, transportadora, CD…"
+        dataInicio={fData}
+        onDataInicio={setFData}
+        dataFim={fDataFim}
+        onDataFim={setFDataFim}
+      />
+
       <Card className="p-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div>
             <Label>CD</Label>
             <Select value={fCd} onValueChange={setFCd}>
@@ -321,10 +343,6 @@ function AgendamentosEntregaPage() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div>
-            <Label>Data</Label>
-            <Input type="date" className="h-9" value={fData} onChange={(e) => setFData(e.target.value)} />
           </div>
           <div>
             <Label>Técnico</Label>
@@ -352,7 +370,7 @@ function AgendamentosEntregaPage() {
       </Card>
 
       <TabelaCrud
-        data={agendamentos}
+        data={agendamentosFiltrados}
         colunas={colunas}
         rowKey={(r) => r.id}
         csvFilename="agendamentos-entrega"
