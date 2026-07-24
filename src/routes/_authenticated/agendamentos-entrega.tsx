@@ -370,7 +370,7 @@ function AgendamentosEntregaPage() {
       </Card>
 
       <TabelaCrud
-        data={agendamentos}
+        data={agendamentosFiltrados}
         colunas={colunas}
         rowKey={(r) => r.id}
         csvFilename="agendamentos-entrega"
