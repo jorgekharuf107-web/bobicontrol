@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AceitarConviteTokenRouteImport } from './routes/aceitar-convite.$token'
 import { Route as AuthenticatedReposicaoBobinasRouteImport } from './routes/_authenticated/reposicao-bobinas'
 import { Route as AuthenticatedRelatorioGerencialRouteImport } from './routes/_authenticated/relatorio-gerencial'
+import { Route as AuthenticatedPermutasAtmRouteImport } from './routes/_authenticated/permutas-atm'
 import { Route as AuthenticatedPermutasRouteImport } from './routes/_authenticated/permutas'
 import { Route as AuthenticatedLinhasRouteImport } from './routes/_authenticated/linhas'
 import { Route as AuthenticatedItensEstoqueRouteImport } from './routes/_authenticated/itens-estoque'
@@ -67,6 +68,12 @@ const AuthenticatedRelatorioGerencialRoute =
   AuthenticatedRelatorioGerencialRouteImport.update({
     id: '/relatorio-gerencial',
     path: '/relatorio-gerencial',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPermutasAtmRoute =
+  AuthenticatedPermutasAtmRouteImport.update({
+    id: '/permutas-atm',
+    path: '/permutas-atm',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedPermutasRoute = AuthenticatedPermutasRouteImport.update({
@@ -209,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/permutas': typeof AuthenticatedPermutasRoute
+  '/permutas-atm': typeof AuthenticatedPermutasAtmRoute
   '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
   '/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/linhas': typeof AuthenticatedLinhasRoute
   '/permutas': typeof AuthenticatedPermutasRoute
+  '/permutas-atm': typeof AuthenticatedPermutasAtmRoute
   '/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
   '/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
@@ -269,6 +278,7 @@ export interface FileRoutesById {
   '/_authenticated/itens-estoque': typeof AuthenticatedItensEstoqueRoute
   '/_authenticated/linhas': typeof AuthenticatedLinhasRoute
   '/_authenticated/permutas': typeof AuthenticatedPermutasRoute
+  '/_authenticated/permutas-atm': typeof AuthenticatedPermutasAtmRoute
   '/_authenticated/relatorio-gerencial': typeof AuthenticatedRelatorioGerencialRoute
   '/_authenticated/reposicao-bobinas': typeof AuthenticatedReposicaoBobinasRoute
   '/aceitar-convite/$token': typeof AceitarConviteTokenRoute
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/itens-estoque'
     | '/linhas'
     | '/permutas'
+    | '/permutas-atm'
     | '/relatorio-gerencial'
     | '/reposicao-bobinas'
     | '/aceitar-convite/$token'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/itens-estoque'
     | '/linhas'
     | '/permutas'
+    | '/permutas-atm'
     | '/relatorio-gerencial'
     | '/reposicao-bobinas'
     | '/aceitar-convite/$token'
@@ -359,6 +371,7 @@ export interface FileRouteTypes {
     | '/_authenticated/itens-estoque'
     | '/_authenticated/linhas'
     | '/_authenticated/permutas'
+    | '/_authenticated/permutas-atm'
     | '/_authenticated/relatorio-gerencial'
     | '/_authenticated/reposicao-bobinas'
     | '/aceitar-convite/$token'
@@ -423,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorio-gerencial'
       fullPath: '/relatorio-gerencial'
       preLoaderRoute: typeof AuthenticatedRelatorioGerencialRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/permutas-atm': {
+      id: '/_authenticated/permutas-atm'
+      path: '/permutas-atm'
+      fullPath: '/permutas-atm'
+      preLoaderRoute: typeof AuthenticatedPermutasAtmRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/permutas': {
@@ -595,6 +615,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedItensEstoqueRoute: typeof AuthenticatedItensEstoqueRoute
   AuthenticatedLinhasRoute: typeof AuthenticatedLinhasRoute
   AuthenticatedPermutasRoute: typeof AuthenticatedPermutasRoute
+  AuthenticatedPermutasAtmRoute: typeof AuthenticatedPermutasAtmRoute
   AuthenticatedRelatorioGerencialRoute: typeof AuthenticatedRelatorioGerencialRoute
   AuthenticatedReposicaoBobinasRoute: typeof AuthenticatedReposicaoBobinasRoute
   AuthenticatedAdminAlertasRoute: typeof AuthenticatedAdminAlertasRoute
@@ -623,6 +644,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedItensEstoqueRoute: AuthenticatedItensEstoqueRoute,
   AuthenticatedLinhasRoute: AuthenticatedLinhasRoute,
   AuthenticatedPermutasRoute: AuthenticatedPermutasRoute,
+  AuthenticatedPermutasAtmRoute: AuthenticatedPermutasAtmRoute,
   AuthenticatedRelatorioGerencialRoute: AuthenticatedRelatorioGerencialRoute,
   AuthenticatedReposicaoBobinasRoute: AuthenticatedReposicaoBobinasRoute,
   AuthenticatedAdminAlertasRoute: AuthenticatedAdminAlertasRoute,

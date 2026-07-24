@@ -66,6 +66,10 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
       let id = fornecedorId;
       const payload = { ...forn };
       delete (payload as any).id;
+      // Se marcado como padrão, desmarca os outros (índice único exige)
+      if (payload.fornecedor_padrao) {
+        await supabase.from("fornecedores").update({ fornecedor_padrao: false }).eq("fornecedor_padrao", true);
+      }
       if (isEdit) {
         const { error } = await supabase.from("fornecedores").update(payload).eq("id", id!);
         if (error) throw error;
@@ -75,7 +79,6 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
         id = data.id;
       }
 
-      // Upsert motoristas (apenas se preenchidos)
       for (const m of [m1, m2]) {
         const hasData = m.nome_completo.trim() || m.cpf.trim() || m.celular.trim() || m.email.trim();
         if (!hasData) continue;
