@@ -15,7 +15,7 @@ type Fornecedor = {
   id?: string; razao_social: string; cnpj: string; cidade: string; estado: string;
   contato_principal: string; status: "ativo" | "inativo"; telefone: string; email: string;
   endereco: string; bairro: string; cidade_endereco: string; estado_uf: string; cep: string;
-  fornecedor_ativo_sim_nao: boolean;
+  fornecedor_ativo_sim_nao: boolean; fornecedor_padrao: boolean;
 };
 
 type Motorista = {
@@ -27,6 +27,7 @@ const emptyFornecedor: Fornecedor = {
   razao_social: "", cnpj: "", cidade: "", estado: "", contato_principal: "",
   status: "ativo", telefone: "", email: "", endereco: "", bairro: "",
   cidade_endereco: "", estado_uf: "", cep: "", fornecedor_ativo_sim_nao: true,
+  fornecedor_padrao: false,
 };
 
 const emptyMotorista = (tipo: "motorista1" | "motorista2"): Motorista => ({
