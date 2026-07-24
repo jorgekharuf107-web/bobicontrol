@@ -90,7 +90,7 @@ function AgendamentosEntregaPage() {
   });
 
   const { data: agendamentos = [] } = useQuery({
-    queryKey: ["agendamentos", fCd, fData, fTecnico, fStatus],
+    queryKey: ["agendamentos", fCd, fData, fDataFim, fTecnico, fStatus],
     queryFn: async () => {
       let q = supabase
         .from("agendamentos_entrega")
@@ -99,12 +99,21 @@ function AgendamentosEntregaPage() {
       if (fCd !== "todos") q = q.eq("estacao_cd_id", fCd);
       if (fTecnico !== "todos") q = q.eq("tecnico_id", fTecnico);
       if (fStatus !== "todos") q = q.eq("status", fStatus);
-      if (fData) {
-        q = q.gte("data_hora_entrega", `${fData}T00:00:00`).lte("data_hora_entrega", `${fData}T23:59:59`);
-      }
+      if (fData) q = q.gte("data_hora_entrega", `${fData}T00:00:00`);
+      if (fDataFim) q = q.lte("data_hora_entrega", `${fDataFim}T23:59:59`);
       return (await q).data ?? [];
     },
   });
+
+  const agendamentosFiltrados = (() => {
+    const t = busca.trim().toLowerCase();
+    if (!t) return agendamentos;
+    return (agendamentos as any[]).filter((r) =>
+      [r.nome_motorista, r.celular_motorista, r.transportadora, r.numero_nf, r.observacao,
+       r.cds?.nome_cd, r.cds?.estacoes?.nome]
+        .filter(Boolean).some((v: string) => String(v).toLowerCase().includes(t))
+    );
+  })();
 
   function resetForm() {
     setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null);
