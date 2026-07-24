@@ -38,12 +38,14 @@ const admin: Item[] = [
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
   { title: "Importar Dados", to: "/importar-dados", icon: Upload },
   { title: "Importador Corporativo", to: "/importador-corporativo", icon: Cloud },
-  { title: "Sobre", to: "/admin/sobre", icon: Info },
 ];
 
 const adminSuper: Item[] = [
   { title: "Backup", to: "/admin/backup", icon: Database },
 ];
+
+const sobreItem: Item = { title: "Sobre", to: "/admin/sobre", icon: Info };
+
 
 export function AppSidebar() {
   const router = useRouter();
@@ -109,12 +111,18 @@ export function AppSidebar() {
           </button>
         )}
       </div>
-      <div className="flex-1 overflow-y-auto py-4">
+      <div
+        ref={scrollRef}
+        onScroll={(e) => { scrollPosRef.current = (e.target as HTMLDivElement).scrollTop; }}
+        className="flex-1 overflow-y-auto py-4"
+      >
         <NavGroup label="Principal" items={principal} />
         <NavGroup label="Estoque" items={estoque} />
         <NavGroup label="Cadastros" items={cadastros} />
-        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...admin, ...adminSuper] : admin} />}
+        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...admin, ...adminSuper, sobreItem] : [...admin, sobreItem]]} />}
+        {!isAdmin && <NavGroup label="" items={[sobreItem]} />}
       </div>
+
       <div className="border-t border-sidebar-border p-3 shrink-0">
         <div className="px-2 mb-2">
           <p className="text-sm font-medium truncate">{nome ?? "Usuário"}</p>
