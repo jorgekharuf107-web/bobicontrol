@@ -335,12 +335,12 @@ function AgendamentosEntregaPage() {
         onDataFim={setFDataFim}
       />
 
-      <Card className="p-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <div>
-            <Label>CD</Label>
+      <Card className="p-2">
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="min-w-[160px]">
+            <Label className="text-[11px] mb-0.5 block">CD</Label>
             <Select value={fCd} onValueChange={setFCd}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-7 text-xs w-auto min-w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
                 {cds.map((c: any) => (
@@ -350,9 +350,9 @@ function AgendamentosEntregaPage() {
             </Select>
           </div>
           <div>
-            <Label>Técnico</Label>
+            <Label className="text-[11px] mb-0.5 block">Técnico</Label>
             <Select value={fTecnico} onValueChange={setFTecnico}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-7 text-xs w-auto min-w-[140px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
                 {tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}
@@ -360,9 +360,9 @@ function AgendamentosEntregaPage() {
             </Select>
           </div>
           <div>
-            <Label>Status</Label>
+            <Label className="text-[11px] mb-0.5 block">Status</Label>
             <Select value={fStatus} onValueChange={setFStatus}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-7 text-xs w-auto min-w-[120px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="Agendado">Agendado</SelectItem>
@@ -371,8 +371,14 @@ function AgendamentosEntregaPage() {
               </SelectContent>
             </Select>
           </div>
+          <div className="min-w-[160px]">
+            <Label className="text-[11px] mb-0.5 block">Motorista</Label>
+            <Input className="h-7 text-xs" placeholder="Filtrar motorista"
+              value={fMotorista} onChange={(e) => setFMotorista(e.target.value)} />
+          </div>
         </div>
       </Card>
+
 
       <TabelaCrud
         data={agendamentosFiltrados}
