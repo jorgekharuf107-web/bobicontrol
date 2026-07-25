@@ -70,7 +70,9 @@ function AgendamentosEntregaPage() {
   const [fDataFim, setFDataFim] = useState("");
   const [fTecnico, setFTecnico] = useState("todos");
   const [fStatus, setFStatus] = useState("todos");
+  const [fMotorista, setFMotorista] = useState("");
   const [busca, setBusca] = useState("");
+
 
   // Só CDs vinculados a estações (todo CD já pertence a uma estação, portanto lista todos)
   const { data: cds = [] } = useQuery({
