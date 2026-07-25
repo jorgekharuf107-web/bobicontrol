@@ -109,13 +109,16 @@ function AgendamentosEntregaPage() {
 
   const agendamentosFiltrados = (() => {
     const t = busca.trim().toLowerCase();
-    if (!t) return agendamentos;
-    return (agendamentos as any[]).filter((r) =>
-      [r.nome_motorista, r.celular_motorista, r.transportadora, r.numero_nf, r.observacao,
-       r.cds?.nome_cd, r.cds?.estacoes?.nome]
-        .filter(Boolean).some((v: string) => String(v).toLowerCase().includes(t))
-    );
+    const m = fMotorista.trim().toLowerCase();
+    return (agendamentos as any[]).filter((r) => {
+      if (m && !String(r.nome_motorista ?? "").toLowerCase().includes(m)) return false;
+      if (!t) return true;
+      return [r.nome_motorista, r.celular_motorista, r.transportadora, r.numero_nf, r.observacao,
+        r.cds?.nome_cd, r.cds?.estacoes?.nome]
+        .filter(Boolean).some((v: string) => String(v).toLowerCase().includes(t));
+    });
   })();
+
 
   function resetForm() {
     setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null);
