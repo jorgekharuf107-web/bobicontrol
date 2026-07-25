@@ -32,19 +32,21 @@ function AuditoriaPage() {
           columns={[
             { header: "Data", accessor: (l: any) => new Date(l.criado_em).toLocaleString("pt-BR") },
             { header: "Ação", accessor: (l: any) => l.acao },
-            { header: "Tabela", accessor: (l: any) => l.tabela },
+            { header: "Módulo", accessor: (l: any) => l.tabela },
             { header: "Registro", accessor: (l: any) => l.registro_id ?? "" },
             { header: "Usuário", accessor: (l: any) => l.usuario_id ?? "" },
           ]}
+
           filename="auditoria"
         />
       </div>
       <Card className="p-0 overflow-hidden">
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Data</TableHead><TableHead>Ação</TableHead><TableHead>Tabela</TableHead>
+            <TableHead>Data</TableHead><TableHead>Ação</TableHead><TableHead>Módulo</TableHead>
             <TableHead>Registro</TableHead><TableHead>Usuário</TableHead>
           </TableRow></TableHeader>
+
           <TableBody>
             {logs.length === 0 && (
               <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum registro de auditoria.</TableCell></TableRow>

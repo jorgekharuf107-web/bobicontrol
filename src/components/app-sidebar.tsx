@@ -35,19 +35,20 @@ const cadastros: Item[] = [
   { title: "Linhas", to: "/linhas", icon: Train },
   { title: "Fornecedores", to: "/fornecedores", icon: Building2 },
 ];
-const admin: Item[] = [
+const adminBase: Item[] = [
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
   { title: "Importar Dados", to: "/importar-dados", icon: Upload },
-  { title: "Importador Corporativo", to: "/importador-corporativo", icon: Cloud },
 ];
 
 const adminSuper: Item[] = [
+  { title: "Importador Corporativo", to: "/importador-corporativo", icon: Cloud },
   { title: "Backup", to: "/admin/backup", icon: Database },
 ];
 
 const sobreItem: Item = { title: "Sobre", to: "/admin/sobre", icon: Info };
+
 
 
 export function AppSidebar() {
@@ -139,8 +140,9 @@ export function AppSidebar() {
         <NavGroup label="Principal" items={principal} />
         <NavGroup label="Estoque" items={estoque} />
         <NavGroup label="Cadastros" items={cadastros} />
-        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...admin, ...adminSuper, sobreItem] : [...admin, sobreItem]} />}
-        {!isAdmin && <NavGroup label="" items={[sobreItem]} />}
+        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...adminBase, ...adminSuper] : adminBase} />}
+        <NavGroup label="" items={[sobreItem]} />
+
       </div>
 
       <div className="border-t border-sidebar-border p-3 shrink-0">

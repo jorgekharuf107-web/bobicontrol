@@ -16,8 +16,17 @@ import { BackButton } from "@/components/back-button";
 import { APP_NAME } from "@/lib/app-config";
 
 export const Route = createFileRoute("/_authenticated/importador-corporativo")({
+  beforeLoad: async () => {
+    const { redirect } = await import("@tanstack/react-router");
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) return;
+    const { data: usr } = await supabase.from("usuarios").select("perfil").eq("id", data.user.id).maybeSingle();
+    const perfil = String((usr as any)?.perfil ?? "").toUpperCase();
+    if (perfil !== "SUPER_ADMIN") throw redirect({ to: "/dashboard" });
+  },
   component: ImportadorCorporativoPage,
 });
+
 
 type EntidadeKey =
   | "linhas" | "estacoes" | "cds" | "fornecedores" | "atms"
