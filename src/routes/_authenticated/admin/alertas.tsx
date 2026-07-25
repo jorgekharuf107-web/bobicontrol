@@ -116,9 +116,14 @@ function AlertasPage() {
             <div className="space-y-2"><Label>Frequência (horas)</Label>
               <Input type="number" min={0} className="h-9 w-28" value={form.frequencia_envio_horas}
                 onChange={(e) => setForm({ ...form, frequencia_envio_horas: Math.max(0, +e.target.value || 0) })} /></div>
-            <div className="space-y-2"><Label>Destinatários (separados por vírgula)</Label>
-              <Input value={form.destinatarios_email}
-                onChange={(e) => setForm({ ...form, destinatarios_email: e.target.value })} /></div>
+            <div className="space-y-2 col-span-2"><Label>Destinatários</Label>
+              <Textarea
+                rows={3}
+                placeholder="Ex: tecnico1@email.com, tecnico2@email.com"
+                value={form.destinatarios_email}
+                onChange={(e) => setForm({ ...form, destinatarios_email: e.target.value })} />
+              <p className="text-[11px] text-muted-foreground">Separe cada e-mail por vírgula</p></div>
+
             <div className="space-y-2 col-span-2"><Label>Mensagem personalizada</Label>
               <Textarea value={form.mensagem_personalizada}
                 onChange={(e) => setForm({ ...form, mensagem_personalizada: e.target.value })} /></div>
