@@ -140,8 +140,9 @@ export function AppSidebar() {
         <NavGroup label="Principal" items={principal} />
         <NavGroup label="Estoque" items={estoque} />
         <NavGroup label="Cadastros" items={cadastros} />
-        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...admin, ...adminSuper, sobreItem] : [...admin, sobreItem]} />}
-        {!isAdmin && <NavGroup label="" items={[sobreItem]} />}
+        {isAdmin && <NavGroup label="Administração" items={isSuperAdmin ? [...adminBase, ...adminSuper] : adminBase} />}
+        <NavGroup label="" items={[sobreItem]} />
+
       </div>
 
       <div className="border-t border-sidebar-border p-3 shrink-0">
