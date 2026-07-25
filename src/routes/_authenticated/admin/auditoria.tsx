@@ -32,10 +32,11 @@ function AuditoriaPage() {
           columns={[
             { header: "Data", accessor: (l: any) => new Date(l.criado_em).toLocaleString("pt-BR") },
             { header: "Ação", accessor: (l: any) => l.acao },
-            { header: "Tabela", accessor: (l: any) => l.tabela },
+            { header: "Módulo", accessor: (l: any) => l.tabela },
             { header: "Registro", accessor: (l: any) => l.registro_id ?? "" },
             { header: "Usuário", accessor: (l: any) => l.usuario_id ?? "" },
           ]}
+
           filename="auditoria"
         />
       </div>
