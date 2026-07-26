@@ -189,14 +189,16 @@
     vertical-align: middle;
   }
 
-  /* Quebra de linha em todas as células */
-  .excel-table th,
-  .excel-table td,
-  table th,
-  table td {
-    white-space: normal;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
+  /* Quebra de linha em todas as células (desktop/tablet; mobile inalterado) */
+  @media (min-width: 768px) {
+    .excel-table th,
+    .excel-table td,
+    table th,
+    table td {
+      white-space: normal;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+    }
   }
 
   /* Colunas numéricas centralizadas */
