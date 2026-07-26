@@ -99,6 +99,10 @@ function PermutasAtm() {
     });
   }, [movs, q, dIni, dFim, atms]);
 
+  const historicoAsc = [...filtradas].sort(
+    (a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime(),
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
