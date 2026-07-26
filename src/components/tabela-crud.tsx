@@ -15,6 +15,7 @@ type Props<T> = {
   data: T[];
   colunas: Coluna<T>[];
   acoes?: (row: T) => ReactNode;
+  acoesHeader?: string;
   headerAcoes?: ReactNode;
   csvFilename?: string;
   emptyMessage?: string;
@@ -26,7 +27,7 @@ type Props<T> = {
  * Reutilizável em qualquer listagem CRUD.
  */
 export function TabelaCrud<T>({
-  titulo, data, colunas, acoes, headerAcoes,
+  titulo, data, colunas, acoes, acoesHeader = "Ações", headerAcoes,
   csvFilename, emptyMessage = "Nenhum registro encontrado", rowKey,
 }: Props<T>) {
   const csvColumns: CsvColumn<T>[] = colunas
@@ -51,9 +52,10 @@ export function TabelaCrud<T>({
           <thead>
             <tr>
               {colunas.map((c, i) => <th key={i} className={c.className}>{c.header}</th>)}
-              {acoes && <th>Ações</th>}
+              {acoes && <th>{acoesHeader}</th>}
             </tr>
           </thead>
+
           <tbody>
             {data.length === 0 && (
               <tr>
