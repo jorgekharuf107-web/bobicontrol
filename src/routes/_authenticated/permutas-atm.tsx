@@ -127,35 +127,69 @@ function PermutasAtm() {
         </div>
       </div>
 
-      <TableSearch
-        search={q} onSearch={setQ}
-        placeholder="Pesquisar item, ATM, técnico, motivo…"
-        dataInicio={dIni} onDataInicio={setDIni}
-        dataFim={dFim} onDataFim={setDFim}
-      />
+      <Tabs defaultValue="lista">
+        <TabsList>
+          <TabsTrigger value="lista">Permutas entre ATM</TabsTrigger>
+          <TabsTrigger value="historico">Histórico</TabsTrigger>
+        </TabsList>
 
-      <Card className="p-0 overflow-hidden">
-        <table className="excel-table">
-          <thead><tr><th>Data</th><th>Item</th><th>Qtd</th><th>ATM Origem</th><th></th><th>ATM Destino</th><th>Técnico</th><th>Motivo</th></tr></thead>
-          <tbody>
-            {filtradas.length === 0 && (
-              <tr><td colSpan={8} className="text-center py-6 font-bold text-muted-foreground">Nenhuma permuta ATM registrada</td></tr>
-            )}
-            {filtradas.map((m: any) => (
-              <tr key={m.id}>
-                <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
-                <td>{m.itens?.nome ?? "—"}</td>
-                <td>{m.qtd}</td>
-                <td className="font-medium">{atmLabel(m.origem_id)}</td>
-                <td className="text-center text-muted-foreground"><ArrowRightLeft className="inline h-3 w-3" /></td>
-                <td className="font-medium">{atmLabel(m.destino_id)}</td>
-                <td>{m.usuarios?.nome_completo ?? "—"}</td>
-                <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+        <TabsContent value="lista" className="space-y-3 pt-3">
+          <TableSearch
+            search={q} onSearch={setQ}
+            placeholder="Pesquisar item, ATM, técnico, observações…"
+            dataInicio={dIni} onDataInicio={setDIni}
+            dataFim={dFim} onDataFim={setDFim}
+          />
+
+          <Card className="p-0 overflow-hidden">
+            <table className="excel-table">
+              <thead><tr><th>Data da Criação</th><th>Item</th><th className="num">Qtd</th><th>ATM Origem</th><th></th><th>ATM Destino</th><th>Técnico</th><th>Observações</th></tr></thead>
+              <tbody>
+                {filtradas.length === 0 && (
+                  <tr><td colSpan={8} className="text-center py-6 font-bold text-muted-foreground">Nenhuma permuta ATM registrada</td></tr>
+                )}
+                {filtradas.map((m: any) => (
+                  <tr key={m.id}>
+                    <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
+                    <td>{m.itens?.nome ?? "—"}</td>
+                    <td className="num">{m.qtd}</td>
+                    <td className="font-medium">{atmLabel(m.origem_id)}</td>
+                    <td className="text-center text-muted-foreground"><ArrowRightLeft className="inline h-3 w-3" /></td>
+                    <td className="font-medium">{atmLabel(m.destino_id)}</td>
+                    <td>{m.usuarios?.nome_completo ?? "—"}</td>
+                    <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="historico" className="pt-3">
+          <Card className="p-0 overflow-hidden">
+            <table className="excel-table">
+              <thead><tr><th>Data da Criação</th><th>Item</th><th className="num">Qtd</th><th>ATM Origem</th><th>ATM Destino</th><th>Técnico</th><th>Observações</th></tr></thead>
+              <tbody>
+                {historicoAsc.length === 0 && (
+                  <tr><td colSpan={7} className="text-center py-6 font-bold text-muted-foreground">Nenhum histórico</td></tr>
+                )}
+                {historicoAsc.map((m: any) => (
+                  <tr key={m.id}>
+                    <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
+                    <td>{m.itens?.nome ?? "—"}</td>
+                    <td className="num">{m.qtd}</td>
+                    <td className="font-medium">{atmLabel(m.origem_id)}</td>
+                    <td className="font-medium">{atmLabel(m.destino_id)}</td>
+                    <td>{m.usuarios?.nome_completo ?? "—"}</td>
+                    <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl">
