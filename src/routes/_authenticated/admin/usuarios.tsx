@@ -34,6 +34,19 @@ const LABEL: Record<string, string> = {
 };
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
+  head: () => ({
+    meta: [
+      { title: "Gestão de Usuários | Bobi Control" },
+      { name: "description", content: "Gerencie usuários, perfis de acesso e convites de acesso ao Bobi Control." },
+      { property: "og:title", content: "Gestão de Usuários | Bobi Control" },
+      { property: "og:description", content: "Gerencie usuários, perfis de acesso e convites de acesso ao Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/admin/usuarios" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/admin/usuarios" }],
+  }),
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return;

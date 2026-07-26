@@ -11,8 +11,11 @@ export const Route = createFileRoute("/_authenticated/admin/sobre")({
       { property: "og:title", content: "Sobre o Sistema | BobiControl" },
       { property: "og:description", content: "Sistema de gestão e controle de estoque de bobinas para ATMs e CDs." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/admin/sobre" },
       { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
+    links: [{ rel: "canonical", href: "/admin/sobre" }],
   }),
 });
 
@@ -33,9 +36,9 @@ function SobrePage() {
 
         {/* Card principal */}
         <div className="bg-white rounded-2xl shadow-sm p-6 flex flex-col items-center text-center">
-          <h2 className="text-[32px] font-extrabold text-[#0EA5E9] leading-tight tracking-tight">
+          <h1 className="text-[32px] font-extrabold text-[#0EA5E9] leading-tight tracking-tight">
             BobiControl
-          </h2>
+          </h1>
           <p className="text-[14px] text-[#475569] mt-3 max-w-[500px] leading-relaxed">
             Sistema de gestão e controle de estoque de bobinas para ATMs e CDs, com Dashboards, alertas de nível baixo e histórico de movimentações.
           </p>

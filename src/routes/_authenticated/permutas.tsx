@@ -19,6 +19,19 @@ import { confirmar } from "@/components/confirm-dialog";
 import { nowLocal } from "@/components/movimentacao-form";
 
 export const Route = createFileRoute("/_authenticated/permutas")({
+  head: () => ({
+    meta: [
+      { title: "Permutas entre Linhas | Bobi Control" },
+      { name: "description", content: "Solicite e aprove permutas de bobinas entre linhas do Bobi Control." },
+      { property: "og:title", content: "Permutas entre Linhas | Bobi Control" },
+      { property: "og:description", content: "Solicite e aprove permutas de bobinas entre linhas do Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/permutas" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/permutas" }],
+  }),
   component: Permutas,
 });
 

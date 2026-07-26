@@ -7,6 +7,19 @@ import { Label } from "@/components/ui/label";
 import { BackButton } from "@/components/back-button";
 
 export const Route = createFileRoute("/_authenticated/relatorio-gerencial")({
+  head: () => ({
+    meta: [
+      { title: "Relatório Gerencial | Bobi Control" },
+      { name: "description", content: "Relatórios de status, movimentações, alertas e analytics do estoque." },
+      { property: "og:title", content: "Relatório Gerencial | Bobi Control" },
+      { property: "og:description", content: "Relatórios de status, movimentações, alertas e analytics do estoque." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/relatorio-gerencial" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/relatorio-gerencial" }],
+  }),
   component: RelatorioGerencial,
 });
 

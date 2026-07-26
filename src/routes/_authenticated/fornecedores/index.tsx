@@ -11,6 +11,19 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
 
 export const Route = createFileRoute("/_authenticated/fornecedores/")({
+  head: () => ({
+    meta: [
+      { title: "Fornecedores | Bobi Control" },
+      { name: "description", content: "Consulte e gerencie o cadastro de fornecedores de bobinas do Bobi Control." },
+      { property: "og:title", content: "Fornecedores | Bobi Control" },
+      { property: "og:description", content: "Consulte e gerencie o cadastro de fornecedores de bobinas do Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/fornecedores" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/fornecedores" }],
+  }),
   component: ListPage,
 });
 

@@ -16,6 +16,19 @@ import { BackButton } from "@/components/back-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/admin/alertas")({
+  head: () => ({
+    meta: [
+      { title: "Configuração de Alertas | Bobi Control" },
+      { name: "description", content: "Configure alertas de estoque baixo por linha e destinatários de notificação no Bobi Control." },
+      { property: "og:title", content: "Configuração de Alertas | Bobi Control" },
+      { property: "og:description", content: "Configure alertas de estoque baixo por linha e destinatários de notificação no Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/admin/alertas" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/admin/alertas" }],
+  }),
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return;

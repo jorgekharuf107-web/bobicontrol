@@ -19,6 +19,19 @@ import { nowLocal } from "@/components/movimentacao-form";
 import { useCurrentUser } from "@/lib/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/permutas-atm")({
+  head: () => ({
+    meta: [
+      { title: "Permutas entre ATM | Bobi Control" },
+      { name: "description", content: "Registre permutas de bobinas entre ATMs com baixa e entrada automáticas." },
+      { property: "og:title", content: "Permutas entre ATM | Bobi Control" },
+      { property: "og:description", content: "Registre permutas de bobinas entre ATMs com baixa e entrada automáticas." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/permutas-atm" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/permutas-atm" }],
+  }),
   component: PermutasAtm,
 });
 

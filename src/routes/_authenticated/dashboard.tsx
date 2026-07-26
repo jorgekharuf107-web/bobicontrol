@@ -18,6 +18,19 @@ import { useCurrentUser } from "@/lib/use-current-user";
 import { AssistenteReposicao } from "@/components/assistente-reposicao";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Dashboard de Controle | Bobi Control" },
+      { name: "description", content: "Painel com indicadores de estoque, movimentações, alertas e permutas de bobinas." },
+      { property: "og:title", content: "Dashboard de Controle | Bobi Control" },
+      { property: "og:description", content: "Painel com indicadores de estoque, movimentações, alertas e permutas de bobinas." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/dashboard" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/dashboard" }],
+  }),
   component: Dashboard,
 });
 

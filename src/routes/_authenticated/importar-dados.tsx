@@ -11,6 +11,19 @@ import { BackButton } from "@/components/back-button";
 import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
 
 export const Route = createFileRoute("/_authenticated/importar-dados")({
+  head: () => ({
+    meta: [
+      { title: "Importar Dados | Bobi Control" },
+      { name: "description", content: "Importe planilhas e arquivos de dados para as tabelas do Bobi Control." },
+      { property: "og:title", content: "Importar Dados | Bobi Control" },
+      { property: "og:description", content: "Importe planilhas e arquivos de dados para as tabelas do Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/importar-dados" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/importar-dados" }],
+  }),
   component: ImportarDadosPage,
 });
 

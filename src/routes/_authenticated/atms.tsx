@@ -17,6 +17,19 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/atms")({
+  head: () => ({
+    meta: [
+      { title: "ATMs | Bobi Control" },
+      { name: "description", content: "Cadastro de ATMs por linha, capacidade e vínculo com centro de distribuição." },
+      { property: "og:title", content: "ATMs | Bobi Control" },
+      { property: "og:description", content: "Cadastro de ATMs por linha, capacidade e vínculo com centro de distribuição." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/atms" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/atms" }],
+  }),
   component: AtmsPage,
 });
 
@@ -183,8 +196,8 @@ function AtmsPage() {
                 <td>{a.possui_cd ? "Sim" : "Não"}</td>
                 <td>{statusLabel[a.status_operacional] ?? a.status_operacional}</td>
                 <td className="whitespace-nowrap">
-                  <Button variant="ghost" size="icon" onClick={() => startEdit(a)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => excluir(a.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Editar registro" onClick={() => startEdit(a)}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Excluir registro" onClick={() => excluir(a.id)}><Trash2 className="h-4 w-4" /></Button>
                 </td>
               </tr>
             ))}

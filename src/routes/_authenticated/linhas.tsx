@@ -16,6 +16,19 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/linhas")({
+  head: () => ({
+    meta: [
+      { title: "Linhas | Bobi Control" },
+      { name: "description", content: "Cadastro das linhas do metrô com cor de identificação e estações vinculadas." },
+      { property: "og:title", content: "Linhas | Bobi Control" },
+      { property: "og:description", content: "Cadastro das linhas do metrô com cor de identificação e estações vinculadas." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/linhas" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/linhas" }],
+  }),
   component: LinhasPage,
 });
 

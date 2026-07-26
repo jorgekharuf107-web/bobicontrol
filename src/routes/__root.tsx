@@ -58,6 +58,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-title", content: "Bobi Control" },
       { title: "Bobi Control" },
       { name: "description", content: "Bobi Control - Sistema Interno de gestão de ATMs, CDs, linhas e fornecedores." },
+      { property: "og:site_name", content: "Bobi Control" },
+      { property: "og:type", content: "website" },
+      { property: "og:title", content: "Bobi Control" },
+      { property: "og:description", content: "Sistema de gestão e controle de estoque de bobinas para ATMs e CDs." },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

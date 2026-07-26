@@ -23,6 +23,19 @@ import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/agendamentos-entrega")({
+  head: () => ({
+    meta: [
+      { title: "Agendamentos de Entrega | Bobi Control" },
+      { name: "description", content: "Agende e acompanhe entregas de bobinas por fornecedor, motorista e status." },
+      { property: "og:title", content: "Agendamentos de Entrega | Bobi Control" },
+      { property: "og:description", content: "Agende e acompanhe entregas de bobinas por fornecedor, motorista e status." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/agendamentos-entrega" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/agendamentos-entrega" }],
+  }),
   component: AgendamentosEntregaPage,
 });
 

@@ -21,6 +21,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovimentacaoForm } from "@/components/movimentacao-form";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
+  head: () => ({
+    meta: [
+      { title: "Controle de Estoque | Bobi Control" },
+      { name: "description", content: "Acompanhe o saldo e o histórico de movimentações de bobinas." },
+      { property: "og:title", content: "Controle de Estoque | Bobi Control" },
+      { property: "og:description", content: "Acompanhe o saldo e o histórico de movimentações de bobinas." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/controle-estoque" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/controle-estoque" }],
+  }),
   component: ControleEstoque,
 });
 
@@ -249,8 +262,8 @@ function ControleEstoque() {
                   <div className="flex items-center justify-between gap-1">
                     <span className="text-xs">{m.observacao || "—"}</span>
                     <span className="whitespace-nowrap">
-                      <Button variant="ghost" size="icon" onClick={() => startEdit(m)}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => excluir(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" aria-label="Editar registro" onClick={() => startEdit(m)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" aria-label="Excluir registro" onClick={() => excluir(m.id)}><Trash2 className="h-4 w-4" /></Button>
                     </span>
                   </div>
                 </td>

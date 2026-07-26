@@ -16,6 +16,19 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/cds")({
+  head: () => ({
+    meta: [
+      { title: "Centros de Distribuição | Bobi Control" },
+      { name: "description", content: "Cadastro e controle dos centros de distribuição de bobinas." },
+      { property: "og:title", content: "Centros de Distribuição | Bobi Control" },
+      { property: "og:description", content: "Cadastro e controle dos centros de distribuição de bobinas." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/cds" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/cds" }],
+  }),
   component: CdsPage,
 });
 
@@ -166,8 +179,8 @@ function CdsPage() {
                 <td>{c.capacidade}</td><td>{c.nivel_minimo}</td>
                 <td>{c.status === "ativo" ? "Ativo" : "Inativo"}</td>
                 <td className="whitespace-nowrap">
-                  <Button variant="ghost" size="icon" onClick={() => startEdit(c)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => excluir(c.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Editar registro" onClick={() => startEdit(c)}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Excluir registro" onClick={() => excluir(c.id)}><Trash2 className="h-4 w-4" /></Button>
                 </td>
               </tr>
             ))}
