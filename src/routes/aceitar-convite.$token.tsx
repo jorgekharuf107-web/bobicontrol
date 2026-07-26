@@ -10,6 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/aceitar-convite/$token")({
+  head: () => ({
+    meta: [
+      { title: "Aceitar Convite | Bobi Control" },
+      { name: "description", content: "Ative seu acesso ao Bobi Control usando o convite recebido por e-mail." },
+      { property: "og:title", content: "Aceitar Convite | Bobi Control" },
+      { property: "og:description", content: "Ative seu acesso ao Bobi Control usando o convite recebido por e-mail." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/aceitar-convite" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/aceitar-convite" }],
+  }),
   ssr: false,
   component: AceitarConvitePage,
 });

@@ -11,6 +11,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
+  head: () => ({
+    meta: [
+      { title: "Entrar | Bobi Control" },
+      { name: "description", content: "Acesse o Bobi Control, o sistema de gestão e controle de estoque de bobinas para ATMs e CDs." },
+      { property: "og:title", content: "Entrar | Bobi Control" },
+      { property: "og:description", content: "Acesse o Bobi Control, o sistema de gestão e controle de estoque de bobinas para ATMs e CDs." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/auth" },
+      { name: "twitter:card", content: "summary" },
+    ],
+    links: [{ rel: "canonical", href: "/auth" }],
+  }),
   ssr: false,
   component: AuthPage,
 });
