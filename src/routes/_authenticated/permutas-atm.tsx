@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { nowLocal } from "@/components/movimentacao-form";
+import { useCurrentUser } from "@/lib/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/permutas-atm")({
   component: PermutasAtm,
@@ -25,13 +28,20 @@ function PermutasAtm() {
   const [q, setQ] = useState("");
   const [dIni, setDIni] = useState("");
   const [dFim, setDFim] = useState("");
+  const { user } = useCurrentUser();
   const [form, setForm] = useState({
     origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "",
+    data_criacao: nowLocal(), tecnico_id: "",
   });
 
   const { data: atms = [] } = useQuery({
     queryKey: ["atms-sel"],
     queryFn: async () => (await supabase.from("atms").select("id, id_atm").order("id_atm")).data ?? [],
+  });
+  const { data: tecnicos = [] } = useQuery({
+    queryKey: ["tecnicos-permuta-atm"],
+    queryFn: async () =>
+      (await supabase.from("usuarios").select("id, nome_completo").eq("ativo", true).order("nome_completo")).data ?? [],
   });
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-sel"],
@@ -57,7 +67,7 @@ function PermutasAtm() {
     if (form.origem_id === form.destino_id) return toast.error("Origem e destino não podem ser iguais");
     if (!form.item_id) return toast.error("Selecione o item");
     if (form.qtd < 1) return toast.error("Quantidade deve ser ≥ 1");
-    const { data: ses } = await supabase.auth.getUser();
+    if (!form.tecnico_id) return toast.error("Selecione o técnico");
     // Saída na origem
     const { error: e1 } = await supabase.from("movimentacoes").insert({
       tipo: "Permuta", item_id: form.item_id, qtd: form.qtd,
@@ -65,12 +75,13 @@ function PermutasAtm() {
       destino_tipo: "ATM", destino_id: form.destino_id,
       observacao: form.motivo || null,
       motivo_permuta: form.motivo || null,
-      tecnico_id: ses.user?.id ?? null,
+      tecnico_id: form.tecnico_id || user?.id || null,
+      data: new Date(form.data_criacao).toISOString(),
     });
     if (e1) return toast.error(e1.message);
     toast.success("Permuta ATM x ATM registrada — baixa/entrada automáticas");
     setOpen(false);
-    setForm({ origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "" });
+    setForm({ origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "", data_criacao: nowLocal(), tecnico_id: "" });
     qc.invalidateQueries({ queryKey: ["permutas-atm"] });
     qc.invalidateQueries({ queryKey: ["movs-all"] });
   }
@@ -108,7 +119,7 @@ function PermutasAtm() {
               { header: "ATM Origem", accessor: (m: any) => atmLabel(m.origem_id) },
               { header: "ATM Destino", accessor: (m: any) => atmLabel(m.destino_id) },
               { header: "Técnico", accessor: (m: any) => m.usuarios?.nome_completo ?? "" },
-              { header: "Motivo", accessor: (m: any) => m.motivo_permuta ?? m.observacao ?? "" },
+              { header: "Observações", accessor: (m: any) => m.motivo_permuta ?? m.observacao ?? "" },
             ]}
             filename="permutas-atm"
           />
@@ -165,6 +176,18 @@ function PermutasAtm() {
               </Select>
             </div>
             <div>
+              <Label>Data da Criação</Label>
+              <Input type="datetime-local" className="h-9" value={form.data_criacao}
+                onChange={(e) => setForm({ ...form, data_criacao: e.target.value })} />
+            </div>
+            <div>
+              <Label>Técnico</Label>
+              <Select value={form.tecnico_id || undefined} onValueChange={(v) => setForm({ ...form, tecnico_id: v })}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o técnico" /></SelectTrigger>
+                <SelectContent>{tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>Item</Label>
               <Select value={form.item_id || undefined} onValueChange={(v) => setForm({ ...form, item_id: v })}>
                 <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o item" /></SelectTrigger>
@@ -177,7 +200,7 @@ function PermutasAtm() {
                 onChange={(e) => setForm({ ...form, qtd: Math.max(1, +e.target.value || 1) })} />
             </div>
             <div className="col-span-2">
-              <Label>Motivo</Label>
+              <Label>Observações</Label>
               <Textarea value={form.motivo} onChange={(e) => setForm({ ...form, motivo: e.target.value })} placeholder="Descreva o motivo da permuta" />
             </div>
           </div>
