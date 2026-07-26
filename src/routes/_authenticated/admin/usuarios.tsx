@@ -20,6 +20,7 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
 import { adminCreateUser, adminResetPassword, adminDeleteUser } from "@/lib/admin.functions";
+import { confirmar, confirmarExclusao } from "@/components/confirm-dialog";
 
 type Papel = "admin_geral" | "supervisor_linha" | "tecnico_estacao" | "dispatcher";
 const PAPEIS: Papel[] = ["admin_geral", "supervisor_linha", "tecnico_estacao", "dispatcher"];
@@ -199,12 +200,12 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
     toast.success("Link copiado");
   }
   async function deleteConvite(id: string) {
-    if (!confirm("Excluir este convite?")) return;
+    if (!(await confirmarExclusao("convite"))) return;
     await supabase.from("convites").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["convites"] });
   }
   async function excluirUsuario(u: any) {
-    if (!confirm(`Excluir o usuário "${u.nome_completo}"? Esta ação é irreversível.`)) return;
+    if (!(await confirmar(`Excluir este usuário?`, { description: `${u.nome_completo} — esta ação é irreversível.`, confirmLabel: "Excluir" }))) return;
     try {
       await deleteUser({ data: { user_id: u.id } });
       toast.success("Usuário excluído");

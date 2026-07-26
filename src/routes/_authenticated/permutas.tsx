@@ -9,6 +9,7 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { LinhaBadge } from "@/lib/use-accessible-linhas";
+import { confirmar } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/permutas")({
   component: Permutas,
@@ -36,7 +37,7 @@ function Permutas() {
   });
 
   async function decidir(id: string, aprovar: boolean) {
-    if (!confirm(aprovar ? "Aprovar esta permuta?" : "Rejeitar esta permuta?")) return;
+    if (!(await confirmar(aprovar ? "Aprovar esta permuta?" : "Rejeitar esta permuta?", { confirmLabel: aprovar ? "Aprovar" : "Rejeitar" }))) return;
     const { error } = await supabase.rpc("aprovar_movimentacao", { _id: id, _aprovar: aprovar });
     if (error) return toast.error(error.message);
     toast.success(aprovar ? "Permuta aprovada" : "Permuta rejeitada");

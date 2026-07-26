@@ -16,6 +16,7 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
 import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
+import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   component: ControleEstoque,
@@ -118,7 +119,7 @@ function ControleEstoque() {
   }
 
   async function excluir(id: string) {
-    if (!confirm("Excluir esta movimentação?")) return;
+    if (!(await confirmarExclusao("movimentação"))) return;
     const { error } = await supabase.from("movimentacoes").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["movs-all"] });

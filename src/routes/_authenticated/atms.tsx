@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
+import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/atms")({
   component: AtmsPage,
@@ -95,7 +96,7 @@ function AtmsPage() {
     qc.invalidateQueries({ queryKey: ["atms"] });
   }
   async function excluir(id: string) {
-    if (!confirm("Excluir este ATM?")) return;
+    if (!(await confirmarExclusao("ATM"))) return;
     const { error } = await supabase.from("atms").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["atms"] });

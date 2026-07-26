@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
+import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/estacoes")({
   component: EstacoesPage,
@@ -45,7 +46,7 @@ function EstacoesPage() {
   }
 
   async function excluir(id: string) {
-    if (!confirm("Excluir esta estação?")) return;
+    if (!(await confirmarExclusao("estação"))) return;
     const { error } = await supabase.from("estacoes").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["estacoes"] });

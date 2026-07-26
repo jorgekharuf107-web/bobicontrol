@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
+import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/cds")({
   component: CdsPage,
@@ -85,7 +86,7 @@ function CdsPage() {
     qc.invalidateQueries({ queryKey: ["cds"] });
   }
   async function excluir(id: string) {
-    if (!confirm("Excluir este CD?")) return;
+    if (!(await confirmarExclusao("CD"))) return;
     const { error } = await supabase.from("cds").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["cds"] });

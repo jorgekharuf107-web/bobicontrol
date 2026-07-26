@@ -19,6 +19,7 @@ import { TableSearch } from "@/components/table-search";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
 import { sendEmail } from "@/lib/email.functions";
+import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/agendamentos-entrega")({
   component: AgendamentosEntregaPage,
@@ -282,7 +283,7 @@ function AgendamentosEntregaPage() {
   }
 
   async function excluir(id: string) {
-    if (!confirm("Excluir agendamento?")) return;
+    if (!(await confirmarExclusao("agendamento"))) return;
     const { error } = await supabase.from("agendamentos_entrega").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Excluído");
