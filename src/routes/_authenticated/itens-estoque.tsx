@@ -12,10 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/itens-estoque")({
   component: ItensPage,
@@ -43,7 +43,7 @@ const empty: ItemForm = { nome: "", codigo: "", unidade: "Unidade", qtd_por_unid
 
 function ItensPage() {
   const qc = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [aba, setAba] = useState("pesquisa");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ItemForm>(empty);
   const [busca, setBusca] = useState("");
@@ -73,7 +73,7 @@ function ItensPage() {
     return arr;
   }, [itens, busca, ordenar, direcao]);
 
-  function startCreate() { setEditingId(null); setForm({ ...empty, fornecedor_padrao_id: fornecedorPadraoId }); setOpen(true); }
+  function startCreate() { setEditingId(null); setForm({ ...empty, fornecedor_padrao_id: fornecedorPadraoId }); setAba("novo"); }
   function startEdit(it: any) {
     setEditingId(it.id);
     setForm({
@@ -81,7 +81,7 @@ function ItensPage() {
       medida: it.medida ?? "", estoque_minimo: it.estoque_minimo,
       descricao: it.descricao ?? "", fornecedor_padrao_id: it.fornecedor_padrao_id ?? "", ativo: it.ativo,
     });
-    setOpen(true);
+    setAba("novo");
   }
 
   async function salvar() {
@@ -93,7 +93,9 @@ function ItensPage() {
       : await supabase.from("itens").insert(payload);
     if (error) return toast.error(error.message);
     toast.success(editingId ? "Item atualizado" : "Item criado");
-    setOpen(false);
+    setEditingId(null);
+    setForm({ ...empty, fornecedor_padrao_id: fornecedorPadraoId });
+    setAba("pesquisa");
     qc.invalidateQueries({ queryKey: ["itens"] });
   }
 
@@ -128,6 +130,13 @@ function ItensPage() {
         </div>
       </div>
 
+      <Tabs value={aba} onValueChange={setAba}>
+        <TabsList>
+          <TabsTrigger value="pesquisa">Pesquisa</TabsTrigger>
+          <TabsTrigger value="novo">Novo Item</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pesquisa" className="space-y-3 pt-3">
       <div className="flex flex-wrap gap-3 items-end">
         <div className="flex-1 min-w-[240px]">
           <Label>Pesquisar</Label>
@@ -160,14 +169,14 @@ function ItensPage() {
       <Card className="p-0 overflow-hidden">
         <table className="excel-table text-[14px]">
           <thead><tr>
-            <th>Código</th><th>Nome</th><th>Unidade</th><th>Qtd por Unidade</th><th>Estoque Mínimo</th><th>Status</th><th>Ações</th>
+            <th>Código</th><th>Nome</th><th>Unidade</th><th className="num">Qtd por Unidade</th><th className="num">Estoque Mínimo</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody>
             {filtrados.length === 0 && <tr><td colSpan={7} className="text-center py-8 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
             {filtrados.map((i: any) => (
               <tr key={i.id}>
                 <td>{i.codigo}</td><td>{i.nome}</td>
-                <td>{i.unidade}</td><td>{i.qtd_por_unidade}</td><td>{i.estoque_minimo}</td>
+                <td>{i.unidade}</td><td className="num">{i.qtd_por_unidade}</td><td className="num">{i.estoque_minimo}</td>
                 <td>{i.ativo ? "Ativo" : "Inativo"}</td>
                 <td className="whitespace-nowrap">
                   <Button variant="ghost" size="icon" onClick={() => startEdit(i)}><Pencil className="h-4 w-4" /></Button>
@@ -178,15 +187,14 @@ function ItensPage() {
           </tbody>
         </table>
       </Card>
+        </TabsContent>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              <div className="text-sm text-muted-foreground font-normal">Controle de Estoque</div>
-              <div className="text-lg">{editingId ? "Editar Item" : "Novo Item"}</div>
-            </DialogTitle>
-          </DialogHeader>
+        <TabsContent value="novo" className="pt-3">
+        <Card className="p-4 space-y-3">
+          <div>
+            <div className="text-sm text-muted-foreground font-normal">Controle de Estoque</div>
+            <div className="text-lg font-semibold">{editingId ? "Editar Item" : "Novo Item"}</div>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2"><Label>Nome do Item</Label>
               <Input placeholder="Ex: Bobina Térmica 80mm" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
@@ -233,12 +241,13 @@ function ItensPage() {
               <Label>Item ativo</Label>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => { setEditingId(null); setForm({ ...empty, fornecedor_padrao_id: fornecedorPadraoId }); setAba("pesquisa"); }}>Cancelar</Button>
             <Button onClick={salvar}>{editingId ? "Salvar" : "Criar"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
