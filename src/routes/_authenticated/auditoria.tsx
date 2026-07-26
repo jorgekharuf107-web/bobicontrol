@@ -20,6 +20,8 @@ function AuditoriaPage() {
   const [dataInicio, setDataInicio] = useState<string>("");
   const [dataFim, setDataFim] = useState<string>("");
   const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
+  const [moduloFiltro, setModuloFiltro] = useState<string>("todos");
+  const [acaoFiltro, setAcaoFiltro] = useState<string>("todas");
 
   const { data: linhas = [] } = useAccessibleLinhas();
   const linhaMap = new Map(linhas.map((l) => [l.id, l]));
@@ -44,6 +46,15 @@ function AuditoriaPage() {
     return Array.from(map.entries()).map(([id, nome]) => ({ id, nome }));
   }, [logs]);
 
+  const modulos = useMemo(
+    () => Array.from(new Set((logs as any[]).map((l) => l.tabela).filter(Boolean))).sort(),
+    [logs],
+  );
+  const acoes = useMemo(
+    () => Array.from(new Set((logs as any[]).map((l) => l.acao).filter(Boolean))).sort(),
+    [logs],
+  );
+
   const filtrados = useMemo(() => {
     const s = q.trim().toLowerCase();
     return (logs as any[]).filter((l) => {
@@ -54,6 +65,8 @@ function AuditoriaPage() {
         if (dt > fim) return false;
       }
       if (tecFiltro !== "todos" && l.usuario_id !== tecFiltro) return false;
+      if (moduloFiltro !== "todos" && l.tabela !== moduloFiltro) return false;
+      if (acaoFiltro !== "todas" && l.acao !== acaoFiltro) return false;
       if (linhaFiltro !== "todas") {
         const lid = linhaDoLog(l);
         if (lid !== linhaFiltro) return false;
@@ -64,7 +77,7 @@ function AuditoriaPage() {
       }
       return true;
     });
-  }, [logs, dataInicio, dataFim, linhaFiltro, tecFiltro, q]);
+  }, [logs, dataInicio, dataFim, linhaFiltro, tecFiltro, moduloFiltro, acaoFiltro, q]);
 
 
   const detalhes = (l: any) => {
@@ -85,7 +98,7 @@ function AuditoriaPage() {
             { header: "Data", accessor: (l: any) => new Date(l.criado_em).toLocaleString("pt-BR") },
             { header: "Usuário", accessor: (l: any) => l.usuarios?.nome_completo ?? l.usuario_id ?? "" },
             { header: "Ação", accessor: (l: any) => l.acao },
-            { header: "Tabela", accessor: (l: any) => l.tabela },
+            { header: "Módulo", accessor: (l: any) => l.tabela },
             { header: "Detalhes", accessor: (l: any) => detalhes(l) },
             { header: "Linha Afetada", accessor: (l: any) => linhaMap.get(linhaDoLog(l) ?? "")?.nome ?? "" },
           ]}
@@ -110,7 +123,27 @@ function AuditoriaPage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="md:col-span-5">
+        <div>
+          <Label>Módulo</Label>
+          <Select value={moduloFiltro} onValueChange={setModuloFiltro}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Todos" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {modulos.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Ação</Label>
+          <Select value={acaoFiltro} onValueChange={setAcaoFiltro}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Todas" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas</SelectItem>
+              {acoes.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="md:col-span-3">
           <Label>Linha</Label>
           <Select value={linhaFiltro} onValueChange={setLinhaFiltro}>
             <SelectTrigger className="h-9"><SelectValue placeholder="Todas" /></SelectTrigger>
@@ -134,12 +167,12 @@ function AuditoriaPage() {
         <table className="excel-table">
           <thead>
             <tr>
-              <th>Data</th><th>Usuário</th><th>Ação</th><th>Detalhes</th><th>Linha Afetada</th>
+              <th>Data</th><th>Usuário</th><th>Ação</th><th>Módulo</th><th>Detalhes</th><th>Linha Afetada</th>
             </tr>
           </thead>
           <tbody>
             {filtrados.length === 0 && (
-              <tr><td colSpan={5} className="text-center py-8 font-bold text-muted-foreground">Nenhum registro de auditoria</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 font-bold text-muted-foreground">Nenhum registro de auditoria</td></tr>
             )}
             {filtrados.map((l: any) => {
               const lid = linhaDoLog(l);
@@ -148,7 +181,8 @@ function AuditoriaPage() {
                 <tr key={l.id}>
                   <td>{new Date(l.criado_em).toLocaleString("pt-BR")}</td>
                   <td>{l.usuarios?.nome_completo ?? <span className="font-mono text-xs">{l.usuario_id ?? "—"}</span>}</td>
-                  <td><span className="font-medium">{l.acao}</span> <span className="text-xs text-muted-foreground">/ {l.tabela}</span></td>
+                  <td><span className="font-medium">{l.acao}</span></td>
+                  <td>{l.tabela}</td>
                   <td className="font-mono text-xs">{detalhes(l)}</td>
                   <td>{linha ? <LinhaBadge nome={linha.nome} cor={linha.cor_hex} /> : <span className="text-muted-foreground">—</span>}</td>
                 </tr>
