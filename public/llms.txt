@@ -1,0 +1,9 @@
+# Bobi Control
+
+> Sistema interno de gestão e controle de estoque de bobinas para ATMs e centros de distribuição, com dashboards, alertas de nível baixo e histórico de movimentações.
+
+O Bobi Control é um sistema corporativo de acesso restrito. Todas as telas de operação (estoque, movimentações, agendamentos, cadastros e administração) exigem autenticação e não estão disponíveis para leitura pública.
+
+## Pages
+
+- [Entrar](/auth): Tela de acesso ao Bobi Control por e-mail e senha ou conta Google.
