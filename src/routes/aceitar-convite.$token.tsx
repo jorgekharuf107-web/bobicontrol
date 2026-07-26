@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Shield, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { buscarConvitePorToken } from "@/lib/convites.functions";
+
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,21 +22,20 @@ function AceitarConvitePage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("convites").select("*").eq("token", token).maybeSingle();
-      if (!data) return setStatus("invalid");
-      if (data.status !== "pendente") return setStatus("invalid");
-      if (new Date(data.expira_em) < new Date()) return setStatus("expired");
-      setConvite(data);
+      const res = await buscarConvitePorToken({ data: { token } });
+      if (res.status !== "valid" || !res.convite) return setStatus(res.status);
+      setConvite(res.convite);
       setStatus("valid");
 
       // Se já está logado com o mesmo email, redireciona
       const { data: userData } = await supabase.auth.getUser();
-      if (userData.user?.email === data.email_convidado) {
+      if (userData.user?.email === res.convite.email_convidado) {
         toast.success("Bem-vindo!");
         router.navigate({ to: "/dashboard" });
       }
     })();
   }, [token, router]);
+
 
   async function signInGoogle() {
     const result = await lovable.auth.signInWithOAuth("google", {
