@@ -17,6 +17,8 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
 import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
 import { confirmarExclusao } from "@/components/confirm-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MovimentacaoForm } from "@/components/movimentacao-form";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   component: ControleEstoque,
