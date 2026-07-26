@@ -20,6 +20,7 @@ import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
 import { sendEmail } from "@/lib/email.functions";
 import { confirmarExclusao } from "@/components/confirm-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/agendamentos-entrega")({
   component: AgendamentosEntregaPage,
@@ -60,7 +61,9 @@ function AgendamentosEntregaPage() {
   const qc = useQueryClient();
   const { user, canManageEstoque } = useCurrentUser();
   const send = useServerFn(sendEmail);
-  const [open, setOpen] = useState(false);
+  const [aba, setAba] = useState("lista");
+  const [fornecedorId, setFornecedorId] = useState("");
+  const [fItemDataHora, setFItemDataHora] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [header, setHeader] = useState<Header>(emptyHeader);
   const [itens, setItens] = useState<ItemForm[]>([]);
@@ -86,6 +89,30 @@ function AgendamentosEntregaPage() {
     queryFn: async () =>
       (await supabase.from("usuarios").select("id, nome_completo, email").eq("ativo", true).order("nome_completo")).data ?? [],
   });
+  const { data: fornecedores = [] } = useQuery({
+    queryKey: ["fornecedores-agend"],
+    queryFn: async () =>
+      (await supabase.from("fornecedores").select("id, razao_social, telefone, fornecedor_padrao")
+        .order("razao_social")).data ?? [],
+  });
+  const { data: motoristas = [] } = useQuery({
+    queryKey: ["motoristas-agend", fornecedorId],
+    enabled: !!fornecedorId,
+    queryFn: async () =>
+      (await supabase.from("motoristas").select("id, nome_completo, celular, tipo_contato")
+        .eq("fornecedor_id", fornecedorId).order("tipo_contato")).data ?? [],
+  });
+  const contatosFornecedor = (motoristas as any[]).slice(0, 2);
+
+  function usarContato(m: any) {
+    setHeader((h) => ({ ...h, nome_motorista: m.nome_completo ?? "", celular_motorista: m.celular ?? "" }));
+  }
+  function aplicarFornecedor(id: string) {
+    setFornecedorId(id);
+    const f = (fornecedores as any[]).find((x) => x.id === id);
+    setHeader((h) => ({ ...h, transportadora: f?.razao_social ?? h.transportadora }));
+  }
+
   const { data: itensCatalogo = [] } = useQuery({
     queryKey: ["itens-agend"],
     queryFn: async () =>
@@ -122,12 +149,14 @@ function AgendamentosEntregaPage() {
 
 
   function resetForm() {
-    setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null);
+    setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null); setFornecedorId("");
   }
   function abrirNovo() {
     resetForm();
     if (user?.id) setHeader((h) => ({ ...h, tecnico_id: user.id }));
-    setOpen(true);
+    const padrao = (fornecedores as any[]).find((f) => f.fornecedor_padrao);
+    if (padrao) aplicarFornecedor(padrao.id);
+    setAba("novo");
   }
   function abrirEditar(row: any) {
     resetForm();
@@ -150,7 +179,7 @@ function AgendamentosEntregaPage() {
       qtd_bobina_100: i.qtd_bobina_100 ?? 0,
       qtd_bobina_50: i.qtd_bobina_50 ?? 0,
     })));
-    setOpen(true);
+    setAba("novo");
   }
 
   function addItem() {
@@ -261,8 +290,8 @@ function AgendamentosEntregaPage() {
 
     toast.success(editingId ? "Agendamento atualizado" : "Agendamento criado");
     qc.invalidateQueries({ queryKey: ["agendamentos"] });
-    setOpen(false);
     resetForm();
+    setAba("lista");
   }
 
   async function marcarRecebido(row: any) {
