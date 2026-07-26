@@ -19,6 +19,8 @@ import { TableSearch } from "@/components/table-search";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
 import { sendEmail } from "@/lib/email.functions";
+import { confirmarExclusao } from "@/components/confirm-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/agendamentos-entrega")({
   component: AgendamentosEntregaPage,
@@ -59,7 +61,9 @@ function AgendamentosEntregaPage() {
   const qc = useQueryClient();
   const { user, canManageEstoque } = useCurrentUser();
   const send = useServerFn(sendEmail);
-  const [open, setOpen] = useState(false);
+  const [aba, setAba] = useState("lista");
+  const [fornecedorId, setFornecedorId] = useState("");
+  const [fItemDataHora, setFItemDataHora] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [header, setHeader] = useState<Header>(emptyHeader);
   const [itens, setItens] = useState<ItemForm[]>([]);
@@ -85,6 +89,30 @@ function AgendamentosEntregaPage() {
     queryFn: async () =>
       (await supabase.from("usuarios").select("id, nome_completo, email").eq("ativo", true).order("nome_completo")).data ?? [],
   });
+  const { data: fornecedores = [] } = useQuery({
+    queryKey: ["fornecedores-agend"],
+    queryFn: async () =>
+      (await supabase.from("fornecedores").select("id, razao_social, telefone, fornecedor_padrao")
+        .order("razao_social")).data ?? [],
+  });
+  const { data: motoristas = [] } = useQuery({
+    queryKey: ["motoristas-agend", fornecedorId],
+    enabled: !!fornecedorId,
+    queryFn: async () =>
+      (await supabase.from("motoristas").select("id, nome_completo, celular, tipo_contato")
+        .eq("fornecedor_id", fornecedorId).order("tipo_contato")).data ?? [],
+  });
+  const contatosFornecedor = (motoristas as any[]).slice(0, 2);
+
+  function usarContato(m: any) {
+    setHeader((h) => ({ ...h, nome_motorista: m.nome_completo ?? "", celular_motorista: m.celular ?? "" }));
+  }
+  function aplicarFornecedor(id: string) {
+    setFornecedorId(id);
+    const f = (fornecedores as any[]).find((x) => x.id === id);
+    setHeader((h) => ({ ...h, transportadora: f?.razao_social ?? h.transportadora }));
+  }
+
   const { data: itensCatalogo = [] } = useQuery({
     queryKey: ["itens-agend"],
     queryFn: async () =>
@@ -121,12 +149,14 @@ function AgendamentosEntregaPage() {
 
 
   function resetForm() {
-    setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null);
+    setHeader(emptyHeader); setItens([]); setNovoItem(emptyItem); setEditingId(null); setFornecedorId("");
   }
   function abrirNovo() {
     resetForm();
     if (user?.id) setHeader((h) => ({ ...h, tecnico_id: user.id }));
-    setOpen(true);
+    const padrao = (fornecedores as any[]).find((f) => f.fornecedor_padrao);
+    if (padrao) aplicarFornecedor(padrao.id);
+    setAba("novo");
   }
   function abrirEditar(row: any) {
     resetForm();
@@ -149,7 +179,7 @@ function AgendamentosEntregaPage() {
       qtd_bobina_100: i.qtd_bobina_100 ?? 0,
       qtd_bobina_50: i.qtd_bobina_50 ?? 0,
     })));
-    setOpen(true);
+    setAba("novo");
   }
 
   function addItem() {
@@ -260,8 +290,8 @@ function AgendamentosEntregaPage() {
 
     toast.success(editingId ? "Agendamento atualizado" : "Agendamento criado");
     qc.invalidateQueries({ queryKey: ["agendamentos"] });
-    setOpen(false);
     resetForm();
+    setAba("lista");
   }
 
   async function marcarRecebido(row: any) {
@@ -282,7 +312,7 @@ function AgendamentosEntregaPage() {
   }
 
   async function excluir(id: string) {
-    if (!confirm("Excluir agendamento?")) return;
+    if (!(await confirmarExclusao("agendamento"))) return;
     const { error } = await supabase.from("agendamentos_entrega").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Excluído");
@@ -312,247 +342,328 @@ function AgendamentosEntregaPage() {
       ), csv: (r) => r.status },
   ];
 
-  return (
-    <div className="space-y-4">
-      <BackButton />
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold">Agendamentos de Entrega</h1>
-          <p className="text-sm text-muted-foreground">Recepção de bobinas no CD da estação</p>
+  // Aba 3 — todos os itens de agendamento, achatados com Data/Hora
+  const itensFlat = (agendamentosFiltrados as any[]).flatMap((r) =>
+    (r.agendamento_itens ?? []).map((i: any) => ({
+      id: i.id,
+      data_hora: r.data_hora_entrega,
+      cd: `${r.cds?.nome_cd ?? "—"} / ${r.cds?.estacoes?.nome ?? "—"}`,
+      item: i.itens?.tipo_bobina ?? "—",
+      qtd_caixas: i.qtd_caixas ?? 0,
+      qtd_bobina_100: i.qtd_bobina_100 ?? 0,
+      qtd_bobina_50: i.qtd_bobina_50 ?? 0,
+      total: (i.qtd_caixas ?? 0) * 3 + (i.qtd_bobina_100 ?? 0) + (i.qtd_bobina_50 ?? 0) + (i.quantidade ?? 0),
+      status: r.status,
+    })),
+  );
+  const itensFlatFiltrados = itensFlat.filter((i) => {
+    if (!fItemDataHora) return true;
+    return String(i.data_hora ?? "").startsWith(fItemDataHora);
+  });
+
+  const colunasItens: Coluna<any>[] = [
+    { header: "Data/Hora", cell: (i) => new Date(i.data_hora).toLocaleString("pt-BR"), csv: (i) => new Date(i.data_hora).toLocaleString("pt-BR") },
+    { header: "CD / Estação", cell: (i) => i.cd, csv: (i) => i.cd },
+    { header: "Item", cell: (i) => i.item, csv: (i) => i.item },
+    { header: "Caixas", className: "num", cell: (i) => i.qtd_caixas, csv: (i) => i.qtd_caixas },
+    { header: "Bob. 100%", className: "num", cell: (i) => i.qtd_bobina_100, csv: (i) => i.qtd_bobina_100 },
+    { header: "Bob. <50%", className: "num", cell: (i) => i.qtd_bobina_50, csv: (i) => i.qtd_bobina_50 },
+    { header: "Total", className: "num", cell: (i) => <b>{i.total}</b>, csv: (i) => i.total },
+    { header: "Status", cell: (i) => i.status, csv: (i) => i.status },
+  ];
+
+  const formAgendamento = (
+    <Card className="p-3 space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="sm:col-span-2">
+          <Label>CD / Estação de recebimento *</Label>
+          <Select value={header.estacao_cd_id} onValueChange={(v) => setHeader({ ...header, estacao_cd_id: v })}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o CD" /></SelectTrigger>
+            <SelectContent>
+              {cds.map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>{c.nome_cd} — {c.estacoes?.nome ?? "—"}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        {canManageEstoque && (
-          <Button onClick={abrirNovo}><Plus className="h-4 w-4" /> Novo Agendamento</Button>
-        )}
+
+        <div className="sm:col-span-2 rounded border bg-muted/40 p-2 space-y-2">
+          <Label className="text-[11px]">Fornecedor / Transportadora (auto-preenche motorista)</Label>
+          <Select value={fornecedorId || undefined} onValueChange={aplicarFornecedor}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
+            <SelectContent>
+              {fornecedores.map((f: any) => (
+                <SelectItem key={f.id} value={f.id}>{f.razao_social}{f.fornecedor_padrao ? " (padrão)" : ""}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {contatosFornecedor.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {contatosFornecedor.map((m: any, idx: number) => (
+                <Button key={m.id} type="button" size="sm" variant="outline"
+                  onClick={() => usarContato(m)}>
+                  {idx + 1}º contato: {m.nome_completo}{m.celular ? ` · ${m.celular}` : ""}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <Label>Data/Hora *</Label>
+          <Input type="datetime-local" className="h-9"
+            value={header.data_hora_entrega}
+            onChange={(e) => setHeader({ ...header, data_hora_entrega: e.target.value })} />
+        </div>
+        <div>
+          <Label>Status</Label>
+          <Select value={header.status} onValueChange={(v: any) => setHeader({ ...header, status: v })}>
+            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Agendado">Agendado</SelectItem>
+              <SelectItem value="Recebido">Recebido</SelectItem>
+              <SelectItem value="Cancelado">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Motorista *</Label>
+          <Input className="h-9" value={header.nome_motorista}
+            onChange={(e) => setHeader({ ...header, nome_motorista: e.target.value })} />
+        </div>
+        <div>
+          <Label>Celular Motorista</Label>
+          <Input className="h-9" value={header.celular_motorista}
+            onChange={(e) => setHeader({ ...header, celular_motorista: e.target.value })} />
+        </div>
+        <div>
+          <Label>Transportadora</Label>
+          <Input className="h-9" value={header.transportadora}
+            onChange={(e) => setHeader({ ...header, transportadora: e.target.value })} />
+        </div>
+        <div>
+          <Label>Nº NF</Label>
+          <Input className="h-9" value={header.numero_nf}
+            onChange={(e) => setHeader({ ...header, numero_nf: e.target.value })} />
+        </div>
+        <div className="sm:col-span-2">
+          <Label>Técnico Responsável</Label>
+          <Select value={header.tecnico_id} onValueChange={(v) => setHeader({ ...header, tecnico_id: v })}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger>
+            <SelectContent>
+              {tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="sm:col-span-2 flex items-center gap-2">
+          <Checkbox id="offline" checked={header.modo_offline}
+            onCheckedChange={(c) => setHeader({ ...header, modo_offline: !!c })} />
+          <Label htmlFor="offline" className="cursor-pointer flex items-center gap-1">
+            <CloudOff className="h-4 w-4" /> Técnico estará Offline em campo
+          </Label>
+        </div>
+        <div className="sm:col-span-2">
+          <Label>Observação</Label>
+          <Textarea rows={2} value={header.observacao}
+            onChange={(e) => setHeader({ ...header, observacao: e.target.value })} />
+        </div>
       </div>
 
-      <TableSearch
-        search={busca}
-        onSearch={setBusca}
-        placeholder="Pesquisar motorista, NF, transportadora, CD…"
-        dataInicio={fData}
-        onDataInicio={setFData}
-        dataFim={fDataFim}
-        onDataFim={setFDataFim}
-      />
-
-      <Card className="p-2">
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="min-w-[160px]">
-            <Label className="text-[11px] mb-0.5 block">CD</Label>
-            <Select value={fCd} onValueChange={setFCd}>
-              <SelectTrigger className="h-7 text-xs w-auto min-w-[160px]"><SelectValue /></SelectTrigger>
+      <div className="border-t pt-3 space-y-2">
+        <p className="text-sm font-semibold">Itens do Agendamento</p>
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_90px_90px_90px_auto] gap-2 items-end">
+          <div>
+            <Label>Item</Label>
+            <Select value={novoItem.item_id} onValueChange={(v) => setNovoItem({ ...novoItem, item_id: v })}>
+              <SelectTrigger className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                {cds.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nome_cd} — {c.estacoes?.nome ?? "—"}</SelectItem>
+                {itensCatalogo.map((t: any) => (
+                  <SelectItem key={t.id} value={t.id}>{t.tipo_bobina ?? t.descricao}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label className="text-[11px] mb-0.5 block">Técnico</Label>
-            <Select value={fTecnico} onValueChange={setFTecnico}>
-              <SelectTrigger className="h-7 text-xs w-auto min-w-[140px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                {tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <Label>Caixas</Label>
+            <Input type="number" min={0} className="h-9" value={novoItem.qtd_caixas}
+              onChange={(e) => setNovoItem({ ...novoItem, qtd_caixas: Number(e.target.value) || 0 })} />
           </div>
           <div>
-            <Label className="text-[11px] mb-0.5 block">Status</Label>
-            <Select value={fStatus} onValueChange={setFStatus}>
-              <SelectTrigger className="h-7 text-xs w-auto min-w-[120px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="Agendado">Agendado</SelectItem>
-                <SelectItem value="Recebido">Recebido</SelectItem>
-                <SelectItem value="Cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Bob. 100%</Label>
+            <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_100}
+              onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_100: Number(e.target.value) || 0 })} />
           </div>
-          <div className="min-w-[160px]">
-            <Label className="text-[11px] mb-0.5 block">Motorista</Label>
-            <Input className="h-7 text-xs" placeholder="Filtrar motorista"
-              value={fMotorista} onChange={(e) => setFMotorista(e.target.value)} />
+          <div>
+            <Label>Bob. &lt;50%</Label>
+            <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_50}
+              onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_50: Number(e.target.value) || 0 })} />
           </div>
+          <Button type="button" onClick={addItem}><Plus className="h-4 w-4" /></Button>
         </div>
-      </Card>
-
-
-      <TabelaCrud
-        data={agendamentosFiltrados}
-        colunas={colunas}
-        rowKey={(r) => r.id}
-        csvFilename="agendamentos-entrega"
-        emptyMessage="Nenhum agendamento encontrado"
-        acoes={(r) => (
-          <div className="flex gap-1">
-            {r.status === "Agendado" && canManageEstoque && (
-              <Button size="sm" variant="outline" title="Marcar Recebido" onClick={() => marcarRecebido(r)}>
-                <Check className="h-4 w-4" />
-              </Button>
-            )}
-            <Button size="sm" variant="ghost" onClick={() => abrirEditar(r)}><Pencil className="h-4 w-4" /></Button>
-            {canManageEstoque && (
-              <Button size="sm" variant="ghost" onClick={() => excluir(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-            )}
-          </div>
+        <Card className="p-0 overflow-hidden">
+          <table className="excel-table">
+            <thead>
+              <tr><th>Item</th><th className="num">Caixas</th><th className="num">Bob. 100%</th><th className="num">Bob. &lt;50%</th><th className="num">Total</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+              {itens.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-4 text-muted-foreground">Nenhum item</td></tr>
+              )}
+              {itens.map((i, idx) => {
+                const item = (itensCatalogo as any[]).find((x) => x.id === i.item_id);
+                const total = i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50;
+                return (
+                  <tr key={idx}>
+                    <td>{item?.tipo_bobina ?? item?.descricao ?? "—"}</td>
+                    <td className="num">{i.qtd_caixas}</td>
+                    <td className="num">{i.qtd_bobina_100}</td>
+                    <td className="num">{i.qtd_bobina_50}</td>
+                    <td className="num"><b>{total}</b></td>
+                    <td>
+                      <Button size="sm" variant="ghost" onClick={() => removeItem(idx)}>
+                        <X className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+        {header.status === "Recebido" && (
+          <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">
+            Ao salvar como "Recebido", será gerada uma Movimentação de <b>Recebimento</b> no CD para cada item.
+          </p>
         )}
-      />
+      </div>
 
-      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingId ? "Editar Agendamento" : "Novo Agendamento"}</DialogTitle>
-          </DialogHeader>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={resetForm}>Cancelar</Button>
+        <Button onClick={salvar}>{editingId ? "Salvar" : "Criar"}</Button>
+      </div>
+    </Card>
+  );
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2">
-              <Label>CD / Estação de recebimento *</Label>
-              <Select value={header.estacao_cd_id} onValueChange={(v) => setHeader({ ...header, estacao_cd_id: v })}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o CD" /></SelectTrigger>
-                <SelectContent>
-                  {cds.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nome_cd} — {c.estacoes?.nome ?? "—"}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Data/Hora *</Label>
-              <Input type="datetime-local" className="h-9"
-                value={header.data_hora_entrega}
-                onChange={(e) => setHeader({ ...header, data_hora_entrega: e.target.value })} />
-            </div>
-            <div>
-              <Label>Status</Label>
-              <Select value={header.status} onValueChange={(v: any) => setHeader({ ...header, status: v })}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Agendado">Agendado</SelectItem>
-                  <SelectItem value="Recebido">Recebido</SelectItem>
-                  <SelectItem value="Cancelado">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Motorista *</Label>
-              <Input className="h-9" value={header.nome_motorista}
-                onChange={(e) => setHeader({ ...header, nome_motorista: e.target.value })} />
-            </div>
-            <div>
-              <Label>Celular Motorista</Label>
-              <Input className="h-9" value={header.celular_motorista}
-                onChange={(e) => setHeader({ ...header, celular_motorista: e.target.value })} />
-            </div>
-            <div>
-              <Label>Transportadora</Label>
-              <Input className="h-9" value={header.transportadora}
-                onChange={(e) => setHeader({ ...header, transportadora: e.target.value })} />
-            </div>
-            <div>
-              <Label>Nº NF</Label>
-              <Input className="h-9" value={header.numero_nf}
-                onChange={(e) => setHeader({ ...header, numero_nf: e.target.value })} />
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Técnico Responsável</Label>
-              <Select value={header.tecnico_id} onValueChange={(v) => setHeader({ ...header, tecnico_id: v })}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>
-                  {tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="sm:col-span-2 flex items-center gap-2">
-              <Checkbox id="offline" checked={header.modo_offline}
-                onCheckedChange={(c) => setHeader({ ...header, modo_offline: !!c })} />
-              <Label htmlFor="offline" className="cursor-pointer flex items-center gap-1">
-                <CloudOff className="h-4 w-4" /> Técnico estará Offline em campo
-              </Label>
-            </div>
-            <div className="sm:col-span-2">
-              <Label>Observação</Label>
-              <Textarea rows={2} value={header.observacao}
-                onChange={(e) => setHeader({ ...header, observacao: e.target.value })} />
-            </div>
+  return (
+    <div className="space-y-4">
+      <BackButton />
+      <div>
+        <h1 className="text-2xl font-bold">Agendamentos de Entrega</h1>
+        <p className="text-sm text-muted-foreground">Recepção de bobinas no CD da estação</p>
+      </div>
+
+      <Tabs value={aba} onValueChange={setAba}>
+        <TabsList>
+          <TabsTrigger value="lista">Agendamentos de Entrega</TabsTrigger>
+          <TabsTrigger value="novo">Novo Agendamento</TabsTrigger>
+          <TabsTrigger value="itens">Itens do Agendamento</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="lista" className="space-y-3 pt-3">
+          <div className="flex justify-end">
+            {canManageEstoque && (
+              <Button onClick={abrirNovo}><Plus className="h-4 w-4" /> Novo Agendamento</Button>
+            )}
           </div>
 
-          <div className="border-t pt-3 space-y-2">
-            <p className="text-sm font-semibold">Itens do Agendamento</p>
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_90px_90px_90px_auto] gap-2 items-end">
-              <div>
-                <Label>Item</Label>
-                <Select value={novoItem.item_id} onValueChange={(v) => setNovoItem({ ...novoItem, item_id: v })}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger>
+          <TableSearch
+            search={busca}
+            onSearch={setBusca}
+            placeholder="Pesquisar motorista, NF, transportadora, CD…"
+            dataInicio={fData}
+            onDataInicio={setFData}
+            dataFim={fDataFim}
+            onDataFim={setFDataFim}
+          />
+
+          <Card className="p-2">
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="min-w-[160px]">
+                <Label className="text-[11px] mb-0.5 block">CD</Label>
+                <Select value={fCd} onValueChange={setFCd}>
+                  <SelectTrigger className="h-7 text-xs w-auto min-w-[160px]"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {itensCatalogo.map((t: any) => (
-                      <SelectItem key={t.id} value={t.id}>{t.tipo_bobina ?? t.descricao}</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    {cds.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>{c.nome_cd} — {c.estacoes?.nome ?? "—"}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Caixas</Label>
-                <Input type="number" min={0} className="h-9" value={novoItem.qtd_caixas}
-                  onChange={(e) => setNovoItem({ ...novoItem, qtd_caixas: Number(e.target.value) || 0 })} />
+                <Label className="text-[11px] mb-0.5 block">Técnico</Label>
+                <Select value={fTecnico} onValueChange={setFTecnico}>
+                  <SelectTrigger className="h-7 text-xs w-auto min-w-[140px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    {tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <Label>Bob. 100%</Label>
-                <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_100}
-                  onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_100: Number(e.target.value) || 0 })} />
+                <Label className="text-[11px] mb-0.5 block">Status</Label>
+                <Select value={fStatus} onValueChange={setFStatus}>
+                  <SelectTrigger className="h-7 text-xs w-auto min-w-[120px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="Agendado">Agendado</SelectItem>
+                    <SelectItem value="Recebido">Recebido</SelectItem>
+                    <SelectItem value="Cancelado">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <Label>Bob. &lt;50%</Label>
-                <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_50}
-                  onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_50: Number(e.target.value) || 0 })} />
+              <div className="min-w-[160px]">
+                <Label className="text-[11px] mb-0.5 block">Motorista</Label>
+                <Input className="h-7 text-xs" placeholder="Filtrar motorista"
+                  value={fMotorista} onChange={(e) => setFMotorista(e.target.value)} />
               </div>
-              <Button type="button" onClick={addItem}><Plus className="h-4 w-4" /></Button>
             </div>
-            <Card className="p-0 overflow-hidden">
-              <table className="excel-table">
-                <thead>
-                  <tr><th>Item</th><th>Caixas</th><th>Bob. 100%</th><th>Bob. &lt;50%</th><th>Total</th><th>Ações</th></tr>
-                </thead>
-                <tbody>
-                  {itens.length === 0 && (
-                    <tr><td colSpan={6} className="text-center py-4 text-muted-foreground">Nenhum item</td></tr>
-                  )}
-                  {itens.map((i, idx) => {
-                    const item = (itensCatalogo as any[]).find((x) => x.id === i.item_id);
-                    const total = i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50;
-                    return (
-                      <tr key={idx}>
-                        <td>{item?.tipo_bobina ?? item?.descricao ?? "—"}</td>
-                        <td>{i.qtd_caixas}</td>
-                        <td>{i.qtd_bobina_100}</td>
-                        <td>{i.qtd_bobina_50}</td>
-                        <td><b>{total}</b></td>
-                        <td>
-                          <Button size="sm" variant="ghost" onClick={() => removeItem(idx)}>
-                            <X className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </Card>
-            {header.status === "Recebido" && (
-              <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">
-                Ao salvar como "Recebido", será gerada uma Movimentação de <b>Recebimento</b> no CD para cada item.
-              </p>
-            )}
-          </div>
+          </Card>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={salvar}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <TabelaCrud
+            data={agendamentosFiltrados}
+            colunas={colunas}
+            rowKey={(r) => r.id}
+            csvFilename="agendamentos-entrega"
+            emptyMessage="Nenhum agendamento encontrado"
+            acoesHeader="Observação"
+            acoes={(r) => (
+              <div className="flex items-center gap-1">
+                <span className="text-xs mr-1">{r.observacao || "—"}</span>
+                {r.status === "Agendado" && canManageEstoque && (
+                  <Button size="sm" variant="outline" title="Marcar Recebido" onClick={() => marcarRecebido(r)}>
+                    <Check className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button size="sm" variant="ghost" onClick={() => abrirEditar(r)}><Pencil className="h-4 w-4" /></Button>
+                {canManageEstoque && (
+                  <Button size="sm" variant="ghost" onClick={() => excluir(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                )}
+              </div>
+            )}
+          />
+        </TabsContent>
+
+        <TabsContent value="novo" className="pt-3">{formAgendamento}</TabsContent>
+
+        <TabsContent value="itens" className="space-y-3 pt-3">
+          <div className="flex items-end gap-2 p-2 rounded border bg-muted/40">
+            <div className="w-[180px]">
+              <Label className="text-[11px] mb-0.5 block">🔎 Data/Hora</Label>
+              <Input type="date" className="h-8 text-sm" value={fItemDataHora}
+                onChange={(e) => setFItemDataHora(e.target.value)} />
+            </div>
+          </div>
+          <TabelaCrud
+            data={itensFlatFiltrados}
+            colunas={colunasItens}
+            rowKey={(i) => i.id}
+            csvFilename="itens-agendamento"
+            emptyMessage="Nenhum item encontrado"
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
+

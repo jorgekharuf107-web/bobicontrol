@@ -16,6 +16,9 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
 import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
+import { confirmarExclusao } from "@/components/confirm-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MovimentacaoForm } from "@/components/movimentacao-form";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   component: ControleEstoque,
@@ -118,7 +121,7 @@ function ControleEstoque() {
   }
 
   async function excluir(id: string) {
-    if (!confirm("Excluir esta movimentação?")) return;
+    if (!(await confirmarExclusao("movimentação"))) return;
     const { error } = await supabase.from("movimentacoes").delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["movs-all"] });
@@ -151,12 +154,23 @@ function ControleEstoque() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3">
-          <BackButton to="/dashboard" />
-          <h1 className="text-2xl font-bold">Controle de Estoque</h1>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-3">
+        <BackButton to="/dashboard" />
+        <h1 className="text-2xl font-bold">Controle de Estoque</h1>
+      </div>
+
+      <Tabs defaultValue="controle">
+        <TabsList>
+          <TabsTrigger value="controle">Controle de Estoque</TabsTrigger>
+          <TabsTrigger value="nova">Nova Movimentação</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="nova" className="pt-3">
+          <MovimentacaoForm />
+        </TabsContent>
+
+        <TabsContent value="controle" className="space-y-3 pt-3">
+      <div className="flex items-center justify-end gap-2 flex-wrap">
           {linhas.length > 1 && (
             <Select value={linhaFiltro} onValueChange={setLinhaFiltro}>
               <SelectTrigger className="w-52"><SelectValue placeholder="Filtrar por linha" /></SelectTrigger>
@@ -178,12 +192,11 @@ function ControleEstoque() {
               { header: "Linha(s)", accessor: (m: any) => linhaAfetada(m).map((l: any) => l.nome).join(" / ") },
               { header: "Técnico", accessor: (m: any) => m.usuarios?.nome_completo ?? "" },
               { header: "Status", accessor: (m: any) => m.status_aprovacao ?? "" },
-              { header: "Observação", accessor: (m: any) => m.observacao ?? "" },
+              { header: "Observações", accessor: (m: any) => m.observacao ?? "" },
             ]}
             filename="movimentacoes"
           />
           <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova Movimentação</Button>
-        </div>
       </div>
 
       <TableSearch
@@ -206,7 +219,7 @@ function ControleEstoque() {
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
-          <thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th>Qtd</th><th>Origem</th><th>Destino</th><th>Linha</th><th>Técnico</th><th>Status</th><th>Ações</th></tr></thead>
+          <thead><tr><th>Data</th><th>Tipo</th><th>Item</th><th className="num">Qtd</th><th>Origem</th><th>Destino</th><th>Linha</th><th>Técnico</th><th>Status</th><th>Observações</th></tr></thead>
           <tbody>
             {movsFiltradas.length === 0 && (
               <tr><td colSpan={10} className="text-center py-8 font-bold text-muted-foreground">Nenhuma movimentação registrada</td></tr>
@@ -220,7 +233,7 @@ function ControleEstoque() {
                 <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
                 <td>{m.tipo}</td>
                 <td>{m.itens?.nome ?? "—"}</td>
-                <td>{m.qtd}</td>
+                <td className="num">{m.qtd}</td>
                 <td>{m.origem_tipo ?? "—"}</td>
                 <td>{m.destino_tipo ?? "—"}</td>
                 <td>
@@ -232,9 +245,14 @@ function ControleEstoque() {
                 </td>
                 <td>{m.usuarios?.nome_completo ?? "—"}</td>
                 <td><span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{st}</span></td>
-                <td className="whitespace-nowrap">
-                  <Button variant="ghost" size="icon" onClick={() => startEdit(m)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => excluir(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                <td>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-xs">{m.observacao || "—"}</span>
+                    <span className="whitespace-nowrap">
+                      <Button variant="ghost" size="icon" onClick={() => startEdit(m)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => excluir(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                    </span>
+                  </div>
                 </td>
               </tr>
               );
@@ -242,6 +260,9 @@ function ControleEstoque() {
           </tbody>
         </table>
       </Card>
+        </TabsContent>
+      </Tabs>
+
 
 
       <Dialog open={open} onOpenChange={setOpen}>

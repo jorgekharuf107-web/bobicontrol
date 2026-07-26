@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
+import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/linhas")({
   component: LinhasPage,
@@ -57,7 +58,7 @@ function LinhasPage() {
     qc.invalidateQueries({ queryKey: ["linhas"] });
   }
   async function remove(id: string) {
-    if (!confirm("Excluir esta linha?")) return;
+    if (!(await confirmarExclusao("linha"))) return;
     const { error } = await supabase.from("linhas").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Linha excluída");

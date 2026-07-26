@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { nowLocal } from "@/components/movimentacao-form";
+import { useCurrentUser } from "@/lib/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/permutas-atm")({
   component: PermutasAtm,
@@ -25,13 +28,20 @@ function PermutasAtm() {
   const [q, setQ] = useState("");
   const [dIni, setDIni] = useState("");
   const [dFim, setDFim] = useState("");
+  const { user } = useCurrentUser();
   const [form, setForm] = useState({
     origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "",
+    data_criacao: nowLocal(), tecnico_id: "",
   });
 
   const { data: atms = [] } = useQuery({
     queryKey: ["atms-sel"],
     queryFn: async () => (await supabase.from("atms").select("id, id_atm").order("id_atm")).data ?? [],
+  });
+  const { data: tecnicos = [] } = useQuery({
+    queryKey: ["tecnicos-permuta-atm"],
+    queryFn: async () =>
+      (await supabase.from("usuarios").select("id, nome_completo").eq("ativo", true).order("nome_completo")).data ?? [],
   });
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-sel"],
@@ -57,7 +67,7 @@ function PermutasAtm() {
     if (form.origem_id === form.destino_id) return toast.error("Origem e destino não podem ser iguais");
     if (!form.item_id) return toast.error("Selecione o item");
     if (form.qtd < 1) return toast.error("Quantidade deve ser ≥ 1");
-    const { data: ses } = await supabase.auth.getUser();
+    if (!form.tecnico_id) return toast.error("Selecione o técnico");
     // Saída na origem
     const { error: e1 } = await supabase.from("movimentacoes").insert({
       tipo: "Permuta", item_id: form.item_id, qtd: form.qtd,
@@ -65,12 +75,13 @@ function PermutasAtm() {
       destino_tipo: "ATM", destino_id: form.destino_id,
       observacao: form.motivo || null,
       motivo_permuta: form.motivo || null,
-      tecnico_id: ses.user?.id ?? null,
+      tecnico_id: form.tecnico_id || user?.id || null,
+      data: new Date(form.data_criacao).toISOString(),
     });
     if (e1) return toast.error(e1.message);
     toast.success("Permuta ATM x ATM registrada — baixa/entrada automáticas");
     setOpen(false);
-    setForm({ origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "" });
+    setForm({ origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "", data_criacao: nowLocal(), tecnico_id: "" });
     qc.invalidateQueries({ queryKey: ["permutas-atm"] });
     qc.invalidateQueries({ queryKey: ["movs-all"] });
   }
@@ -87,6 +98,10 @@ function PermutasAtm() {
       return true;
     });
   }, [movs, q, dIni, dFim, atms]);
+
+  const historicoAsc = [...filtradas].sort(
+    (a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime(),
+  );
 
   return (
     <div className="space-y-4">
@@ -108,7 +123,7 @@ function PermutasAtm() {
               { header: "ATM Origem", accessor: (m: any) => atmLabel(m.origem_id) },
               { header: "ATM Destino", accessor: (m: any) => atmLabel(m.destino_id) },
               { header: "Técnico", accessor: (m: any) => m.usuarios?.nome_completo ?? "" },
-              { header: "Motivo", accessor: (m: any) => m.motivo_permuta ?? m.observacao ?? "" },
+              { header: "Observações", accessor: (m: any) => m.motivo_permuta ?? m.observacao ?? "" },
             ]}
             filename="permutas-atm"
           />
@@ -116,35 +131,69 @@ function PermutasAtm() {
         </div>
       </div>
 
-      <TableSearch
-        search={q} onSearch={setQ}
-        placeholder="Pesquisar item, ATM, técnico, motivo…"
-        dataInicio={dIni} onDataInicio={setDIni}
-        dataFim={dFim} onDataFim={setDFim}
-      />
+      <Tabs defaultValue="lista">
+        <TabsList>
+          <TabsTrigger value="lista">Permutas entre ATM</TabsTrigger>
+          <TabsTrigger value="historico">Histórico</TabsTrigger>
+        </TabsList>
 
-      <Card className="p-0 overflow-hidden">
-        <table className="excel-table">
-          <thead><tr><th>Data</th><th>Item</th><th>Qtd</th><th>ATM Origem</th><th></th><th>ATM Destino</th><th>Técnico</th><th>Motivo</th></tr></thead>
-          <tbody>
-            {filtradas.length === 0 && (
-              <tr><td colSpan={8} className="text-center py-6 font-bold text-muted-foreground">Nenhuma permuta ATM registrada</td></tr>
-            )}
-            {filtradas.map((m: any) => (
-              <tr key={m.id}>
-                <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
-                <td>{m.itens?.nome ?? "—"}</td>
-                <td>{m.qtd}</td>
-                <td className="font-medium">{atmLabel(m.origem_id)}</td>
-                <td className="text-center text-muted-foreground"><ArrowRightLeft className="inline h-3 w-3" /></td>
-                <td className="font-medium">{atmLabel(m.destino_id)}</td>
-                <td>{m.usuarios?.nome_completo ?? "—"}</td>
-                <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+        <TabsContent value="lista" className="space-y-3 pt-3">
+          <TableSearch
+            search={q} onSearch={setQ}
+            placeholder="Pesquisar item, ATM, técnico, observações…"
+            dataInicio={dIni} onDataInicio={setDIni}
+            dataFim={dFim} onDataFim={setDFim}
+          />
+
+          <Card className="p-0 overflow-hidden">
+            <table className="excel-table">
+              <thead><tr><th>Data da Criação</th><th>Item</th><th className="num">Qtd</th><th>ATM Origem</th><th></th><th>ATM Destino</th><th>Técnico</th><th>Observações</th></tr></thead>
+              <tbody>
+                {filtradas.length === 0 && (
+                  <tr><td colSpan={8} className="text-center py-6 font-bold text-muted-foreground">Nenhuma permuta ATM registrada</td></tr>
+                )}
+                {filtradas.map((m: any) => (
+                  <tr key={m.id}>
+                    <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
+                    <td>{m.itens?.nome ?? "—"}</td>
+                    <td className="num">{m.qtd}</td>
+                    <td className="font-medium">{atmLabel(m.origem_id)}</td>
+                    <td className="text-center text-muted-foreground"><ArrowRightLeft className="inline h-3 w-3" /></td>
+                    <td className="font-medium">{atmLabel(m.destino_id)}</td>
+                    <td>{m.usuarios?.nome_completo ?? "—"}</td>
+                    <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="historico" className="pt-3">
+          <Card className="p-0 overflow-hidden">
+            <table className="excel-table">
+              <thead><tr><th>Data da Criação</th><th>Item</th><th className="num">Qtd</th><th>ATM Origem</th><th>ATM Destino</th><th>Técnico</th><th>Observações</th></tr></thead>
+              <tbody>
+                {historicoAsc.length === 0 && (
+                  <tr><td colSpan={7} className="text-center py-6 font-bold text-muted-foreground">Nenhum histórico</td></tr>
+                )}
+                {historicoAsc.map((m: any) => (
+                  <tr key={m.id}>
+                    <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
+                    <td>{m.itens?.nome ?? "—"}</td>
+                    <td className="num">{m.qtd}</td>
+                    <td className="font-medium">{atmLabel(m.origem_id)}</td>
+                    <td className="font-medium">{atmLabel(m.destino_id)}</td>
+                    <td>{m.usuarios?.nome_completo ?? "—"}</td>
+                    <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl">
@@ -165,6 +214,18 @@ function PermutasAtm() {
               </Select>
             </div>
             <div>
+              <Label>Data da Criação</Label>
+              <Input type="datetime-local" className="h-9" value={form.data_criacao}
+                onChange={(e) => setForm({ ...form, data_criacao: e.target.value })} />
+            </div>
+            <div>
+              <Label>Técnico</Label>
+              <Select value={form.tecnico_id || undefined} onValueChange={(v) => setForm({ ...form, tecnico_id: v })}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o técnico" /></SelectTrigger>
+                <SelectContent>{tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>Item</Label>
               <Select value={form.item_id || undefined} onValueChange={(v) => setForm({ ...form, item_id: v })}>
                 <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o item" /></SelectTrigger>
@@ -177,7 +238,7 @@ function PermutasAtm() {
                 onChange={(e) => setForm({ ...form, qtd: Math.max(1, +e.target.value || 1) })} />
             </div>
             <div className="col-span-2">
-              <Label>Motivo</Label>
+              <Label>Observações</Label>
               <Textarea value={form.motivo} onChange={(e) => setForm({ ...form, motivo: e.target.value })} placeholder="Descreva o motivo da permuta" />
             </div>
           </div>

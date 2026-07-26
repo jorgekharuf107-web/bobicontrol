@@ -20,6 +20,7 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useServerFn } from "@tanstack/react-start";
 import { adminCreateUser, adminResetPassword, adminDeleteUser } from "@/lib/admin.functions";
+import { confirmar, confirmarExclusao } from "@/components/confirm-dialog";
 
 type Papel = "admin_geral" | "supervisor_linha" | "tecnico_estacao" | "dispatcher";
 const PAPEIS: Papel[] = ["admin_geral", "supervisor_linha", "tecnico_estacao", "dispatcher"];
@@ -99,6 +100,15 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
   const [linhasSelecionadas, setLinhasSelecionadas] = useState<Set<string>>(new Set());
   const [resetTarget, setResetTarget] = useState<any | null>(null);
   const [novaSenha, setNovaSenha] = useState("");
+  // Filtros — Usuários cadastrados
+  const [fUsuario, setFUsuario] = useState("");
+  const [fPapel, setFPapel] = useState("todos");
+  const [fAtivo, setFAtivo] = useState("todos");
+  // Filtros — Convites
+  const [fEmail, setFEmail] = useState("");
+  const [fPapelConv, setFPapelConv] = useState("todos");
+  const [fStatusConv, setFStatusConv] = useState("todos");
+  const [fExpira, setFExpira] = useState("");
 
   const { data: linhas = [] } = useQuery({
     queryKey: ["linhas-vinc"],
@@ -112,9 +122,26 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
   // Mascaramento: SUPER_ADMIN só é visível para outros SUPER_ADMINs.
   const usuarios = isSuperAdmin ? usuariosRaw : usuariosRaw.filter((u: any) => u.perfil !== "SUPER_ADMIN");
 
+  const usuariosFiltrados = (usuarios as any[]).filter((u) => {
+    const t = fUsuario.trim().toLowerCase();
+    if (t && !`${u.nome_completo ?? ""} ${u.email ?? ""}`.toLowerCase().includes(t)) return false;
+    if (fPapel !== "todos" && u.perfil !== fPapel) return false;
+    if (fAtivo !== "todos" && String(!!u.ativo) !== fAtivo) return false;
+    return true;
+  });
+
   const { data: convites = [] } = useQuery({
     queryKey: ["convites"],
     queryFn: async () => (await supabase.from("convites").select("*").order("criado_em", { ascending: false })).data ?? [],
+  });
+
+  const convitesFiltrados = (convites as any[]).filter((c) => {
+    const t = fEmail.trim().toLowerCase();
+    if (t && !String(c.email_convidado ?? "").toLowerCase().includes(t)) return false;
+    if (fPapelConv !== "todos" && c.perfil_convidado !== fPapelConv) return false;
+    if (fStatusConv !== "todos" && c.status !== fStatusConv) return false;
+    if (fExpira && !String(c.expira_em ?? "").startsWith(fExpira)) return false;
+    return true;
   });
 
   async function criarUsuario() {
@@ -199,12 +226,12 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
     toast.success("Link copiado");
   }
   async function deleteConvite(id: string) {
-    if (!confirm("Excluir este convite?")) return;
+    if (!(await confirmarExclusao("convite"))) return;
     await supabase.from("convites").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["convites"] });
   }
   async function excluirUsuario(u: any) {
-    if (!confirm(`Excluir o usuário "${u.nome_completo}"? Esta ação é irreversível.`)) return;
+    if (!(await confirmar(`Excluir este usuário?`, { description: `${u.nome_completo} — esta ação é irreversível.`, confirmLabel: "Excluir" }))) return;
     try {
       await deleteUser({ data: { user_id: u.id } });
       toast.success("Usuário excluído");
@@ -218,7 +245,7 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
     <>
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <CsvExportButton
-          rows={usuarios}
+          rows={usuariosFiltrados}
           columns={[
             { header: "Nome Completo", accessor: (u: any) => u.nome_completo ?? "" },
             { header: "Email", accessor: (u: any) => u.email },
@@ -243,6 +270,33 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
 
       <Card className="p-0 overflow-hidden">
         <h3 className="px-4 py-3 font-medium border-b">Usuários cadastrados</h3>
+        <div className="flex flex-wrap items-end gap-2 p-3 border-b bg-muted/40">
+          <div className="min-w-[200px] flex-1">
+            <Label className="text-[11px] mb-0.5 block">🔎 Usuário (nome ou email)</Label>
+            <Input className="h-8 text-sm" value={fUsuario} onChange={(e) => setFUsuario(e.target.value)} placeholder="Pesquisar usuário…" />
+          </div>
+          <div className="w-52">
+            <Label className="text-[11px] mb-0.5 block">Papel</Label>
+            <Select value={fPapel} onValueChange={setFPapel}>
+              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {PAPEIS.map((p) => <SelectItem key={p} value={p}>{LABEL[p]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-40">
+            <Label className="text-[11px] mb-0.5 block">Ativo</Label>
+            <Select value={fAtivo} onValueChange={setFAtivo}>
+              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="true">Ativo</SelectItem>
+                <SelectItem value="false">Inativo</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader><TableRow>
@@ -251,10 +305,10 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
               <TableHead>Cadastrado em</TableHead><TableHead className="text-right">Ações</TableHead>
             </TableRow></TableHeader>
             <TableBody>
-              {usuarios.length === 0 && (
+              {usuariosFiltrados.length === 0 && (
                 <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum usuário cadastrado.</TableCell></TableRow>
               )}
-              {usuarios.map((u: any) => (
+              {usuariosFiltrados.map((u: any) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.nome_completo}</TableCell>
                   <TableCell>{u.email}</TableCell>
@@ -296,6 +350,38 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
 
       <Card className="p-0 overflow-hidden">
         <h3 className="px-4 py-3 font-medium border-b">Convites</h3>
+        <div className="flex flex-wrap items-end gap-2 p-3 border-b bg-muted/40">
+          <div className="min-w-[200px] flex-1">
+            <Label className="text-[11px] mb-0.5 block">🔎 Email</Label>
+            <Input className="h-8 text-sm" value={fEmail} onChange={(e) => setFEmail(e.target.value)} placeholder="Pesquisar email…" />
+          </div>
+          <div className="w-52">
+            <Label className="text-[11px] mb-0.5 block">Papel</Label>
+            <Select value={fPapelConv} onValueChange={setFPapelConv}>
+              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {PAPEIS.map((p) => <SelectItem key={p} value={p}>{LABEL[p]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-40">
+            <Label className="text-[11px] mb-0.5 block">Status</Label>
+            <Select value={fStatusConv} onValueChange={setFStatusConv}>
+              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="pendente">Pendente</SelectItem>
+                <SelectItem value="aceito">Aceito</SelectItem>
+                <SelectItem value="expirado">Expirado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-[150px]">
+            <Label className="text-[11px] mb-0.5 block">Expira em</Label>
+            <Input type="date" className="h-8 text-sm" value={fExpira} onChange={(e) => setFExpira(e.target.value)} />
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader><TableRow>
@@ -303,10 +389,10 @@ function AbaUsuarios({ qc, isSuperAdmin }: { qc: ReturnType<typeof useQueryClien
               <TableHead>Expira em</TableHead><TableHead className="text-right">Ações</TableHead>
             </TableRow></TableHeader>
             <TableBody>
-              {convites.length === 0 && (
+              {convitesFiltrados.length === 0 && (
                 <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum convite enviado.</TableCell></TableRow>
               )}
-              {convites.map((c: any) => (
+              {convitesFiltrados.map((c: any) => (
                 <TableRow key={c.id}>
                   <TableCell>{c.email_convidado}</TableCell>
                   <TableCell>{LABEL[c.perfil_convidado] ?? c.perfil_convidado}</TableCell>

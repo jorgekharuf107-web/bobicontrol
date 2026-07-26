@@ -121,7 +121,17 @@
     color: var(--color-foreground);
     font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   }
+
+  /* REGRA GLOBAL 1 — Responsivo desktop 125% (>= 1024px). Mobile intocado. */
+  @media (min-width: 1024px) {
+    html { font-size: 15px; }
+    .excel-table { font-size: 15px; }
+    .excel-table th,
+    .excel-table td { padding: 8px 12px; }
+    .recharts-responsive-container { min-height: 125%; }
+  }
 }
+
 
 
 @layer components {
@@ -166,5 +176,38 @@
   @media (max-width: 400px) {
     .excel-table { font-size: 11px; }
     .excel-table th, .excel-table td { padding: 6px; }
+  }
+}
+
+/* ===== REGRA GLOBAL 2 — Tabelas tipo Excel (todas as tabelas do sistema) ===== */
+@layer components {
+  /* Cabeçalhos sempre centralizados */
+  .excel-table thead th,
+  table thead th,
+  table thead [data-slot="table-head"] {
+    text-align: center !important;
+    vertical-align: middle;
+  }
+
+  /* Quebra de linha em todas as células (desktop/tablet; mobile inalterado) */
+  @media (min-width: 768px) {
+    .excel-table th,
+    .excel-table td,
+    table th,
+    table td {
+      white-space: normal;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  /* Colunas numéricas centralizadas */
+  .excel-table td.num,
+  .excel-table th.num,
+  table td.num,
+  table th.num {
+    text-align: center;
+    width: 1%;
+    white-space: nowrap;
   }
 }

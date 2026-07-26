@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BackButton } from "@/components/back-button";
+import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/admin/alertas")({
   beforeLoad: async () => {
@@ -63,7 +64,7 @@ function AlertasPage() {
     qc.invalidateQueries({ queryKey: ["alertas"] });
   }
   async function remove(id: string) {
-    if (!confirm("Excluir esta configuração?")) return;
+    if (!(await confirmarExclusao("configuração"))) return;
     await supabase.from("configuracao_alertas").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["alertas"] });
   }
