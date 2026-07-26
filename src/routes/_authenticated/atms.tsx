@@ -183,8 +183,8 @@ function AtmsPage() {
                 <td>{a.possui_cd ? "Sim" : "Não"}</td>
                 <td>{statusLabel[a.status_operacional] ?? a.status_operacional}</td>
                 <td className="whitespace-nowrap">
-                  <Button variant="ghost" size="icon" onClick={() => startEdit(a)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => excluir(a.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Editar registro" onClick={() => startEdit(a)}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Excluir registro" onClick={() => excluir(a.id)}><Trash2 className="h-4 w-4" /></Button>
                 </td>
               </tr>
             ))}
