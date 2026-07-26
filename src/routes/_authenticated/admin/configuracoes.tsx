@@ -16,6 +16,19 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendEmail } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/configuracoes")({
+  head: () => ({
+    meta: [
+      { title: "Configurações do Sistema | Bobi Control" },
+      { name: "description", content: "Ajuste parâmetros gerais e configurações de e-mail SMTP do Bobi Control." },
+      { property: "og:title", content: "Configurações do Sistema | Bobi Control" },
+      { property: "og:description", content: "Ajuste parâmetros gerais e configurações de e-mail SMTP do Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/admin/configuracoes" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/admin/configuracoes" }],
+  }),
   component: ConfiguracoesPage,
 });
 

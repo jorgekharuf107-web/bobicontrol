@@ -12,6 +12,19 @@ import { MovimentacaoForm, TIPOS, LOCAIS_ORIG_DEST, LOCAIS_TIPO } from "@/compon
 import { useCurrentUser } from "@/lib/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/estoque/movimentacoes")({
+  head: () => ({
+    meta: [
+      { title: "Nova Movimentação | Bobi Control" },
+      { name: "description", content: "Registre recebimentos, retiradas, abastecimentos e permutas de bobinas." },
+      { property: "og:title", content: "Nova Movimentação | Bobi Control" },
+      { property: "og:description", content: "Registre recebimentos, retiradas, abastecimentos e permutas de bobinas." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/estoque/movimentacoes" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/estoque/movimentacoes" }],
+  }),
   component: MovimentacoesPage,
 });
 

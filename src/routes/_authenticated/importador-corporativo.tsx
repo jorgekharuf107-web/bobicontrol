@@ -16,6 +16,19 @@ import { BackButton } from "@/components/back-button";
 import { APP_NAME } from "@/lib/app-config";
 
 export const Route = createFileRoute("/_authenticated/importador-corporativo")({
+  head: () => ({
+    meta: [
+      { title: "Importador Corporativo | Bobi Control" },
+      { name: "description", content: "Importe dados corporativos de linhas, estações, ATMs, itens e usuários." },
+      { property: "og:title", content: "Importador Corporativo | Bobi Control" },
+      { property: "og:description", content: "Importe dados corporativos de linhas, estações, ATMs, itens e usuários." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/importador-corporativo" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/importador-corporativo" }],
+  }),
   beforeLoad: async () => {
     const { redirect } = await import("@tanstack/react-router");
     const { data } = await supabase.auth.getUser();

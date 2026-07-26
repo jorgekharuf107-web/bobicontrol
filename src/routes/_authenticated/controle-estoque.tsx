@@ -21,6 +21,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovimentacaoForm } from "@/components/movimentacao-form";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
+  head: () => ({
+    meta: [
+      { title: "Controle de Estoque | Bobi Control" },
+      { name: "description", content: "Acompanhe o saldo e o histórico de movimentações de bobinas." },
+      { property: "og:title", content: "Controle de Estoque | Bobi Control" },
+      { property: "og:description", content: "Acompanhe o saldo e o histórico de movimentações de bobinas." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/controle-estoque" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/controle-estoque" }],
+  }),
   component: ControleEstoque,
 });
 

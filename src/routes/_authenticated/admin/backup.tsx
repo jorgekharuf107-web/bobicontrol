@@ -14,6 +14,19 @@ import {
 import { BackButton } from "@/components/back-button";
 
 export const Route = createFileRoute("/_authenticated/admin/backup")({
+  head: () => ({
+    meta: [
+      { title: "Backup e Manutenção | Bobi Control" },
+      { name: "description", content: "Exporte dados e faça a manutenção de movimentações antigas do Bobi Control." },
+      { property: "og:title", content: "Backup e Manutenção | Bobi Control" },
+      { property: "og:description", content: "Exporte dados e faça a manutenção de movimentações antigas do Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/admin/backup" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/admin/backup" }],
+  }),
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return;

@@ -17,6 +17,19 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/atms")({
+  head: () => ({
+    meta: [
+      { title: "ATMs | Bobi Control" },
+      { name: "description", content: "Cadastro de ATMs por linha, capacidade e vínculo com centro de distribuição." },
+      { property: "og:title", content: "ATMs | Bobi Control" },
+      { property: "og:description", content: "Cadastro de ATMs por linha, capacidade e vínculo com centro de distribuição." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/atms" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/atms" }],
+  }),
   component: AtmsPage,
 });
 

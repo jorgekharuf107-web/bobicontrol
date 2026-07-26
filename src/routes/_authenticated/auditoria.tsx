@@ -11,6 +11,19 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
 
 export const Route = createFileRoute("/_authenticated/auditoria")({
+  head: () => ({
+    meta: [
+      { title: "Auditoria | Bobi Control" },
+      { name: "description", content: "Histórico de ações realizadas no sistema por data, usuário, módulo e linha." },
+      { property: "og:title", content: "Auditoria | Bobi Control" },
+      { property: "og:description", content: "Histórico de ações realizadas no sistema por data, usuário, módulo e linha." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/auditoria" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/auditoria" }],
+  }),
   component: AuditoriaPage,
 });
 

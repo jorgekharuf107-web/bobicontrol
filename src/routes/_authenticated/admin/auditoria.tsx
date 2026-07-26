@@ -7,6 +7,19 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 
 export const Route = createFileRoute("/_authenticated/admin/auditoria")({
+  head: () => ({
+    meta: [
+      { title: "Auditoria do Sistema | Bobi Control" },
+      { name: "description", content: "Consulte o registro de auditoria de ações, módulos e usuários do Bobi Control." },
+      { property: "og:title", content: "Auditoria do Sistema | Bobi Control" },
+      { property: "og:description", content: "Consulte o registro de auditoria de ações, módulos e usuários do Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/admin/auditoria" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/admin/auditoria" }],
+  }),
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return;

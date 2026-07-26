@@ -15,6 +15,19 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/_authenticated/estacoes")({
+  head: () => ({
+    meta: [
+      { title: "Estações | Bobi Control" },
+      { name: "description", content: "Cadastro e manutenção das estações vinculadas às linhas do Bobi Control." },
+      { property: "og:title", content: "Estações | Bobi Control" },
+      { property: "og:description", content: "Cadastro e manutenção das estações vinculadas às linhas do Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/estacoes" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/estacoes" }],
+  }),
   component: EstacoesPage,
 });
 

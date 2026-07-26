@@ -18,6 +18,19 @@ import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/itens-estoque")({
+  head: () => ({
+    meta: [
+      { title: "Itens de Estoque | Bobi Control" },
+      { name: "description", content: "Cadastre e pesquise os itens de estoque controlados pelo Bobi Control." },
+      { property: "og:title", content: "Itens de Estoque | Bobi Control" },
+      { property: "og:description", content: "Cadastre e pesquise os itens de estoque controlados pelo Bobi Control." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/itens-estoque" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+    links: [{ rel: "canonical", href: "/itens-estoque" }],
+  }),
   component: ItensPage,
 });
 
