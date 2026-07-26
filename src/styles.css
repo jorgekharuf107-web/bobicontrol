@@ -121,7 +121,17 @@
     color: var(--color-foreground);
     font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   }
+
+  /* REGRA GLOBAL 1 — Responsivo desktop 125% (>= 1024px). Mobile intocado. */
+  @media (min-width: 1024px) {
+    html { font-size: 15px; }
+    .excel-table { font-size: 15px; }
+    .excel-table th,
+    .excel-table td { padding: 8px 12px; }
+    .recharts-responsive-container { min-height: 125%; }
+  }
 }
+
 
 
 @layer components {
