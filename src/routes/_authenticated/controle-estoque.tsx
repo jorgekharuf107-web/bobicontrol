@@ -254,8 +254,28 @@ function ControleEstoque() {
             ]}
             filename="movimentacoes"
           />
+          <Button variant="outline" onClick={() => { setItemEditId(null); setItemNome(""); setItemBpc(6); setItensOpen(true); }}>
+            <Package className="h-4 w-4" /> Gerenciar Itens
+          </Button>
           <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova Movimentação</Button>
       </div>
+
+      <Card className="p-0 overflow-hidden">
+        <table className="excel-table">
+          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Saldo (bobinas)</th></tr></thead>
+          <tbody>
+            {saldos.length === 0 && <tr><td colSpan={3} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {saldos.map((i: any) => (
+              <tr key={i.id}>
+                <td>{i.nome}</td>
+                <td className="num">{i.bobinas_por_caixa}</td>
+                <td className="num font-semibold">{i.saldo}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
 
       <TableSearch
         search={q} onSearch={setQ}
