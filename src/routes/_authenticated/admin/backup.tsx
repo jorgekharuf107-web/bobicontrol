@@ -1,3 +1,4 @@
+import { souSuperAdmin } from "@/lib/permissoes.functions";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { Download, Trash2, AlertTriangle } from "lucide-react";
