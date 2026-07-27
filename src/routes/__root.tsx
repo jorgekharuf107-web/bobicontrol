@@ -61,8 +61,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "Bobi Control" },
       { property: "og:type", content: "website" },
       { property: "og:title", content: "Bobi Control" },
-      { property: "og:description", content: "Sistema de gestão e controle de estoque de bobinas para ATMs e CDs." },
+      { property: "og:description", content: "Bobi Control - Sistema Interno de gestão de ATMs, CDs, linhas e fornecedores." },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Bobi Control" },
+      { name: "twitter:description", content: "Bobi Control - Sistema Interno de gestão de ATMs, CDs, linhas e fornecedores." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a84c9044-99c1-4894-8e1c-bb5f6c5bef9e/id-preview-06269c04--4e9970f5-60d3-4795-b7ec-e49ec67fe120.lovable.app-1785111643659.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a84c9044-99c1-4894-8e1c-bb5f6c5bef9e/id-preview-06269c04--4e9970f5-60d3-4795-b7ec-e49ec67fe120.lovable.app-1785111643659.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
