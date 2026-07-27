@@ -57,10 +57,13 @@ export const adminResetPassword = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     // Somente SUPER_ADMIN pode resetar senhas diretamente
-    const { data: isSuper } = await context.supabase.rpc("e_super_admin", { _user_id: context.userId });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: caller } = await supabaseAdmin
+      .from("usuarios").select("perfil, ativo").eq("id", context.userId).maybeSingle();
+    const isSuper = caller?.perfil === "SUPER_ADMIN" && caller?.ativo === true;
     if (!isSuper) throw new Error("Apenas SUPER_ADMIN pode redefinir senhas");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, {
       password: data.nova_senha,
     });
@@ -85,9 +88,12 @@ export const adminDeleteUser = createServerFn({ method: "POST" })
     // Bloquear exclusão de SUPER_ADMIN por não-super
     const { data: alvo } = await supabaseAdmin.from("usuarios").select("perfil").eq("id", data.user_id).maybeSingle();
     if (alvo?.perfil === "SUPER_ADMIN") {
-      const { data: isSuper } = await context.supabase.rpc("e_super_admin", { _user_id: context.userId });
+      const { data: caller } = await supabaseAdmin
+        .from("usuarios").select("perfil, ativo").eq("id", context.userId).maybeSingle();
+      const isSuper = caller?.perfil === "SUPER_ADMIN" && caller?.ativo === true;
       if (!isSuper) throw new Error("Apenas SUPER_ADMIN pode excluir outro SUPER_ADMIN");
     }
+
     await supabaseAdmin.from("usuario_linhas").delete().eq("usuario_id", data.user_id);
     await supabaseAdmin.from("usuarios").delete().eq("id", data.user_id);
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);

@@ -1,3 +1,4 @@
+import { aprovarPermuta } from "@/lib/permissoes.functions";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -97,8 +98,12 @@ function Permutas() {
 
   async function decidir(id: string, aprovar: boolean) {
     if (!(await confirmar(aprovar ? "Aprovar esta permuta?" : "Rejeitar esta permuta?", { confirmLabel: aprovar ? "Aprovar" : "Rejeitar" }))) return;
-    const { error } = await supabase.rpc("aprovar_movimentacao", { _id: id, _aprovar: aprovar });
-    if (error) return toast.error(error.message);
+    try {
+      await aprovarPermuta({ data: { id, aprovar } });
+    } catch (e: any) {
+      return toast.error(e?.message ?? "Falha ao processar permuta");
+    }
+
     toast.success(aprovar ? "Permuta aprovada" : "Permuta rejeitada");
     qc.invalidateQueries({ queryKey: ["permutas"] });
     qc.invalidateQueries({ queryKey: ["movs-all"] });

@@ -1,3 +1,4 @@
+import { souSuperAdmin } from "@/lib/permissoes.functions";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { Download, Trash2, AlertTriangle } from "lucide-react";
@@ -30,9 +31,10 @@ export const Route = createFileRoute("/_authenticated/admin/backup")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return;
-    const { data: isSuper } = await supabase.rpc("e_super_admin" as any, { _user_id: data.user.id });
-    if (!isSuper) throw redirect({ to: "/dashboard" });
+    const { superAdmin } = await souSuperAdmin();
+    if (!superAdmin) throw redirect({ to: "/dashboard" });
   },
+
   component: BackupPage,
 });
 
