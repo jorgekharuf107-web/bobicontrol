@@ -80,7 +80,8 @@ function ControleEstoque() {
   });
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-sel"],
-    queryFn: async () => (await supabase.from("itens").select("id, nome").order("nome")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("itens").select("id, nome, bobinas_por_caixa, ativo").order("nome")).data ?? [],
   });
   const { data: cds = [] } = useQuery({
     queryKey: ["cds-sel"],
