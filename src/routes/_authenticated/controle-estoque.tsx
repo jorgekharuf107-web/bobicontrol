@@ -196,6 +196,19 @@ function ControleEstoque() {
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
 
+  // Saldo atual por item: entradas (destino) − saídas (origem)
+  const saldos = (itens as any[]).map((i) => {
+    let saldo = 0;
+    (movs as any[]).forEach((m) => {
+      if (m.item_id !== i.id) return;
+      if (m.status_aprovacao === "pendente" || m.status_aprovacao === "rejeitado") return;
+      if (m.destino_tipo || m.linha_destino_id) saldo += m.qtd ?? 0;
+      if (m.origem_tipo || m.linha_origem_id) saldo -= m.qtd ?? 0;
+    });
+    return { ...i, saldo };
+  });
+
+
 
   return (
     <div className="space-y-4">
