@@ -61,8 +61,11 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
 
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-mov"],
-    queryFn: async () => (await supabase.from("itens").select("id, nome").order("nome")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("itens").select("id, nome, bobinas_por_caixa").eq("ativo", true).order("nome")).data ?? [],
   });
+  const itemSel = (itens as any[]).find((i) => i.id === form.item_id);
+  const porCaixa = itemSel?.bobinas_por_caixa ?? BOBINAS_POR_CAIXA;
   const { data: cds = [] } = useQuery({
     queryKey: ["cds-mov"],
     queryFn: async () => (await supabase.from("cds").select("id, nome").order("nome")).data ?? [],
@@ -99,7 +102,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   const qCaixas = tCaixa ? form.qtd_caixas : 0;
   const q100 = t100 ? form.qtd_bobina_100 : 0;
   const q50 = t50 ? form.qtd_bobina_50 : 0;
-  const totalBobinas = qCaixas * BOBINAS_POR_CAIXA + q100 + q50;
+  const totalBobinas = qCaixas * porCaixa + q100 + q50;
 
   function limpar() {
     setForm({ ...empty, data: nowLocal() });
@@ -145,6 +148,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     limpar();
     qc.invalidateQueries({ queryKey: ["movs-page"] });
     qc.invalidateQueries({ queryKey: ["movs-all"] });
+    qc.invalidateQueries({ queryKey: ["saldo-itens"] });
     qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     onSaved?.();
   }
@@ -231,7 +235,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
           <div className="flex items-center justify-between gap-2 rounded bg-white/90 p-2">
             <div>
               <p className="text-xs font-medium">Bobina Caixa</p>
-              <p className="text-[10px] text-muted-foreground">6 bobinas / caixa</p>
+              <p className="text-[10px] text-muted-foreground">{porCaixa} bobinas / caixa</p>
             </div>
             <Switch checked={tCaixa} onCheckedChange={setTCaixa} />
           </div>
@@ -276,7 +280,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
         <div className="rounded bg-blue-700 text-white p-2 text-sm">
           <p className="font-bold">Total a movimentar: {totalBobinas} bobina(s)</p>
           <ul className="text-xs mt-1 space-y-0.5 opacity-95">
-            {tCaixa && <li>{qCaixas} caixa(s) = {qCaixas * BOBINAS_POR_CAIXA} bobinas</li>}
+            {tCaixa && <li>{qCaixas} caixa(s) = {qCaixas * porCaixa} bobinas</li>}
             {t100 && <li>+ {q100} bobina(s) avulsa(s) 100%</li>}
             {t50 && <li>+ {q50} bobina(s) avulsa(s) &lt; 50%</li>}
           </ul>
