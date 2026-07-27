@@ -558,8 +558,9 @@ export type Database = {
       itens: {
         Row: {
           ativo: boolean
+          bobinas_por_caixa: number
           cd_id: string | null
-          codigo: string
+          codigo: string | null
           criado_em: string
           descricao: string | null
           estoque_minimo: number
@@ -576,8 +577,9 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean
+          bobinas_por_caixa?: number
           cd_id?: string | null
-          codigo: string
+          codigo?: string | null
           criado_em?: string
           descricao?: string | null
           estoque_minimo?: number
@@ -594,8 +596,9 @@ export type Database = {
         }
         Update: {
           ativo?: boolean
+          bobinas_por_caixa?: number
           cd_id?: string | null
-          codigo?: string
+          codigo?: string | null
           criado_em?: string
           descricao?: string | null
           estoque_minimo?: number

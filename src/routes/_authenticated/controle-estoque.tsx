@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Package } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +67,10 @@ function ControleEstoque() {
   const [dIni, setDIni] = useState("");
   const [dFim, setDFim] = useState("");
   const [tecFiltro, setTecFiltro] = useState<string>("todos");
+  const [itensOpen, setItensOpen] = useState(false);
+  const [itemEditId, setItemEditId] = useState<string | null>(null);
+  const [itemNome, setItemNome] = useState("");
+  const [itemBpc, setItemBpc] = useState(6);
   const { data: linhas = [] } = useAccessibleLinhas();
   const linhaMap = new Map(linhas.map((l) => [l.id, l]));
 
@@ -80,7 +84,8 @@ function ControleEstoque() {
   });
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-sel"],
-    queryFn: async () => (await supabase.from("itens").select("id, nome").order("nome")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("itens").select("id, nome, bobinas_por_caixa, ativo").order("nome")).data ?? [],
   });
   const { data: cds = [] } = useQuery({
     queryKey: ["cds-sel"],
@@ -140,6 +145,33 @@ function ControleEstoque() {
     qc.invalidateQueries({ queryKey: ["movs-all"] });
   }
 
+  async function salvarItem() {
+    const nome = itemNome.trim();
+    if (!nome) return toast.error("Informe o nome do item");
+    const bpc = Math.max(1, itemBpc || 1);
+    const payload: any = { nome, bobinas_por_caixa: bpc, qtd_por_unidade: bpc, ativo: true };
+    const { error } = itemEditId
+      ? await supabase.from("itens").update(payload).eq("id", itemEditId)
+      : await supabase.from("itens").insert({ ...payload, codigo: nome.toUpperCase().slice(0, 20) });
+    if (error) return toast.error(error.message);
+    toast.success(itemEditId ? "Item atualizado" : "Item cadastrado");
+    setItemEditId(null); setItemNome(""); setItemBpc(6);
+    qc.invalidateQueries({ queryKey: ["itens-sel"] });
+    qc.invalidateQueries({ queryKey: ["itens-mov"] });
+    qc.invalidateQueries({ queryKey: ["itens"] });
+  }
+
+  async function excluirItem(id: string) {
+    if (!(await confirmarExclusao("item"))) return;
+    const { error } = await supabase.from("itens").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["itens-sel"] });
+    qc.invalidateQueries({ queryKey: ["itens-mov"] });
+    qc.invalidateQueries({ queryKey: ["itens"] });
+  }
+
+
+
   const tecnicos = (() => {
     const map = new Map<string, string>();
     (movs as any[]).forEach((m) => { if (m.tecnico_id) map.set(m.tecnico_id, m.usuarios?.nome_completo ?? m.tecnico_id); });
@@ -163,6 +195,19 @@ function ControleEstoque() {
     const ids = Array.from(new Set([m.linha_origem_id, m.linha_destino_id].filter(Boolean)));
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
+
+  // Saldo atual por item: entradas (destino) − saídas (origem)
+  const saldos = (itens as any[]).map((i) => {
+    let saldo = 0;
+    (movs as any[]).forEach((m) => {
+      if (m.item_id !== i.id) return;
+      if (m.status_aprovacao === "pendente" || m.status_aprovacao === "rejeitado") return;
+      if (m.destino_tipo || m.linha_destino_id) saldo += m.qtd ?? 0;
+      if (m.origem_tipo || m.linha_origem_id) saldo -= m.qtd ?? 0;
+    });
+    return { ...i, saldo };
+  });
+
 
 
   return (
@@ -209,8 +254,28 @@ function ControleEstoque() {
             ]}
             filename="movimentacoes"
           />
+          <Button variant="outline" onClick={() => { setItemEditId(null); setItemNome(""); setItemBpc(6); setItensOpen(true); }}>
+            <Package className="h-4 w-4" /> Gerenciar Itens
+          </Button>
           <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova Movimentação</Button>
       </div>
+
+      <Card className="p-0 overflow-hidden">
+        <table className="excel-table">
+          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Saldo (bobinas)</th></tr></thead>
+          <tbody>
+            {saldos.length === 0 && <tr><td colSpan={3} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {saldos.map((i: any) => (
+              <tr key={i.id}>
+                <td>{i.nome}</td>
+                <td className="num">{i.bobinas_por_caixa}</td>
+                <td className="num font-semibold">{i.saldo}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
 
       <TableSearch
         search={q} onSearch={setQ}
@@ -333,6 +398,50 @@ function ControleEstoque() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={itensOpen} onOpenChange={setItensOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Gerenciar Itens</DialogTitle></DialogHeader>
+          <div className="flex items-end gap-2 flex-wrap">
+            <div className="flex-1 min-w-[180px]">
+              <Label>Nome do item</Label>
+              <Input value={itemNome} onChange={(e) => setItemNome(e.target.value)} placeholder="Ex: Caixa" />
+            </div>
+            <div className="w-32">
+              <Label>Bobinas / caixa</Label>
+              <Input type="number" min={1} value={itemBpc} onChange={(e) => setItemBpc(Math.max(1, +e.target.value || 1))} />
+            </div>
+            <Button onClick={salvarItem}>{itemEditId ? "Salvar" : "Cadastrar"}</Button>
+            {itemEditId && (
+              <Button variant="outline" onClick={() => { setItemEditId(null); setItemNome(""); setItemBpc(6); }}>Cancelar</Button>
+            )}
+          </div>
+          <Card className="p-0 overflow-hidden">
+            <table className="excel-table">
+              <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th>Ações</th></tr></thead>
+              <tbody>
+                {(itens as any[]).length === 0 && <tr><td colSpan={3} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+                {(itens as any[]).map((i: any) => (
+                  <tr key={i.id}>
+                    <td>{i.nome}</td>
+                    <td className="num">{i.bobinas_por_caixa}</td>
+                    <td className="whitespace-nowrap">
+                      <Button variant="ghost" size="icon" aria-label="Editar item"
+                        onClick={() => { setItemEditId(i.id); setItemNome(i.nome); setItemBpc(i.bobinas_por_caixa ?? 6); }}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" aria-label="Excluir item" onClick={() => excluirItem(i.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
