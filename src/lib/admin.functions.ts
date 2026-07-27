@@ -57,10 +57,13 @@ export const adminResetPassword = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     // Somente SUPER_ADMIN pode resetar senhas diretamente
-    const { data: isSuper } = await context.supabase.rpc("e_super_admin", { _user_id: context.userId });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: caller } = await supabaseAdmin
+      .from("usuarios").select("perfil, ativo").eq("id", context.userId).maybeSingle();
+    const isSuper = caller?.perfil === "SUPER_ADMIN" && caller?.ativo === true;
     if (!isSuper) throw new Error("Apenas SUPER_ADMIN pode redefinir senhas");
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, {
       password: data.nova_senha,
     });
