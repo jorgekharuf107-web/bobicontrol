@@ -398,6 +398,50 @@ function ControleEstoque() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={itensOpen} onOpenChange={setItensOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Gerenciar Itens</DialogTitle></DialogHeader>
+          <div className="flex items-end gap-2 flex-wrap">
+            <div className="flex-1 min-w-[180px]">
+              <Label>Nome do item</Label>
+              <Input value={itemNome} onChange={(e) => setItemNome(e.target.value)} placeholder="Ex: Caixa" />
+            </div>
+            <div className="w-32">
+              <Label>Bobinas / caixa</Label>
+              <Input type="number" min={1} value={itemBpc} onChange={(e) => setItemBpc(Math.max(1, +e.target.value || 1))} />
+            </div>
+            <Button onClick={salvarItem}>{itemEditId ? "Salvar" : "Cadastrar"}</Button>
+            {itemEditId && (
+              <Button variant="outline" onClick={() => { setItemEditId(null); setItemNome(""); setItemBpc(6); }}>Cancelar</Button>
+            )}
+          </div>
+          <Card className="p-0 overflow-hidden">
+            <table className="excel-table">
+              <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th>Ações</th></tr></thead>
+              <tbody>
+                {(itens as any[]).length === 0 && <tr><td colSpan={3} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+                {(itens as any[]).map((i: any) => (
+                  <tr key={i.id}>
+                    <td>{i.nome}</td>
+                    <td className="num">{i.bobinas_por_caixa}</td>
+                    <td className="whitespace-nowrap">
+                      <Button variant="ghost" size="icon" aria-label="Editar item"
+                        onClick={() => { setItemEditId(i.id); setItemNome(i.nome); setItemBpc(i.bobinas_por_caixa ?? 6); }}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" aria-label="Excluir item" onClick={() => excluirItem(i.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
