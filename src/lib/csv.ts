@@ -7,7 +7,7 @@ function escape(v: string | number | null | undefined): string {
   if (v === null || v === undefined) return "";
   let s = String(v);
   // Neutraliza injeção de fórmulas em planilhas (Excel/Sheets)
-  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  if (/^[=+\-@\t\r]/.test(s) && !/^-?\d+([.,]\d+)?$/.test(s)) s = `'${s}`;
   s = s.replace(/"/g, '""');
   return /[",;\n\r]/.test(s) ? `"${s}"` : s;
 }
