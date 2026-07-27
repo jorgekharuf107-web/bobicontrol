@@ -5,9 +5,13 @@ export type CsvColumn<T> = {
 
 function escape(v: string | number | null | undefined): string {
   if (v === null || v === undefined) return "";
-  const s = String(v).replace(/"/g, '""');
+  let s = String(v);
+  // Neutraliza injeção de fórmulas em planilhas (Excel/Sheets)
+  if (/^[=+\-@\t\r]/.test(s) && !/^-?\d+([.,]\d+)?$/.test(s)) s = `'${s}`;
+  s = s.replace(/"/g, '""');
   return /[",;\n\r]/.test(s) ? `"${s}"` : s;
 }
+
 
 export function exportarCSV<T>(rows: T[], columns: CsvColumn<T>[], filename: string) {
   const sep = ";"; // Excel PT-BR friendly

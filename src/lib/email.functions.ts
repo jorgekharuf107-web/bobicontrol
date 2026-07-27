@@ -11,10 +11,27 @@ export const sendEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: SendInput) => {
     if (!data?.to || !data?.subject || !data?.html) throw new Error("Parâmetros inválidos");
-    return data;
+    const to = String(data.to).trim();
+    if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(to)) throw new Error("Destinatário inválido");
+    if (to.length > 254) throw new Error("Destinatário inválido");
+    const subject = String(data.subject).trim().slice(0, 200);
+    const html = String(data.html);
+    if (html.length > 20000) throw new Error("Conteúdo muito longo");
+    return { to, subject, html };
   })
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    // Somente perfis de gestão podem disparar e-mails pelo SMTP da empresa
+    const [{ data: isAdmin }, { data: isGestor }, { data: isDispatcher }] = await Promise.all([
+      context.supabase.rpc("e_admin", { _user_id: context.userId }),
+      context.supabase.rpc("e_gestor", { _user_id: context.userId }),
+      context.supabase.rpc("e_dispatcher", { _user_id: context.userId }),
+    ]);
+    if (!isAdmin && !isGestor && !isDispatcher) {
+      throw new Error("Sem permissão para enviar e-mails");
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     const { data: cfg, error } = await supabaseAdmin
       .from("email_config")
       .select("sender_email, app_password, ativo")
