@@ -145,6 +145,33 @@ function ControleEstoque() {
     qc.invalidateQueries({ queryKey: ["movs-all"] });
   }
 
+  async function salvarItem() {
+    const nome = itemNome.trim();
+    if (!nome) return toast.error("Informe o nome do item");
+    const bpc = Math.max(1, itemBpc || 1);
+    const payload: any = { nome, bobinas_por_caixa: bpc, qtd_por_unidade: bpc, ativo: true };
+    const { error } = itemEditId
+      ? await supabase.from("itens").update(payload).eq("id", itemEditId)
+      : await supabase.from("itens").insert({ ...payload, codigo: nome.toUpperCase().slice(0, 20) });
+    if (error) return toast.error(error.message);
+    toast.success(itemEditId ? "Item atualizado" : "Item cadastrado");
+    setItemEditId(null); setItemNome(""); setItemBpc(6);
+    qc.invalidateQueries({ queryKey: ["itens-sel"] });
+    qc.invalidateQueries({ queryKey: ["itens-mov"] });
+    qc.invalidateQueries({ queryKey: ["itens"] });
+  }
+
+  async function excluirItem(id: string) {
+    if (!(await confirmarExclusao("item"))) return;
+    const { error } = await supabase.from("itens").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["itens-sel"] });
+    qc.invalidateQueries({ queryKey: ["itens-mov"] });
+    qc.invalidateQueries({ queryKey: ["itens"] });
+  }
+
+
+
   const tecnicos = (() => {
     const map = new Map<string, string>();
     (movs as any[]).forEach((m) => { if (m.tecnico_id) map.set(m.tecnico_id, m.usuarios?.nome_completo ?? m.tecnico_id); });
