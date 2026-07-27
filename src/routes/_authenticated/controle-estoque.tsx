@@ -67,6 +67,10 @@ function ControleEstoque() {
   const [dIni, setDIni] = useState("");
   const [dFim, setDFim] = useState("");
   const [tecFiltro, setTecFiltro] = useState<string>("todos");
+  const [itensOpen, setItensOpen] = useState(false);
+  const [itemEditId, setItemEditId] = useState<string | null>(null);
+  const [itemNome, setItemNome] = useState("");
+  const [itemBpc, setItemBpc] = useState(6);
   const { data: linhas = [] } = useAccessibleLinhas();
   const linhaMap = new Map(linhas.map((l) => [l.id, l]));
 
