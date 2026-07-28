@@ -117,6 +117,18 @@ function AgendamentosEntregaPage() {
   });
   const contatosFornecedor = (motoristas as any[]).slice(0, 2);
 
+  // Auto-preenche Motorista (1º contato) ao selecionar o Fornecedor
+  useEffect(() => {
+    if (!fornecedorId) return;
+    const primeiro = (motoristas as any[])[0];
+    if (!primeiro) return;
+    setHeader((h) => (h.nome_motorista ? h : {
+      ...h,
+      nome_motorista: primeiro.nome_completo ?? "",
+      celular_motorista: primeiro.celular ?? h.celular_motorista,
+    }));
+  }, [fornecedorId, motoristas]);
+
   function usarContato(m: any) {
     setHeader((h) => ({ ...h, nome_motorista: m.nome_completo ?? "", celular_motorista: m.celular ?? "" }));
   }
