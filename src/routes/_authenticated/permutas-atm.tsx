@@ -160,10 +160,10 @@ function PermutasAtm() {
 
           <Card className="p-0 overflow-hidden">
             <table className="excel-table">
-              <thead><tr><th>Data da Criação</th><th>Item</th><th className="num">Qtd</th><th>ATM Origem</th><th></th><th>ATM Destino</th><th>Técnico</th><th>Observações</th></tr></thead>
+              <thead><tr><th>Data da Criação</th><th>Item</th><th className="num">Qtd</th><th>ATM Origem</th><th>ATM Destino</th><th>Técnico</th><th>Observações</th></tr></thead>
               <tbody>
                 {filtradas.length === 0 && (
-                  <tr><td colSpan={8} className="text-center py-6 font-bold text-muted-foreground">Nenhuma permuta ATM registrada</td></tr>
+                  <tr><td colSpan={7} className="text-center py-6 font-bold text-muted-foreground">Nenhuma permuta ATM registrada</td></tr>
                 )}
                 {filtradas.map((m: any) => (
                   <tr key={m.id}>
@@ -171,7 +171,6 @@ function PermutasAtm() {
                     <td>{m.itens?.nome ?? "—"}</td>
                     <td className="num">{m.qtd}</td>
                     <td className="font-medium">{atmLabel(m.origem_id)}</td>
-                    <td className="text-center text-muted-foreground"><ArrowRightLeft className="inline h-3 w-3" /></td>
                     <td className="font-medium">{atmLabel(m.destino_id)}</td>
                     <td>{m.usuarios?.nome_completo ?? "—"}</td>
                     <td>{m.motivo_permuta ?? m.observacao ?? "—"}</td>
