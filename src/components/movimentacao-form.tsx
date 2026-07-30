@@ -58,6 +58,9 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   const [tCaixa, setTCaixa] = useState(true);
   const [t100, setT100] = useState(false);
   const [t50, setT50] = useState(false);
+  const [fornecedorId, setFornecedorId] = useState("");
+  const [transportadora, setTransportadora] = useState("");
+  const [motoristaId, setMotoristaId] = useState("");
 
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-mov"],
@@ -78,12 +81,34 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     queryKey: ["linhas-mov"],
     queryFn: async () => (await supabase.from("linhas").select("id, nome").order("nome")).data ?? [],
   });
+  const { data: fornecedores = [] } = useQuery({
+    queryKey: ["fornecedores-mov"],
+    queryFn: async () =>
+      (await supabase.from("fornecedores").select("id, razao_social").order("razao_social")).data ?? [],
+  });
+  const { data: motoristas = [] } = useQuery({
+    queryKey: ["motoristas-mov"],
+    queryFn: async () =>
+      (await supabase.from("motoristas").select("id, nome_completo, fornecedor_id").order("nome_completo")).data ?? [],
+  });
+  const { data: transportadoras = [] } = useQuery({
+    queryKey: ["transportadoras-mov"],
+    queryFn: async () => {
+      const { data } = await supabase.from("agendamentos_entrega").select("transportadora");
+      return Array.from(new Set((data ?? []).map((r: any) => r.transportadora).filter(Boolean))).sort() as string[];
+    },
+  });
 
   const locOptions = (t?: string) =>
     t === "CD" ? cds.map((c: any) => ({ id: c.id, label: c.nome }))
     : t === "ATM" ? atms.map((a: any) => ({ id: a.id, label: a.id_atm }))
     : t === "Linha" ? linhas.map((l: any) => ({ id: l.id, label: l.nome }))
     : [];
+
+
+  const motoristasFiltrados = (motoristas as any[]).filter(
+    (m) => !fornecedorId || m.fornecedor_id === fornecedorId,
+  );
 
   const bloqueiaOrigem = form.tipo === "Recebimento";
   const bloqueiaDestino = form.tipo === "Retirada";
@@ -107,6 +132,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   function limpar() {
     setForm({ ...empty, data: nowLocal() });
     setTCaixa(true); setT100(false); setT50(false);
+    setFornecedorId(""); setTransportadora(""); setMotoristaId("");
   }
 
   async function registrar() {
@@ -134,7 +160,17 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       destino_id: bloqueiaDestino || destinoLinha ? null : p.data.destino_id || null,
       linha_origem_id: origemLinha ? p.data.origem_id || null : null,
       linha_destino_id: destinoLinha ? p.data.destino_id || null : null,
-      observacao: p.data.observacao || null,
+      observacao: (() => {
+        if (!bloqueiaOrigem) return p.data.observacao || null;
+        const forn = (fornecedores as any[]).find((f) => f.id === fornecedorId)?.razao_social;
+        const moto = (motoristas as any[]).find((m) => m.id === motoristaId)?.nome_completo;
+        const extra = [
+          forn && `Fornecedor: ${forn}`,
+          transportadora && `Transportadora: ${transportadora}`,
+          moto && `Motorista: ${moto}`,
+        ].filter(Boolean).join(" | ");
+        return [p.data.observacao, extra].filter(Boolean).join(" — ") || null;
+      })(),
       tecnico_id: user?.id ?? null,
     };
     if (!online) {
@@ -183,7 +219,47 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
           </Select>
         </div>
 
-        {!bloqueiaOrigem && (
+        {bloqueiaOrigem ? (
+        <fieldset className="rounded border bg-white/60 p-2">
+          <legend className="text-[11px] font-semibold px-1">Origem (Fornecedor)</legend>
+          <div className="flex gap-2 flex-wrap">
+            <div className="w-52">
+              <Label className={labelC}>Fornecedor</Label>
+              <Select value={fornecedorId || undefined}
+                onValueChange={(v) => { setFornecedorId(v); setMotoristaId(""); }}>
+                <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {fornecedores.length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum fornecedor</SelectItem>
+                    : (fornecedores as any[]).map((f) => <SelectItem key={f.id} value={f.id}>{f.razao_social}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-44">
+              <Label className={labelC}>Transportadora</Label>
+              <Select value={transportadora || undefined} onValueChange={setTransportadora}>
+                <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {transportadoras.length === 0
+                    ? <SelectItem value="__none" disabled>Nenhuma transportadora</SelectItem>
+                    : (transportadoras as string[]).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-44">
+              <Label className={labelC}>Motorista</Label>
+              <Select value={motoristaId || undefined} onValueChange={setMotoristaId}>
+                <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {motoristasFiltrados.length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
+                    : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </fieldset>
+        ) : (
         <fieldset className="rounded border bg-white/60 p-2">
           <legend className="text-[11px] font-semibold px-1">Origem</legend>
           <div className="flex gap-2 flex-wrap">
@@ -201,12 +277,17 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
                 onValueChange={(v) => setForm({ ...form, origem_id: v })}
                 disabled={!form.origem_tipo}>
                 <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{locOptions(form.origem_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {locOptions(form.origem_tipo).length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum registro</SelectItem>
+                    : locOptions(form.origem_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
           </div>
         </fieldset>
         )}
+
 
         {!bloqueiaDestino && (
         <fieldset className="rounded border bg-white/60 p-2">
@@ -226,7 +307,11 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
                 onValueChange={(v) => setForm({ ...form, destino_id: v })}
                 disabled={!form.destino_tipo}>
                 <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{locOptions(form.destino_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {locOptions(form.destino_tipo).length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum registro</SelectItem>
+                    : locOptions(form.destino_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
           </div>
