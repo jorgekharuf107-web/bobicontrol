@@ -106,6 +106,10 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     : [];
 
 
+  const motoristasFiltrados = (motoristas as any[]).filter(
+    (m) => !fornecedorId || m.fornecedor_id === fornecedorId,
+  );
+
   const bloqueiaOrigem = form.tipo === "Recebimento";
   const bloqueiaDestino = form.tipo === "Retirada";
 
