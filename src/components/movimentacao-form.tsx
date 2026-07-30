@@ -125,6 +125,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   function limpar() {
     setForm({ ...empty, data: nowLocal() });
     setTCaixa(true); setT100(false); setT50(false);
+    setFornecedorId(""); setTransportadora(""); setMotoristaId("");
   }
 
   async function registrar() {
