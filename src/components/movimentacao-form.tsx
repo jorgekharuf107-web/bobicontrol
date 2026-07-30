@@ -205,7 +205,47 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
           </Select>
         </div>
 
-        {!bloqueiaOrigem && (
+        {bloqueiaOrigem ? (
+        <fieldset className="rounded border bg-white/60 p-2">
+          <legend className="text-[11px] font-semibold px-1">Origem (Fornecedor)</legend>
+          <div className="flex gap-2 flex-wrap">
+            <div className="w-52">
+              <Label className={labelC}>Fornecedor</Label>
+              <Select value={fornecedorId || undefined}
+                onValueChange={(v) => { setFornecedorId(v); setMotoristaId(""); }}>
+                <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {fornecedores.length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum fornecedor</SelectItem>
+                    : (fornecedores as any[]).map((f) => <SelectItem key={f.id} value={f.id}>{f.razao_social}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-44">
+              <Label className={labelC}>Transportadora</Label>
+              <Select value={transportadora || undefined} onValueChange={setTransportadora}>
+                <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {transportadoras.length === 0
+                    ? <SelectItem value="__none" disabled>Nenhuma transportadora</SelectItem>
+                    : (transportadoras as string[]).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-44">
+              <Label className={labelC}>Motorista</Label>
+              <Select value={motoristaId || undefined} onValueChange={setMotoristaId}>
+                <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {motoristasFiltrados.length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
+                    : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </fieldset>
+        ) : (
         <fieldset className="rounded border bg-white/60 p-2">
           <legend className="text-[11px] font-semibold px-1">Origem</legend>
           <div className="flex gap-2 flex-wrap">
@@ -223,12 +263,17 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
                 onValueChange={(v) => setForm({ ...form, origem_id: v })}
                 disabled={!form.origem_tipo}>
                 <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{locOptions(form.origem_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {locOptions(form.origem_tipo).length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum registro</SelectItem>
+                    : locOptions(form.origem_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
           </div>
         </fieldset>
         )}
+
 
         {!bloqueiaDestino && (
         <fieldset className="rounded border bg-white/60 p-2">
