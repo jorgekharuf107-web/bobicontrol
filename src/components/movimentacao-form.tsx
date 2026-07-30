@@ -58,6 +58,9 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   const [tCaixa, setTCaixa] = useState(true);
   const [t100, setT100] = useState(false);
   const [t50, setT50] = useState(false);
+  const [fornecedorId, setFornecedorId] = useState("");
+  const [transportadora, setTransportadora] = useState("");
+  const [motoristaId, setMotoristaId] = useState("");
 
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-mov"],
