@@ -307,7 +307,11 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
                 onValueChange={(v) => setForm({ ...form, destino_id: v })}
                 disabled={!form.destino_tipo}>
                 <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{locOptions(form.destino_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}</SelectContent>
+                <SelectContent>
+                  {locOptions(form.destino_tipo).length === 0
+                    ? <SelectItem value="__none" disabled>Nenhum registro</SelectItem>
+                    : locOptions(form.destino_tipo).map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
           </div>
