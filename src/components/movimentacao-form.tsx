@@ -149,6 +149,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     qc.invalidateQueries({ queryKey: ["movs-page"] });
     qc.invalidateQueries({ queryKey: ["movs-all"] });
     qc.invalidateQueries({ queryKey: ["saldo-itens"] });
+    qc.invalidateQueries({ queryKey: ["estoque"] });
     qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     onSaved?.();
   }
