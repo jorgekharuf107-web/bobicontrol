@@ -78,12 +78,30 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     queryKey: ["linhas-mov"],
     queryFn: async () => (await supabase.from("linhas").select("id, nome").order("nome")).data ?? [],
   });
+  const { data: fornecedores = [] } = useQuery({
+    queryKey: ["fornecedores-mov"],
+    queryFn: async () =>
+      (await supabase.from("fornecedores").select("id, razao_social").order("razao_social")).data ?? [],
+  });
+  const { data: motoristas = [] } = useQuery({
+    queryKey: ["motoristas-mov"],
+    queryFn: async () =>
+      (await supabase.from("motoristas").select("id, nome_completo, fornecedor_id").order("nome_completo")).data ?? [],
+  });
+  const { data: transportadoras = [] } = useQuery({
+    queryKey: ["transportadoras-mov"],
+    queryFn: async () => {
+      const { data } = await supabase.from("agendamentos_entrega").select("transportadora");
+      return Array.from(new Set((data ?? []).map((r: any) => r.transportadora).filter(Boolean))).sort() as string[];
+    },
+  });
 
   const locOptions = (t?: string) =>
     t === "CD" ? cds.map((c: any) => ({ id: c.id, label: c.nome }))
     : t === "ATM" ? atms.map((a: any) => ({ id: a.id, label: a.id_atm }))
     : t === "Linha" ? linhas.map((l: any) => ({ id: l.id, label: l.nome }))
     : [];
+
 
   const bloqueiaOrigem = form.tipo === "Recebimento";
   const bloqueiaDestino = form.tipo === "Retirada";
