@@ -160,7 +160,17 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       destino_id: bloqueiaDestino || destinoLinha ? null : p.data.destino_id || null,
       linha_origem_id: origemLinha ? p.data.origem_id || null : null,
       linha_destino_id: destinoLinha ? p.data.destino_id || null : null,
-      observacao: p.data.observacao || null,
+      observacao: (() => {
+        if (!bloqueiaOrigem) return p.data.observacao || null;
+        const forn = (fornecedores as any[]).find((f) => f.id === fornecedorId)?.razao_social;
+        const moto = (motoristas as any[]).find((m) => m.id === motoristaId)?.nome_completo;
+        const extra = [
+          forn && `Fornecedor: ${forn}`,
+          transportadora && `Transportadora: ${transportadora}`,
+          moto && `Motorista: ${moto}`,
+        ].filter(Boolean).join(" | ");
+        return [p.data.observacao, extra].filter(Boolean).join(" — ") || null;
+      })(),
       tecnico_id: user?.id ?? null,
     };
     if (!online) {
