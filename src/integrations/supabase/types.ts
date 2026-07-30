@@ -451,6 +451,53 @@ export type Database = {
           },
         ]
       }
+      estoque: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          id: string
+          item_id: string
+          local_id: string
+          local_tipo: string
+          qtd_bobina_100: number
+          qtd_bobina_50: number
+          qtd_caixas: number
+          total_bobinas: number
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          item_id: string
+          local_id: string
+          local_tipo: string
+          qtd_bobina_100?: number
+          qtd_bobina_50?: number
+          qtd_caixas?: number
+          total_bobinas?: number
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          item_id?: string
+          local_id?: string
+          local_tipo?: string
+          qtd_bobina_100?: number
+          qtd_bobina_50?: number
+          qtd_caixas?: number
+          total_bobinas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estoque_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fornecedores: {
         Row: {
           bairro: string | null
@@ -701,9 +748,11 @@ export type Database = {
           aprovado_por: string | null
           criado_em: string
           data: string
+          data_hora: string | null
           destino_id: string | null
           destino_tipo: Database["public"]["Enums"]["local_tipo"] | null
           id: string
+          id_item: string | null
           item_id: string | null
           linha_destino_id: string | null
           linha_origem_id: string | null
@@ -712,21 +761,27 @@ export type Database = {
           origem_id: string | null
           origem_tipo: Database["public"]["Enums"]["local_tipo"] | null
           qtd: number
+          qtd_avulsa_cheia: number | null
+          qtd_avulsa_parcial: number | null
           qtd_bobina_100: number
           qtd_bobina_50: number
+          qtd_caixa: number | null
           qtd_caixas: number
           status_aprovacao: string
           tecnico_id: string | null
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
+          tipo_mov: string | null
         }
         Insert: {
           aprovado_em?: string | null
           aprovado_por?: string | null
           criado_em?: string
           data?: string
+          data_hora?: string | null
           destino_id?: string | null
           destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           id?: string
+          id_item?: string | null
           item_id?: string | null
           linha_destino_id?: string | null
           linha_origem_id?: string | null
@@ -735,21 +790,27 @@ export type Database = {
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           qtd: number
+          qtd_avulsa_cheia?: number | null
+          qtd_avulsa_parcial?: number | null
           qtd_bobina_100?: number
           qtd_bobina_50?: number
+          qtd_caixa?: number | null
           qtd_caixas?: number
           status_aprovacao?: string
           tecnico_id?: string | null
           tipo: Database["public"]["Enums"]["movimentacao_tipo"]
+          tipo_mov?: string | null
         }
         Update: {
           aprovado_em?: string | null
           aprovado_por?: string | null
           criado_em?: string
           data?: string
+          data_hora?: string | null
           destino_id?: string | null
           destino_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           id?: string
+          id_item?: string | null
           item_id?: string | null
           linha_destino_id?: string | null
           linha_origem_id?: string | null
@@ -758,12 +819,16 @@ export type Database = {
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
           qtd?: number
+          qtd_avulsa_cheia?: number | null
+          qtd_avulsa_parcial?: number | null
           qtd_bobina_100?: number
           qtd_bobina_50?: number
+          qtd_caixa?: number | null
           qtd_caixas?: number
           status_aprovacao?: string
           tecnico_id?: string | null
           tipo?: Database["public"]["Enums"]["movimentacao_tipo"]
+          tipo_mov?: string | null
         }
         Relationships: [
           {
@@ -910,6 +975,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aplicar_saldo_estoque: {
+        Args: {
+          _b100: number
+          _b50: number
+          _caixas: number
+          _item_id: string
+          _local_id: string
+          _local_tipo: string
+          _sinal: number
+        }
+        Returns: undefined
+      }
       aprovar_movimentacao: {
         Args: { _aprovar: boolean; _id: string }
         Returns: undefined
