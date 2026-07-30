@@ -149,6 +149,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     qc.invalidateQueries({ queryKey: ["movs-page"] });
     qc.invalidateQueries({ queryKey: ["movs-all"] });
     qc.invalidateQueries({ queryKey: ["saldo-itens"] });
+    qc.invalidateQueries({ queryKey: ["estoque"] });
     qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     onSaved?.();
   }
@@ -182,7 +183,8 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
           </Select>
         </div>
 
-        <fieldset disabled={bloqueiaOrigem} className={`rounded border bg-white/60 p-2 ${bloqueiaOrigem ? "opacity-50" : ""}`}>
+        {!bloqueiaOrigem && (
+        <fieldset className="rounded border bg-white/60 p-2">
           <legend className="text-[11px] font-semibold px-1">Origem</legend>
           <div className="flex gap-2 flex-wrap">
             <div className="w-24">
@@ -204,8 +206,10 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
             </div>
           </div>
         </fieldset>
+        )}
 
-        <fieldset disabled={bloqueiaDestino} className={`rounded border bg-white/60 p-2 ${bloqueiaDestino ? "opacity-50" : ""}`}>
+        {!bloqueiaDestino && (
+        <fieldset className="rounded border bg-white/60 p-2">
           <legend className="text-[11px] font-semibold px-1">Destino</legend>
           <div className="flex gap-2 flex-wrap">
             <div className="w-24">
@@ -227,6 +231,8 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
             </div>
           </div>
         </fieldset>
+        )}
+
       </div>
 
       <div className="rounded-xl border-2 border-sky-300 p-3 space-y-2 [&_input]:bg-white [&_[role=combobox]]:bg-white" style={{ background: "#87CEEB" }}>

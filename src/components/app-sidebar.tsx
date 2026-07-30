@@ -25,8 +25,8 @@ const estoque: Item[] = [
   { title: "Permutas entre Linhas", to: "/permutas", icon: PackagePlus },
   { title: "Permutas entre ATM", to: "/permutas-atm", icon: PackagePlus },
   { title: "Itens de Estoque", to: "/itens-estoque", icon: Layers },
-  { title: "Auditoria", to: "/auditoria", icon: ClipboardList },
 ];
+
 
 const cadastros: Item[] = [
   { title: "Cadastro de ATM", to: "/atms", icon: Banknote },
