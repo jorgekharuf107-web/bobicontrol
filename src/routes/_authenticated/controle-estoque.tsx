@@ -95,6 +95,11 @@ function ControleEstoque() {
     queryKey: ["atms-sel"],
     queryFn: async () => (await supabase.from("atms").select("id, id_atm").order("id_atm")).data ?? [],
   });
+  const { data: estoque = [] } = useQuery({
+    queryKey: ["estoque"],
+    queryFn: async () => (await supabase.from("estoque").select("*")).data ?? [],
+  });
+
 
   function localOptions(tipo?: string) {
     if (tipo === "CD") return cds.map((c: any) => ({ id: c.id, label: c.nome }));
