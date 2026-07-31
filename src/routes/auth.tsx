@@ -120,8 +120,9 @@ function AuthPage() {
             </div>
             <h1 className="text-2xl font-semibold">Bobi Control</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Entre com sua conta para continuar
+              {cadastro ? "Crie sua conta para solicitar acesso" : "Entre com sua conta para continuar"}
             </p>
+
           </div>
 
           <form className="mt-6 space-y-3" onSubmit={signInEmail}>
