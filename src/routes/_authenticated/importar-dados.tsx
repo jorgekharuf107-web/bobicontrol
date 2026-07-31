@@ -48,11 +48,15 @@ type ImportCtx = {
   linhasByNome: Map<string, string>;
   cdsById: Set<string>;
   cdsByNome: Map<string, string>;
+  estacoesById: Set<string>;
   estacoesByNome: Map<string, string>;
   fornecedoresById: Set<string>;
   itensByCodigo: Map<string, string>;
   usuariosByEmail: Map<string, string>;
+  atmsByIdAtm: Set<string>;
+  usuarioAtual: string;
 };
+
 
 function norm(s: string) { return (s ?? "").trim().toLowerCase(); }
 function toBool(v: string, def = true): boolean {
