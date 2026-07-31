@@ -103,10 +103,11 @@ function AtmsPage() {
   async function salvar() {
     const p = atmSchema.safeParse(form);
     if (!p.success) return toast.error(p.error.issues[0].message);
-    const payload = { ...p.data, estacao_id: p.data.estacao_id || null, localizacao_detalhada: p.data.localizacao_detalhada || null, estacao: null };
+    const payload: any = { ...p.data, estacao_id: p.data.estacao_id || null, localizacao_detalhada: p.data.localizacao_detalhada || null, estacao: null };
     const { error } = editingId
       ? await supabase.from("atms").update(payload).eq("id", editingId)
-      : await supabase.from("atms").insert(payload);
+      : await supabase.from("atms").insert({ ...payload, usuario_atm: nome ?? null });
+
     if (error) return toast.error(error.message);
     toast.success(editingId ? "ATM atualizado" : "ATM criado");
     setOpen(false);
