@@ -151,8 +151,9 @@ function AuthPage() {
               </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full h-11">
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? (cadastro ? "Cadastrando..." : "Entrando...") : (cadastro ? "Cadastrar" : "Entrar")}
             </Button>
+
           </form>
 
           <div className="my-5 flex items-center gap-3">
