@@ -1,5 +1,5 @@
-const payload: any = { ...p.data, estacao_id: p.data.estacao_id || null, localizacao_detalhada: p.data.localizacao_detalhada || null, estacao: null };
-    if (!editingId) payload.usuario_atm = nome ?? null;import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
