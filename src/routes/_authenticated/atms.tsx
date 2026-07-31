@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+const payload: any = { ...p.data, estacao_id: p.data.estacao_id || null, localizacao_detalhada: p.data.localizacao_detalhada || null, estacao: null };
+    if (!editingId) payload.usuario_atm = nome ?? null;import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
@@ -15,6 +16,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
+import { useCurrentUser } from "@/lib/use-current-user";
+
+const MODELOS = ["MK", "MK Exclusiva", "MK NEO", "TCI", "TCI NEO", "Mini Wall"];
 
 export const Route = createFileRoute("/_authenticated/atms")({
   head: () => ({
@@ -213,7 +217,10 @@ function AtmsPage() {
               <Input value={form.id_atm} onChange={(e) => setForm({ ...form, id_atm: e.target.value })} />
             </div>
             <div><Label>Modelo</Label>
-              <Input placeholder="Ex: NCR SelfServ 88" value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })} />
+              <Select value={form.modelo || undefined} onValueChange={(v) => setForm({ ...form, modelo: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione o modelo" /></SelectTrigger>
+                <SelectContent>{MODELOS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
             <div><Label>Estação</Label>
               <Select value={form.estacao_id || undefined} onValueChange={(v) => setForm({ ...form, estacao_id: v })}>
