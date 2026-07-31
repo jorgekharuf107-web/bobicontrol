@@ -38,7 +38,7 @@ function Reposicao() {
   return (
     <div className="space-y-4 max-w-3xl">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <h1 className="text-2xl font-bold">Assistente de Reposição de Bobinas</h1>
       </div>
       <Card className="p-4 min-h-[400px] flex flex-col gap-3">

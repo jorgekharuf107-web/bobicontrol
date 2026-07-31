@@ -451,7 +451,7 @@ function ImportarDadosPage() {
             <span className="text-[11px] text-muted-foreground">{s.fields.length} campos aceitos</span>
             <input
               type="file"
-              accept=".csv,text/csv"
+              accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];

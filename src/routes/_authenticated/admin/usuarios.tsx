@@ -73,7 +73,7 @@ function UsuariosPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <h1 className="text-2xl font-semibold">Usuários</h1>
       </div>
 

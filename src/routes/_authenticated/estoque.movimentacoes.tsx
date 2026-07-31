@@ -89,7 +89,7 @@ function MovimentacoesPage() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <h1 className="text-xl font-bold">Nova Movimentação</h1>
       </div>
 

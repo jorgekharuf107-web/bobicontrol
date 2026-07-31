@@ -120,7 +120,7 @@ function PermutasAtm() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
-          <BackButton to="/dashboard" />
+          <BackButton />
           <div>
             <h1 className="text-2xl font-bold">Permutas entre ATM</h1>
             <p className="text-xs text-muted-foreground">Movimentação de bobinas de uma ATM para outra — baixa e entrada automáticas.</p>

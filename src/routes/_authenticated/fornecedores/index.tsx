@@ -60,7 +60,7 @@ function ListPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3"><BackButton to="/dashboard" /><h1 className="text-2xl font-semibold">Fornecedores</h1></div>
+        <div className="flex items-center gap-3"><BackButton /><h1 className="text-2xl font-semibold">Fornecedores</h1></div>
         <div className="flex items-center gap-2">
           <CsvExportButton
             rows={filtered}
