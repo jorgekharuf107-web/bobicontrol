@@ -48,11 +48,15 @@ type ImportCtx = {
   linhasByNome: Map<string, string>;
   cdsById: Set<string>;
   cdsByNome: Map<string, string>;
+  estacoesById: Set<string>;
   estacoesByNome: Map<string, string>;
   fornecedoresById: Set<string>;
   itensByCodigo: Map<string, string>;
   usuariosByEmail: Map<string, string>;
+  atmsByIdAtm: Set<string>;
+  usuarioAtual: string;
 };
+
 
 function norm(s: string) { return (s ?? "").trim().toLowerCase(); }
 function toBool(v: string, def = true): boolean {
@@ -184,37 +188,34 @@ const SPECS: EntitySpec[] = [
     label: "ATMs",
     table: "atms",
     fields: [
-      { header: "id_atm", description: "obrigatório" },
-      { header: "linha_id", description: "UUID ou nome da linha (obrigatório)" },
-      { header: "modelo", description: "" }, { header: "fabricante", description: "" },
-      { header: "estacao", description: "" }, { header: "capacidade_bobinas", description: "1-9" },
-      { header: "nivel_minimo", description: "" }, { header: "possui_cd", description: "Sim/Não" },
-      { header: "caixas", description: "" }, { header: "avulsas", description: "" },
+      { header: "ID_ATM", description: "obrigatório e único" },
+      { header: "MODELO", description: "nome/modelo (MK, MK NEO, TCI...)" },
+      { header: "LINHA_ID", description: "UUID ou nome da linha (obrigatório)" },
+      { header: "ESTACAO_ID", description: "UUID ou nome da estação" },
+      { header: "LOCALIZACAO_DETALHADA", description: "" },
     ],
     map: (r, ctx) => {
       const id_atm = pick(r, "id_atm", "id");
-      if (!id_atm) return { __error: "id_atm obrigatório" };
+      if (!id_atm) return { __error: "ID_ATM obrigatório" };
+      if (ctx.atmsByIdAtm.has(norm(id_atm))) return { __error: `ID_ATM já cadastrado: "${id_atm}"` };
       const linhaRaw = pick(r, "linha_id", "linha");
-      if (!linhaRaw) return { __error: "linha_id obrigatório" };
+      if (!linhaRaw) return { __error: "LINHA_ID obrigatório" };
       const linha_id = resolveLinhaId(linhaRaw, ctx);
       if (!linha_id) return { __error: `Linha não encontrada: "${linhaRaw}"` };
-      const cap = toInt(pick(r, "capacidade_bobinas", "capacidade"), 1);
+      const estRaw = pick(r, "estacao_id", "estacao");
+      const estacao_id = estRaw
+        ? (ctx.estacoesById.has(estRaw.trim()) ? estRaw.trim() : ctx.estacoesByNome.get(norm(estRaw)) ?? null)
+        : null;
+      if (estRaw && !estacao_id) return { __error: `Estação não encontrada: "${estRaw}"` };
       return {
-        id_atm, linha_id,
+        id_atm, linha_id, estacao_id,
         modelo: pick(r, "modelo") || null,
-        fabricante: pick(r, "fabricante") || null,
-        estacao: pick(r, "estacao") || null,
         localizacao_detalhada: pick(r, "localizacao_detalhada") || null,
-        capacidade_bobinas: Math.min(9, Math.max(1, cap)),
-        nivel_minimo: toInt(pick(r, "nivel_minimo")),
-        possui_cd: toBool(pick(r, "possui_cd"), false),
-        caixas: toInt(pick(r, "caixas")),
-        avulsas: toInt(pick(r, "avulsas")),
-        atm_ativo_sim_nao: toBool(pick(r, "atm_ativo_sim_nao", "ativo"), true),
-        status_operacional: (norm(pick(r, "status_operacional")) as any) || "operacional",
+        usuario_atm: ctx.usuarioAtual || null,
       };
     },
   },
+
   {
     key: "itens",
     label: "Itens",
@@ -306,7 +307,7 @@ const SPECS: EntitySpec[] = [
 
 function ImportarDadosPage() {
   const router = useRouter();
-  const { isAdmin, loading } = useCurrentUser();
+  const { isSuperAdmin, nome, loading } = useCurrentUser();
   const [ctx, setCtx] = useState<ImportCtx | null>(null);
   const [active, setActive] = useState<EntityKey | null>(null);
   const [preview, setPreview] = useState<MapResult[]>([]);
@@ -314,30 +315,35 @@ function ImportarDadosPage() {
   const [report, setReport] = useState<{ ok: number; fail: number; errors: string[] } | null>(null);
 
   useEffect(() => {
-    if (!loading && !isAdmin) router.navigate({ to: "/dashboard", replace: true });
-  }, [loading, isAdmin, router]);
+    if (!loading && !isSuperAdmin) router.navigate({ to: "/dashboard", replace: true });
+  }, [loading, isSuperAdmin, router]);
 
-  useEffect(() => { void loadCtx(); }, []);
+  useEffect(() => { void loadCtx(); }, [nome]);
   async function loadCtx() {
-    const [linhas, cds, estacoes, forn, itens, usu] = await Promise.all([
+    const [linhas, cds, estacoes, forn, itens, usu, atms] = await Promise.all([
       supabase.from("linhas").select("id,nome"),
       supabase.from("cds").select("id,nome_cd"),
       supabase.from("estacoes").select("id,nome"),
       supabase.from("fornecedores").select("id"),
       supabase.from("itens").select("id,codigo"),
       supabase.from("usuarios").select("id,email"),
+      supabase.from("atms").select("id_atm"),
     ]);
     setCtx({
       linhasById: new Set((linhas.data ?? []).map((x: any) => x.id)),
       linhasByNome: new Map((linhas.data ?? []).map((x: any) => [norm(x.nome), x.id])),
       cdsById: new Set((cds.data ?? []).map((x: any) => x.id)),
       cdsByNome: new Map((cds.data ?? []).map((x: any) => [norm(x.nome_cd), x.id])),
+      estacoesById: new Set((estacoes.data ?? []).map((x: any) => x.id)),
       estacoesByNome: new Map((estacoes.data ?? []).map((x: any) => [norm(x.nome), x.id])),
       fornecedoresById: new Set((forn.data ?? []).map((x: any) => x.id)),
       itensByCodigo: new Map((itens.data ?? []).map((x: any) => [norm(x.codigo), x.id])),
       usuariosByEmail: new Map((usu.data ?? []).map((x: any) => [norm(x.email), x.id])),
+      atmsByIdAtm: new Set((atms.data ?? []).map((x: any) => norm(x.id_atm))),
+      usuarioAtual: nome ?? "",
     });
   }
+
 
   const spec = useMemo(() => SPECS.find((s) => s.key === active) ?? null, [active]);
 
@@ -346,21 +352,38 @@ function ImportarDadosPage() {
     const s = SPECS.find((x) => x.key === key)!;
     setActive(key); setReport(null);
     try {
-      const text = await file.text();
-      const rows = parseCSV(text);
-      if (rows.length === 0) { toast.error("CSV vazio"); setPreview([]); return; }
+      let rows: Record<string, string>[];
+      if (/\.xlsx?$/i.test(file.name)) {
+        const XLSX = await import("xlsx");
+        const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: "", raw: false })
+          .map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [String(k).trim(), String(v ?? "").trim()])));
+      } else {
+        rows = parseCSV(await file.text(), ";");
+      }
+      if (rows.length === 0) { toast.error("Arquivo vazio"); setPreview([]); return; }
+      const vistos = new Set<string>();
       const mapped: MapResult[] = rows.map((r, i) => {
         const out = s.map(r, ctx);
         if ((out as any).__error) return { row: r, error: (out as any).__error, lineNumber: i + 2 };
-        return { row: out as Record<string, any>, lineNumber: i + 2 };
+        const rec = out as Record<string, any>;
+        if (key === "atms") {
+          const chave = norm(String(rec.id_atm ?? ""));
+          if (vistos.has(chave)) return { row: rec, error: `ID_ATM duplicado no arquivo: "${rec.id_atm}"`, lineNumber: i + 2 };
+          vistos.add(chave);
+        }
+        return { row: rec, lineNumber: i + 2 };
       });
       setPreview(mapped);
       const bad = mapped.filter((m) => m.error).length;
       toast.success(`${mapped.length} linhas lidas${bad ? ` — ${bad} com erro` : ""}`);
+      if (bad) toast.error(mapped.find((m) => m.error)!.error!);
     } catch (e: any) {
-      toast.error(`Erro ao ler CSV: ${e.message}`);
+      toast.error(`Erro ao ler arquivo: ${e.message}`);
     }
   }
+
 
   async function importar() {
     if (!spec || !preview.length) return;
@@ -403,17 +426,18 @@ function ImportarDadosPage() {
   }, [preview]);
 
   if (loading) return <div className="p-6 text-muted-foreground">Carregando…</div>;
-  if (!isAdmin) return null;
+  if (!isSuperAdmin) return null;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <div>
-          <h1 className="text-2xl font-semibold">Importar Dados (CSV)</h1>
-          <p className="text-sm text-muted-foreground">Somente Administradores. CSV com separador <code>;</code>.</p>
+          <h1 className="text-2xl font-semibold">Importar Dados</h1>
+          <p className="text-sm text-muted-foreground">Somente Super Administrador. CSV (separador <code>;</code>) ou XLSX.</p>
         </div>
       </div>
+
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {SPECS.map((s) => (
@@ -427,7 +451,7 @@ function ImportarDadosPage() {
             <span className="text-[11px] text-muted-foreground">{s.fields.length} campos aceitos</span>
             <input
               type="file"
-              accept=".csv,text/csv"
+              accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];

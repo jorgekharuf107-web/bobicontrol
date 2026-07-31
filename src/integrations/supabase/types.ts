@@ -161,7 +161,6 @@ export type Database = {
           criado_em: string
           estacao: string | null
           estacao_id: string | null
-          fabricante: string | null
           id: string
           id_atm: string
           linha_id: string | null
@@ -170,6 +169,7 @@ export type Database = {
           nivel_minimo: number
           possui_cd: boolean
           status_operacional: Database["public"]["Enums"]["status_operacional"]
+          usuario_atm: string | null
         }
         Insert: {
           atm_ativo_sim_nao?: boolean
@@ -180,7 +180,6 @@ export type Database = {
           criado_em?: string
           estacao?: string | null
           estacao_id?: string | null
-          fabricante?: string | null
           id?: string
           id_atm: string
           linha_id?: string | null
@@ -189,6 +188,7 @@ export type Database = {
           nivel_minimo?: number
           possui_cd?: boolean
           status_operacional?: Database["public"]["Enums"]["status_operacional"]
+          usuario_atm?: string | null
         }
         Update: {
           atm_ativo_sim_nao?: boolean
@@ -199,7 +199,6 @@ export type Database = {
           criado_em?: string
           estacao?: string | null
           estacao_id?: string | null
-          fabricante?: string | null
           id?: string
           id_atm?: string
           linha_id?: string | null
@@ -208,6 +207,7 @@ export type Database = {
           nivel_minimo?: number
           possui_cd?: boolean
           status_operacional?: Database["public"]["Enums"]["status_operacional"]
+          usuario_atm?: string | null
         }
         Relationships: [
           {

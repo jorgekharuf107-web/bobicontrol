@@ -11,6 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    modo: s.modo === "cadastro" ? ("cadastro" as const) : ("login" as const),
+  }),
   head: () => ({
     meta: [
       { title: "Entrar | Bobi Control" },
@@ -26,6 +29,7 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   component: AuthPage,
 });
+
 
 function GoogleIcon() {
   return (
@@ -51,15 +55,11 @@ function MicrosoftIcon() {
 
 function AuthPage() {
   const router = useRouter();
+  const { modo } = Route.useSearch();
+  const cadastro = modo === "cadastro";
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) router.navigate({ to: "/dashboard", replace: true });
-    });
-  }, [router]);
 
   async function signInGoogle() {
     setLoading(true);
@@ -82,6 +82,21 @@ function AuthPage() {
       return;
     }
     setLoading(true);
+    if (cadastro) {
+      const { error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password: senha,
+        options: { emailRedirectTo: `${window.location.origin}/auth` },
+      });
+      setLoading(false);
+      if (error) {
+        toast.error("Falha no cadastro", { description: error.message });
+        return;
+      }
+      toast.success("Cadastro realizado", { description: "Verifique seu email para confirmar a conta." });
+      router.navigate({ to: "/auth", search: { modo: "login" }, replace: true });
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password: senha,
@@ -94,6 +109,7 @@ function AuthPage() {
     router.navigate({ to: "/dashboard", replace: true });
   }
 
+
   return (
     <TooltipProvider>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/30 px-4 py-6">
@@ -104,8 +120,9 @@ function AuthPage() {
             </div>
             <h1 className="text-2xl font-semibold">Bobi Control</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Entre com sua conta para continuar
+              {cadastro ? "Crie sua conta para solicitar acesso" : "Entre com sua conta para continuar"}
             </p>
+
           </div>
 
           <form className="mt-6 space-y-3" onSubmit={signInEmail}>
@@ -134,8 +151,9 @@ function AuthPage() {
               </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full h-11">
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? (cadastro ? "Cadastrando..." : "Entrando...") : (cadastro ? "Cadastrar" : "Entrar")}
             </Button>
+
           </form>
 
           <div className="my-5 flex items-center gap-3">

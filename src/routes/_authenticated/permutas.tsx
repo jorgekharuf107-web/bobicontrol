@@ -131,7 +131,7 @@ function Permutas() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
-          <BackButton to="/dashboard" />
+          <BackButton />
           <h1 className="text-2xl font-bold">Permutas entre Linhas</h1>
         </div>
         <CsvExportButton

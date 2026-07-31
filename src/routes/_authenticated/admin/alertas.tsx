@@ -85,7 +85,7 @@ function AlertasPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3"><BackButton to="/dashboard" /><h1 className="text-2xl font-semibold">Configuração de Alertas</h1></div>
+        <div className="flex items-center gap-3"><BackButton /><h1 className="text-2xl font-semibold">Configuração de Alertas</h1></div>
         <Button onClick={startCreate}><Plus className="h-4 w-4" /> Nova configuração</Button>
       </div>
 

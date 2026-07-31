@@ -39,7 +39,7 @@ function RelatorioGerencial() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <div>
           <h1 className="text-2xl font-bold">Relatório Gerencial - Status dos ATMs</h1>
           <p className="text-sm text-muted-foreground">Acompanhamento crítico do estoque de bobinas</p>

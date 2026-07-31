@@ -39,10 +39,10 @@ const adminBase: Item[] = [
   { title: "Configuração de Alertas", to: "/admin/alertas", icon: Bell },
   { title: "Auditoria", to: "/admin/auditoria", icon: ClipboardList },
   { title: "Usuários", to: "/admin/usuarios", icon: Users },
-  { title: "Importar Dados", to: "/importar-dados", icon: Upload },
 ];
 
 const adminSuper: Item[] = [
+  { title: "Importar Dados", to: "/importar-dados", icon: Upload },
   { title: "Importador Corporativo", to: "/importador-corporativo", icon: Cloud },
   { title: "Backup", to: "/admin/backup", icon: Database },
 ];

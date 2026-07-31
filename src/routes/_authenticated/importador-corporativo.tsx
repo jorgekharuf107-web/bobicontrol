@@ -188,7 +188,7 @@ function ImportadorCorporativoPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <Cloud className="h-6 w-6" /> Importador de Dados Corporativo

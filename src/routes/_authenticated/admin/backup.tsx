@@ -152,7 +152,7 @@ function BackupPage() {
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <h1 className="text-2xl font-semibold">Backup</h1>
       </div>
 
