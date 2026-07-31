@@ -426,17 +426,18 @@ function ImportarDadosPage() {
   }, [preview]);
 
   if (loading) return <div className="p-6 text-muted-foreground">Carregando…</div>;
-  if (!isAdmin) return null;
+  if (!isSuperAdmin) return null;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <BackButton to="/dashboard" />
+        <BackButton />
         <div>
-          <h1 className="text-2xl font-semibold">Importar Dados (CSV)</h1>
-          <p className="text-sm text-muted-foreground">Somente Administradores. CSV com separador <code>;</code>.</p>
+          <h1 className="text-2xl font-semibold">Importar Dados</h1>
+          <p className="text-sm text-muted-foreground">Somente Super Administrador. CSV (separador <code>;</code>) ou XLSX.</p>
         </div>
       </div>
+
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {SPECS.map((s) => (
