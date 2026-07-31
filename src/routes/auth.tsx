@@ -11,6 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    modo: s.modo === "cadastro" ? ("cadastro" as const) : ("login" as const),
+  }),
   head: () => ({
     meta: [
       { title: "Entrar | Bobi Control" },
@@ -26,6 +29,7 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   component: AuthPage,
 });
+
 
 function GoogleIcon() {
   return (
