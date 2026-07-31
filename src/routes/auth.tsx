@@ -55,15 +55,11 @@ function MicrosoftIcon() {
 
 function AuthPage() {
   const router = useRouter();
+  const { modo } = Route.useSearch();
+  const cadastro = modo === "cadastro";
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) router.navigate({ to: "/dashboard", replace: true });
-    });
-  }, [router]);
 
   async function signInGoogle() {
     setLoading(true);
@@ -86,6 +82,21 @@ function AuthPage() {
       return;
     }
     setLoading(true);
+    if (cadastro) {
+      const { error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password: senha,
+        options: { emailRedirectTo: `${window.location.origin}/auth` },
+      });
+      setLoading(false);
+      if (error) {
+        toast.error("Falha no cadastro", { description: error.message });
+        return;
+      }
+      toast.success("Cadastro realizado", { description: "Verifique seu email para confirmar a conta." });
+      router.navigate({ to: "/auth", search: { modo: "login" }, replace: true });
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password: senha,
@@ -97,6 +108,7 @@ function AuthPage() {
     }
     router.navigate({ to: "/dashboard", replace: true });
   }
+
 
   return (
     <TooltipProvider>
