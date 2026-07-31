@@ -57,7 +57,9 @@ type AtmForm = z.infer<typeof atmSchema>;
 const empty: AtmForm = { id_atm: "", modelo: "", estacao_id: "", linha_id: "", localizacao_detalhada: "", capacidade_bobinas: 1, nivel_minimo: 1, status_operacional: "operacional", atm_ativo_sim_nao: true, possui_cd: false };
 
 function AtmsPage() {
+  const { nome } = useCurrentUser();
   const qc = useQueryClient();
+
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AtmForm>(empty);
