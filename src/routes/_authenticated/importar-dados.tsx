@@ -307,7 +307,7 @@ const SPECS: EntitySpec[] = [
 
 function ImportarDadosPage() {
   const router = useRouter();
-  const { isAdmin, loading } = useCurrentUser();
+  const { isSuperAdmin, nome, loading } = useCurrentUser();
   const [ctx, setCtx] = useState<ImportCtx | null>(null);
   const [active, setActive] = useState<EntityKey | null>(null);
   const [preview, setPreview] = useState<MapResult[]>([]);
@@ -315,30 +315,35 @@ function ImportarDadosPage() {
   const [report, setReport] = useState<{ ok: number; fail: number; errors: string[] } | null>(null);
 
   useEffect(() => {
-    if (!loading && !isAdmin) router.navigate({ to: "/dashboard", replace: true });
-  }, [loading, isAdmin, router]);
+    if (!loading && !isSuperAdmin) router.navigate({ to: "/dashboard", replace: true });
+  }, [loading, isSuperAdmin, router]);
 
-  useEffect(() => { void loadCtx(); }, []);
+  useEffect(() => { void loadCtx(); }, [nome]);
   async function loadCtx() {
-    const [linhas, cds, estacoes, forn, itens, usu] = await Promise.all([
+    const [linhas, cds, estacoes, forn, itens, usu, atms] = await Promise.all([
       supabase.from("linhas").select("id,nome"),
       supabase.from("cds").select("id,nome_cd"),
       supabase.from("estacoes").select("id,nome"),
       supabase.from("fornecedores").select("id"),
       supabase.from("itens").select("id,codigo"),
       supabase.from("usuarios").select("id,email"),
+      supabase.from("atms").select("id_atm"),
     ]);
     setCtx({
       linhasById: new Set((linhas.data ?? []).map((x: any) => x.id)),
       linhasByNome: new Map((linhas.data ?? []).map((x: any) => [norm(x.nome), x.id])),
       cdsById: new Set((cds.data ?? []).map((x: any) => x.id)),
       cdsByNome: new Map((cds.data ?? []).map((x: any) => [norm(x.nome_cd), x.id])),
+      estacoesById: new Set((estacoes.data ?? []).map((x: any) => x.id)),
       estacoesByNome: new Map((estacoes.data ?? []).map((x: any) => [norm(x.nome), x.id])),
       fornecedoresById: new Set((forn.data ?? []).map((x: any) => x.id)),
       itensByCodigo: new Map((itens.data ?? []).map((x: any) => [norm(x.codigo), x.id])),
       usuariosByEmail: new Map((usu.data ?? []).map((x: any) => [norm(x.email), x.id])),
+      atmsByIdAtm: new Set((atms.data ?? []).map((x: any) => norm(x.id_atm))),
+      usuarioAtual: nome ?? "",
     });
   }
+
 
   const spec = useMemo(() => SPECS.find((s) => s.key === active) ?? null, [active]);
 
