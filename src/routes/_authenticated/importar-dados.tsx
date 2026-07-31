@@ -352,21 +352,38 @@ function ImportarDadosPage() {
     const s = SPECS.find((x) => x.key === key)!;
     setActive(key); setReport(null);
     try {
-      const text = await file.text();
-      const rows = parseCSV(text);
-      if (rows.length === 0) { toast.error("CSV vazio"); setPreview([]); return; }
+      let rows: Record<string, string>[];
+      if (/\.xlsx?$/i.test(file.name)) {
+        const XLSX = await import("xlsx");
+        const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        rows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: "", raw: false })
+          .map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [String(k).trim(), String(v ?? "").trim()])));
+      } else {
+        rows = parseCSV(await file.text(), ";");
+      }
+      if (rows.length === 0) { toast.error("Arquivo vazio"); setPreview([]); return; }
+      const vistos = new Set<string>();
       const mapped: MapResult[] = rows.map((r, i) => {
         const out = s.map(r, ctx);
         if ((out as any).__error) return { row: r, error: (out as any).__error, lineNumber: i + 2 };
-        return { row: out as Record<string, any>, lineNumber: i + 2 };
+        const rec = out as Record<string, any>;
+        if (key === "atms") {
+          const chave = norm(String(rec.id_atm ?? ""));
+          if (vistos.has(chave)) return { row: rec, error: `ID_ATM duplicado no arquivo: "${rec.id_atm}"`, lineNumber: i + 2 };
+          vistos.add(chave);
+        }
+        return { row: rec, lineNumber: i + 2 };
       });
       setPreview(mapped);
       const bad = mapped.filter((m) => m.error).length;
       toast.success(`${mapped.length} linhas lidas${bad ? ` — ${bad} com erro` : ""}`);
+      if (bad) toast.error(mapped.find((m) => m.error)!.error!);
     } catch (e: any) {
-      toast.error(`Erro ao ler CSV: ${e.message}`);
+      toast.error(`Erro ao ler arquivo: ${e.message}`);
     }
   }
+
 
   async function importar() {
     if (!spec || !preview.length) return;
