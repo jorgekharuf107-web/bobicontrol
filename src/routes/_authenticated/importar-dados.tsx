@@ -184,37 +184,34 @@ const SPECS: EntitySpec[] = [
     label: "ATMs",
     table: "atms",
     fields: [
-      { header: "id_atm", description: "obrigatório" },
-      { header: "linha_id", description: "UUID ou nome da linha (obrigatório)" },
-      { header: "modelo", description: "" }, { header: "fabricante", description: "" },
-      { header: "estacao", description: "" }, { header: "capacidade_bobinas", description: "1-9" },
-      { header: "nivel_minimo", description: "" }, { header: "possui_cd", description: "Sim/Não" },
-      { header: "caixas", description: "" }, { header: "avulsas", description: "" },
+      { header: "ID_ATM", description: "obrigatório e único" },
+      { header: "MODELO", description: "nome/modelo (MK, MK NEO, TCI...)" },
+      { header: "LINHA_ID", description: "UUID ou nome da linha (obrigatório)" },
+      { header: "ESTACAO_ID", description: "UUID ou nome da estação" },
+      { header: "LOCALIZACAO_DETALHADA", description: "" },
     ],
     map: (r, ctx) => {
       const id_atm = pick(r, "id_atm", "id");
-      if (!id_atm) return { __error: "id_atm obrigatório" };
+      if (!id_atm) return { __error: "ID_ATM obrigatório" };
+      if (ctx.atmsByIdAtm.has(norm(id_atm))) return { __error: `ID_ATM já cadastrado: "${id_atm}"` };
       const linhaRaw = pick(r, "linha_id", "linha");
-      if (!linhaRaw) return { __error: "linha_id obrigatório" };
+      if (!linhaRaw) return { __error: "LINHA_ID obrigatório" };
       const linha_id = resolveLinhaId(linhaRaw, ctx);
       if (!linha_id) return { __error: `Linha não encontrada: "${linhaRaw}"` };
-      const cap = toInt(pick(r, "capacidade_bobinas", "capacidade"), 1);
+      const estRaw = pick(r, "estacao_id", "estacao");
+      const estacao_id = estRaw
+        ? (ctx.estacoesById.has(estRaw.trim()) ? estRaw.trim() : ctx.estacoesByNome.get(norm(estRaw)) ?? null)
+        : null;
+      if (estRaw && !estacao_id) return { __error: `Estação não encontrada: "${estRaw}"` };
       return {
-        id_atm, linha_id,
+        id_atm, linha_id, estacao_id,
         modelo: pick(r, "modelo") || null,
-        fabricante: pick(r, "fabricante") || null,
-        estacao: pick(r, "estacao") || null,
         localizacao_detalhada: pick(r, "localizacao_detalhada") || null,
-        capacidade_bobinas: Math.min(9, Math.max(1, cap)),
-        nivel_minimo: toInt(pick(r, "nivel_minimo")),
-        possui_cd: toBool(pick(r, "possui_cd"), false),
-        caixas: toInt(pick(r, "caixas")),
-        avulsas: toInt(pick(r, "avulsas")),
-        atm_ativo_sim_nao: toBool(pick(r, "atm_ativo_sim_nao", "ativo"), true),
-        status_operacional: (norm(pick(r, "status_operacional")) as any) || "operacional",
+        usuario_atm: ctx.usuarioAtual || null,
       };
     },
   },
+
   {
     key: "itens",
     label: "Itens",
