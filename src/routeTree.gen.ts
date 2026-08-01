@@ -19,6 +19,7 @@ import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCdsRouteImport } from './routes/_authenticated/cds'
 import { Route as AuthenticatedControleEstoqueRouteImport } from './routes/_authenticated/controle-estoque'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDiversosRouteImport } from './routes/_authenticated/diversos'
 import { Route as AuthenticatedEstacoesRouteImport } from './routes/_authenticated/estacoes'
 import { Route as AuthenticatedImportadorCorporativoRouteImport } from './routes/_authenticated/importador-corporativo'
 import { Route as AuthenticatedImportarDadosRouteImport } from './routes/_authenticated/importar-dados'
@@ -89,6 +90,11 @@ const AuthenticatedControleEstoqueRoute =
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDiversosRoute = AuthenticatedDiversosRouteImport.update({
+  id: '/diversos',
+  path: '/diversos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEstacoesRoute = AuthenticatedEstacoesRouteImport.update({
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/cds': typeof AuthenticatedCdsRoute
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/diversos': typeof AuthenticatedDiversosRoute
   '/estacoes': typeof AuthenticatedEstacoesRoute
   '/importador-corporativo': typeof AuthenticatedImportadorCorporativoRoute
   '/importar-dados': typeof AuthenticatedImportarDadosRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/cds': typeof AuthenticatedCdsRoute
   '/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/diversos': typeof AuthenticatedDiversosRoute
   '/estacoes': typeof AuthenticatedEstacoesRoute
   '/importador-corporativo': typeof AuthenticatedImportadorCorporativoRoute
   '/importar-dados': typeof AuthenticatedImportarDadosRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/_authenticated/cds': typeof AuthenticatedCdsRoute
   '/_authenticated/controle-estoque': typeof AuthenticatedControleEstoqueRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/diversos': typeof AuthenticatedDiversosRoute
   '/_authenticated/estacoes': typeof AuthenticatedEstacoesRoute
   '/_authenticated/importador-corporativo': typeof AuthenticatedImportadorCorporativoRoute
   '/_authenticated/importar-dados': typeof AuthenticatedImportarDadosRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/cds'
     | '/controle-estoque'
     | '/dashboard'
+    | '/diversos'
     | '/estacoes'
     | '/importador-corporativo'
     | '/importar-dados'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/cds'
     | '/controle-estoque'
     | '/dashboard'
+    | '/diversos'
     | '/estacoes'
     | '/importador-corporativo'
     | '/importar-dados'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cds'
     | '/_authenticated/controle-estoque'
     | '/_authenticated/dashboard'
+    | '/_authenticated/diversos'
     | '/_authenticated/estacoes'
     | '/_authenticated/importador-corporativo'
     | '/_authenticated/importar-dados'
@@ -477,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/diversos': {
+      id: '/_authenticated/diversos'
+      path: '/diversos'
+      fullPath: '/diversos'
+      preLoaderRoute: typeof AuthenticatedDiversosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/estacoes': {
@@ -629,6 +648,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCdsRoute: typeof AuthenticatedCdsRoute
   AuthenticatedControleEstoqueRoute: typeof AuthenticatedControleEstoqueRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDiversosRoute: typeof AuthenticatedDiversosRoute
   AuthenticatedEstacoesRoute: typeof AuthenticatedEstacoesRoute
   AuthenticatedImportadorCorporativoRoute: typeof AuthenticatedImportadorCorporativoRoute
   AuthenticatedImportarDadosRoute: typeof AuthenticatedImportarDadosRoute
@@ -657,6 +677,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCdsRoute: AuthenticatedCdsRoute,
   AuthenticatedControleEstoqueRoute: AuthenticatedControleEstoqueRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDiversosRoute: AuthenticatedDiversosRoute,
   AuthenticatedEstacoesRoute: AuthenticatedEstacoesRoute,
   AuthenticatedImportadorCorporativoRoute:
     AuthenticatedImportadorCorporativoRoute,

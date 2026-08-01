@@ -12,7 +12,7 @@ import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
-    modo: s.modo === "cadastro" ? ("cadastro" as const) : ("login" as const),
+    destino: s.destino === "diversos" ? ("diversos" as const) : ("dashboard" as const),
   }),
   head: () => ({
     meta: [
