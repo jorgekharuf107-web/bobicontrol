@@ -106,7 +106,7 @@ function AuthPage() {
             </div>
             <h1 className="text-2xl font-semibold">Bobi Control</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {cadastro ? "Crie sua conta para solicitar acesso" : "Entre com sua conta para continuar"}
+              Entre com sua conta para continuar
             </p>
 
           </div>
@@ -137,7 +137,7 @@ function AuthPage() {
               </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full h-11">
-              {loading ? (cadastro ? "Cadastrando..." : "Entrando...") : (cadastro ? "Cadastrar" : "Entrar")}
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
 
           </form>
