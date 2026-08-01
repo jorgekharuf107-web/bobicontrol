@@ -15,7 +15,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAccessibleLinhas } from "@/lib/use-accessible-linhas";
 import { useCurrentUser } from "@/lib/use-current-user";
-import { AssistenteReposicao } from "@/components/assistente-reposicao";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -395,7 +394,6 @@ function Dashboard() {
         <TopList title="Atuações por Técnico" items={atuacoesPorTecnico} fg="#0f172a" bg="#f8fafc" />
       </div>
 
-      <AssistenteReposicao />
 
       <p className="text-center text-xs text-muted-foreground">
         {critico === 0 ? "Nenhum ATM crítico" : `${critico} ATM(s) crítico(s)`}

@@ -16,7 +16,7 @@ type Item = { title: string; to: string; icon: React.ComponentType<{ className?:
 const principal: Item[] = [
   { title: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { title: "Relatório Gerencial", to: "/relatorio-gerencial", icon: FileBarChart },
-  { title: "Reposição de Bobinas", to: "/reposicao-bobinas", icon: PackagePlus },
+  { title: "Assistente de Reposição", to: "/reposicao-bobinas", icon: PackagePlus },
 ];
 const estoque: Item[] = [
   { title: "Nova Movimentação", to: "/estoque/movimentacoes", icon: PackagePlus },

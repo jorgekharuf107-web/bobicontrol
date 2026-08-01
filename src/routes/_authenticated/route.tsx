@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouter, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -30,7 +30,7 @@ function papelBadge(p: string | null) {
   return "bg-green-100 text-green-800 border-green-200";
 }
 
-function TopHeader() {
+function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
   const router = useRouter();
   const { nome, perfil, user } = useCurrentUser();
   const display = nome ?? user?.email ?? "Usuário";
@@ -47,14 +47,16 @@ function TopHeader() {
 
   return (
     <header className="h-14 border-b bg-card flex items-center px-4 sm:px-6 gap-3">
-      <button
-        type="button"
-        onClick={isMobile ? toggleMobile : toggleDesktop}
-        aria-label={isMobile ? "Abrir menu" : desktopOpen ? "Recolher menu" : "Expandir menu"}
-        className="h-10 w-10 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
-      >
-        <Menu className="h-7 w-7 text-green-600" strokeWidth={2.75} />
-      </button>
+      {showMenu && (
+        <button
+          type="button"
+          onClick={isMobile ? toggleMobile : toggleDesktop}
+          aria-label={isMobile ? "Abrir menu" : desktopOpen ? "Recolher menu" : "Expandir menu"}
+          className="h-10 w-10 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
+        >
+          <Menu className="h-7 w-7 text-green-600" strokeWidth={2.75} />
+        </button>
+      )}
       <div className="flex-1" />
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
 
@@ -90,12 +92,14 @@ function TopHeader() {
 }
 
 function AuthenticatedLayout() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const emDiversos = pathname.startsWith("/diversos");
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
+        {!emDiversos && <AppSidebar />}
         <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col">
-          <TopHeader />
+          <TopHeader showMenu={!emDiversos} />
           <div className="max-w-7xl mx-auto p-6 w-full flex-1">
             <Outlet />
           </div>
