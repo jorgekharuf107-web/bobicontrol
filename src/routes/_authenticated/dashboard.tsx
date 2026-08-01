@@ -395,7 +395,6 @@ function Dashboard() {
         <TopList title="Atuações por Técnico" items={atuacoesPorTecnico} fg="#0f172a" bg="#f8fafc" />
       </div>
 
-      <AssistenteReposicao />
 
       <p className="text-center text-xs text-muted-foreground">
         {critico === 0 ? "Nenhum ATM crítico" : `${critico} ATM(s) crítico(s)`}
