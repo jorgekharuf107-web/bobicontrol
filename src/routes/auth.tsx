@@ -12,7 +12,7 @@ import { lovable } from "@/integrations/lovable/index";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
-    modo: s.modo === "cadastro" ? ("cadastro" as const) : ("login" as const),
+    destino: s.destino === "diversos" ? ("diversos" as const) : ("dashboard" as const),
   }),
   head: () => ({
     meta: [
@@ -55,8 +55,8 @@ function MicrosoftIcon() {
 
 function AuthPage() {
   const router = useRouter();
-  const { modo } = Route.useSearch();
-  const cadastro = modo === "cadastro";
+  const { destino } = Route.useSearch();
+  const alvo = destino === "diversos" ? "/diversos" : "/dashboard";
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -72,7 +72,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    router.navigate({ to: "/dashboard", replace: true });
+    router.navigate({ to: alvo, replace: true });
   }
 
   async function signInEmail(e: React.FormEvent) {
@@ -82,21 +82,6 @@ function AuthPage() {
       return;
     }
     setLoading(true);
-    if (cadastro) {
-      const { error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password: senha,
-        options: { emailRedirectTo: `${window.location.origin}/auth` },
-      });
-      setLoading(false);
-      if (error) {
-        toast.error("Falha no cadastro", { description: error.message });
-        return;
-      }
-      toast.success("Cadastro realizado", { description: "Verifique seu email para confirmar a conta." });
-      router.navigate({ to: "/auth", search: { modo: "login" }, replace: true });
-      return;
-    }
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password: senha,
@@ -106,8 +91,9 @@ function AuthPage() {
       setLoading(false);
       return;
     }
-    router.navigate({ to: "/dashboard", replace: true });
+    router.navigate({ to: alvo, replace: true });
   }
+
 
 
   return (
@@ -120,7 +106,7 @@ function AuthPage() {
             </div>
             <h1 className="text-2xl font-semibold">Bobi Control</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {cadastro ? "Crie sua conta para solicitar acesso" : "Entre com sua conta para continuar"}
+              Entre com sua conta para continuar
             </p>
 
           </div>
@@ -151,7 +137,7 @@ function AuthPage() {
               </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full h-11">
-              {loading ? (cadastro ? "Cadastrando..." : "Entrando...") : (cadastro ? "Cadastrar" : "Entrar")}
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
 
           </form>
