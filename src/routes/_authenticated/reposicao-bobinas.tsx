@@ -1,10 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/back-button";
-import { Send, Bot } from "lucide-react";
+import { AssistenteReposicao } from "@/components/assistente-reposicao";
 
 export const Route = createFileRoute("/_authenticated/reposicao-bobinas")({
   head: () => ({
