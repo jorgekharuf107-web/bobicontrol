@@ -71,7 +71,7 @@ export function AppSidebar() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    router.navigate({ to: "/auth", replace: true });
+    router.navigate({ to: "/", replace: true });
   }
 
   const NavGroup = ({ label, items }: { label: string; items: Item[] }) => (
