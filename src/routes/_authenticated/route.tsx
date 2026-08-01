@@ -92,12 +92,14 @@ function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
 }
 
 function AuthenticatedLayout() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const emDiversos = pathname.startsWith("/diversos");
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
+        {!emDiversos && <AppSidebar />}
         <main className="flex-1 min-w-0 overflow-x-hidden flex flex-col">
-          <TopHeader />
+          <TopHeader showMenu={!emDiversos} />
           <div className="max-w-7xl mx-auto p-6 w-full flex-1">
             <Outlet />
           </div>
