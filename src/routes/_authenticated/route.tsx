@@ -30,7 +30,7 @@ function papelBadge(p: string | null) {
   return "bg-green-100 text-green-800 border-green-200";
 }
 
-function TopHeader() {
+function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
   const router = useRouter();
   const { nome, perfil, user } = useCurrentUser();
   const display = nome ?? user?.email ?? "Usuário";
@@ -47,14 +47,16 @@ function TopHeader() {
 
   return (
     <header className="h-14 border-b bg-card flex items-center px-4 sm:px-6 gap-3">
-      <button
-        type="button"
-        onClick={isMobile ? toggleMobile : toggleDesktop}
-        aria-label={isMobile ? "Abrir menu" : desktopOpen ? "Recolher menu" : "Expandir menu"}
-        className="h-10 w-10 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
-      >
-        <Menu className="h-7 w-7 text-green-600" strokeWidth={2.75} />
-      </button>
+      {showMenu && (
+        <button
+          type="button"
+          onClick={isMobile ? toggleMobile : toggleDesktop}
+          aria-label={isMobile ? "Abrir menu" : desktopOpen ? "Recolher menu" : "Expandir menu"}
+          className="h-10 w-10 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
+        >
+          <Menu className="h-7 w-7 text-green-600" strokeWidth={2.75} />
+        </button>
+      )}
       <div className="flex-1" />
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
 
