@@ -38,7 +38,7 @@ function TopHeader() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    router.navigate({ to: "/auth", replace: true });
+    router.navigate({ to: "/", replace: true });
   }
 
   const { theme, toggle } = useTheme();
@@ -51,9 +51,9 @@ function TopHeader() {
         type="button"
         onClick={isMobile ? toggleMobile : toggleDesktop}
         aria-label={isMobile ? "Abrir menu" : desktopOpen ? "Recolher menu" : "Expandir menu"}
-        className="h-9 w-9 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
+        className="h-10 w-10 flex items-center justify-center rounded-md border hover:bg-accent hover:text-accent-foreground"
       >
-        <Menu className="h-4 w-4" />
+        <Menu className="h-7 w-7 text-green-600" strokeWidth={2.75} />
       </button>
       <div className="flex-1" />
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
