@@ -1,33 +1,101 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Bot, Send } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type AtmRow = {
+  id: string;
+  id_atm: string;
+  modelo: string | null;
+  linha_id: string | null;
+  estacao_id: string | null;
+};
+
+const TIPOS_BOBINA = ["Caixa (6 bobinas)", "Bobina Avulsa 100%", "Bobina Avulsa < 50%"];
 
 export function AssistenteReposicao() {
+  const [linhaId, setLinhaId] = useState("");
+  const [estacaoId, setEstacaoId] = useState("");
   const [atmId, setAtmId] = useState("");
+  const [atmNome, setAtmNome] = useState("");
   const [tipo, setTipo] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const { data: linhas = [] } = useQuery({
+    queryKey: ["ar-linhas"],
+    queryFn: async () => {
+      const { data } = await supabase.from("linhas").select("id, nome").order("nome");
+      return data ?? [];
+    },
+  });
+
+  const { data: estacoes = [] } = useQuery({
+    queryKey: ["ar-estacoes"],
+    queryFn: async () => {
+      const { data } = await supabase.from("estacoes").select("id, nome, linha_id").order("nome");
+      return data ?? [];
+    },
+  });
+
+  const { data: atms = [] } = useQuery({
+    queryKey: ["ar-atms"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("atms")
+        .select("id, id_atm, modelo, linha_id, estacao_id")
+        .order("id_atm");
+      return (data ?? []) as AtmRow[];
+    },
+  });
+
+  const estacoesFiltradas = useMemo(
+    () => (linhaId ? estacoes.filter((e: any) => e.linha_id === linhaId) : estacoes),
+    [estacoes, linhaId],
+  );
+
+  const atmsFiltrados = useMemo(
+    () =>
+      atms.filter(
+        (a) => (!linhaId || a.linha_id === linhaId) && (!estacaoId || a.estacao_id === estacaoId),
+      ),
+    [atms, linhaId, estacaoId],
+  );
+
+  const nomesAtm = useMemo(() => {
+    const set = new Set<string>();
+    atmsFiltrados.forEach((a) => a.modelo && set.add(a.modelo));
+    return Array.from(set).sort();
+  }, [atmsFiltrados]);
+
   async function registrar() {
-    if (!atmId.trim() || !tipo.trim()) {
-      toast.error("Informe o ATM e o tipo de bobina");
+    if (!atmId || !tipo) {
+      toast.error("Selecione o ATM e o tipo de bobina");
       return;
     }
     setSaving(true);
     const { data: userData } = await supabase.auth.getUser();
-    const { error } = await supabase.from("solicitacoes_reposicao" as any).insert({
-      atm_id: atmId.trim(),
-      tipo_bobina: tipo.trim(),
+    const atm = atms.find((a) => a.id === atmId);
+    const linha = linhas.find((l: any) => l.id === linhaId)?.nome;
+    const estacao = estacoes.find((e: any) => e.id === estacaoId)?.nome;
+    const obs = [linha && `Linha: ${linha}`, estacao && `Estação: ${estacao}`, atmNome && `ATM: ${atmNome}`]
+      .filter(Boolean)
+      .join(" | ");
+    const { error } = await supabase.from("solicitacoes_reposicao").insert({
+      atm_id: atm?.id_atm ?? atmId,
+      tipo_bobina: tipo,
+      observacao: obs || null,
       solicitado_por: userData.user?.id ?? null,
     });
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Solicitação registrada");
     setAtmId("");
+    setAtmNome("");
     setTipo("");
   }
 
@@ -38,16 +106,89 @@ export function AssistenteReposicao() {
         <h3 className="text-sm font-semibold">Assistente de Reposição</h3>
       </div>
       <p className="text-sm text-muted-foreground">
-        Olá! Diga o identificador do ATM e qual tipo de bobina precisa. Vou registrar sua solicitação.
+        Olá! Diga o identificador do ATM, qual tipo de bobina precisa. Vou registrar sua solicitação.
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div>
-          <Label className="text-xs">ATM</Label>
-          <Input placeholder="Ex: ATM-042" value={atmId} onChange={(e) => setAtmId(e.target.value)} className="h-9" />
+          <Label className="text-xs">Linha</Label>
+          <Select
+            value={linhaId}
+            onValueChange={(v) => {
+              setLinhaId(v);
+              setEstacaoId("");
+              setAtmId("");
+              setAtmNome("");
+            }}
+          >
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione a linha" /></SelectTrigger>
+            <SelectContent>
+              {linhas.length === 0 && <SelectItem value="__none" disabled>Nenhum registro</SelectItem>}
+              {linhas.map((l: any) => (
+                <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Estação</Label>
+          <Select
+            value={estacaoId}
+            onValueChange={(v) => {
+              setEstacaoId(v);
+              setAtmId("");
+              setAtmNome("");
+            }}
+          >
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione a estação" /></SelectTrigger>
+            <SelectContent>
+              {estacoesFiltradas.length === 0 && <SelectItem value="__none" disabled>Nenhum registro</SelectItem>}
+              {estacoesFiltradas.map((e: any) => (
+                <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">ID_ATM</Label>
+          <Select
+            value={atmId}
+            onValueChange={(v) => {
+              setAtmId(v);
+              const a = atms.find((x) => x.id === v);
+              if (a?.modelo) setAtmNome(a.modelo);
+            }}
+          >
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o ATM" /></SelectTrigger>
+            <SelectContent>
+              {atmsFiltrados.length === 0 && <SelectItem value="__none" disabled>Nenhum registro</SelectItem>}
+              {atmsFiltrados.map((a) => (
+                <SelectItem key={a.id} value={a.id}>{a.id_atm}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">ATM_NOME</Label>
+          <Select value={atmNome} onValueChange={setAtmNome}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o nome" /></SelectTrigger>
+            <SelectContent>
+              {nomesAtm.length === 0 && <SelectItem value="__none" disabled>Nenhum registro</SelectItem>}
+              {nomesAtm.map((n) => (
+                <SelectItem key={n} value={n}>{n}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label className="text-xs">Tipo de bobina</Label>
-          <Input placeholder="Ex: 80mm térmica" value={tipo} onChange={(e) => setTipo(e.target.value)} className="h-9" />
+          <Select value={tipo} onValueChange={setTipo}>
+            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+            <SelectContent>
+              {TIPOS_BOBINA.map((t) => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="flex justify-end">
