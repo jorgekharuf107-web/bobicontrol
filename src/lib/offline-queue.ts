@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -25,6 +26,13 @@ function writeQueue(q: QueuedOp[]) {
 
 export function queueSize(): number {
   return readQueue().length;
+}
+
+/** Movimentações ainda não sincronizadas — usadas para refletir saldo/dashboard offline. */
+export function pendingMovimentacoes(): any[] {
+  return readQueue()
+    .filter((o) => o.table === "movimentacoes")
+    .map((o) => ({ ...o.payload, id: `offline-${o.id}`, __offline: true }));
 }
 
 export function enqueue(op: Omit<QueuedOp, "id" | "createdAt">) {
@@ -60,12 +68,30 @@ export function initOfflineSync() {
   if (typeof window === "undefined") return;
   const tryFlush = () => { if (navigator.onLine) void flushQueue(); };
   window.addEventListener("online", tryFlush);
-  // initial attempt
+  // tentativa inicial + reforço periódico (garante sincronização assim que a rede volta)
   setTimeout(tryFlush, 1500);
+  setInterval(tryFlush, 30000);
+}
+
+/** Assina alterações da fila offline e devolve as movimentações pendentes. */
+export function usePendingMovimentacoes() {
+  const [pend, setPend] = useState<any[]>([]);
+  useEffect(() => {
+    const upd = () => setPend(pendingMovimentacoes());
+    upd();
+    window.addEventListener("bobi:queue-change", upd);
+    return () => window.removeEventListener("bobi:queue-change", upd);
+  }, []);
+  return pend;
 }
 
 export function useQueueSize() {
-  // Lightweight subscription via custom event
-  if (typeof window === "undefined") return 0;
-  return readQueue().length;
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const upd = () => setN(queueSize());
+    upd();
+    window.addEventListener("bobi:queue-change", upd);
+    return () => window.removeEventListener("bobi:queue-change", upd);
+  }, []);
+  return n;
 }
