@@ -56,15 +56,20 @@ function MovimentacoesPage() {
   });
 
   const podeVerTudo = isAdmin || isGestor;
+  /** Data local no formato yyyy-mm-dd — filtro por dia, ignorando a hora. */
+  const diaLocal = (v: string) => (v ? new Date(v).toLocaleDateString("sv-SE") : "");
+
+  const todas = useMemo(() => [...pendentes, ...(movs as any[])], [pendentes, movs]);
+
   const filtradas = useMemo(() =>
-    (movs as any[]).filter((m: any) => {
+    todas.filter((m: any) => {
       if (!podeVerTudo && m.tecnico_id !== user?.id) return false;
       if (fTipo !== "todos" && m.tipo !== fTipo) return false;
       if (fItem !== "todos" && m.item_id !== fItem) return false;
       if (fTec !== "todos" && m.tecnico_id !== fTec) return false;
       if (fOrig !== "todos" && m.origem_tipo !== fOrig) return false;
       if (fDest !== "todos" && m.destino_tipo !== fDest) return false;
-      if (fData && !m.data?.startsWith(fData)) return false;
+      if (fData && diaLocal(m.data) !== fData) return false;
       if (fSearch.trim()) {
         const s = fSearch.trim().toLowerCase();
         const hay = [m.tipo, m.itens?.nome, m.origem_tipo, m.destino_tipo, m.usuarios?.nome_completo, m.observacao].filter(Boolean).join(" ").toLowerCase();
@@ -72,15 +77,21 @@ function MovimentacoesPage() {
       }
       return true;
     })
-  , [movs, fTipo, fItem, fTec, fData, fOrig, fDest, fSearch, podeVerTudo, user?.id]);
+  , [todas, fTipo, fItem, fTec, fData, fOrig, fDest, fSearch, podeVerTudo, user?.id]);
+
+  const center = "text-center align-middle whitespace-normal break-words max-w-[110px]";
+  const wrap = "whitespace-normal break-words max-w-[140px]";
 
   const colunas: Coluna<any>[] = [
-    { header: "Data", cell: (m) => new Date(m.data).toLocaleString("pt-BR"), csv: (m) => new Date(m.data).toLocaleString("pt-BR") },
-    { header: "Origem", cell: (m) => m.origem_tipo ?? (m.linha_origem_id ? "Linha" : "—"), csv: (m) => m.origem_tipo ?? "" },
-    { header: "Destino", cell: (m) => m.destino_tipo ?? (m.linha_destino_id ? "Linha" : "—"), csv: (m) => m.destino_tipo ?? "" },
-    { header: "Item", cell: (m) => m.itens?.nome ?? "—", csv: (m) => m.itens?.nome ?? "" },
-    { header: "Qtd", className: "num", cell: (m) => m.qtd, csv: (m) => m.qtd },
-    { header: "Técnico", cell: (m) => m.usuarios?.nome_completo ?? "—", csv: (m) => m.usuarios?.nome_completo ?? "" },
+    { header: "Data", className: center, cell: (m) => new Date(m.data).toLocaleString("pt-BR"), csv: (m) => new Date(m.data).toLocaleString("pt-BR") },
+    { header: "Tipo", className: center, cell: (m) => (
+        <span>{m.tipo}{m.__offline && <span className="ml-1 text-[10px] text-orange-600">(offline)</span>}</span>
+      ), csv: (m) => m.tipo ?? "" },
+    { header: "Origem", className: center, cell: (m) => m.origem_tipo ?? (m.linha_origem_id ? "Linha" : "—"), csv: (m) => m.origem_tipo ?? "" },
+    { header: "Destino", className: center, cell: (m) => m.destino_tipo ?? (m.linha_destino_id ? "Linha" : "—"), csv: (m) => m.destino_tipo ?? "" },
+    { header: "Item", className: wrap, cell: (m) => m.itens?.nome ?? "—", csv: (m) => m.itens?.nome ?? "" },
+    { header: "QTD", className: center, cell: (m) => m.qtd, csv: (m) => m.qtd },
+    { header: "Técnico", className: wrap, cell: (m) => m.usuarios?.nome_completo ?? "—", csv: (m) => m.usuarios?.nome_completo ?? "" },
   ];
 
   const inputH = "h-8 text-sm";
