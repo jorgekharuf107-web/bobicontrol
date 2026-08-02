@@ -60,6 +60,7 @@ const empty: MovForm = {
 
 function ControleEstoque() {
   const qc = useQueryClient();
+  const pendentes = usePendingMovimentacoes();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MovForm>(empty);
