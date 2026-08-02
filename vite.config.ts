@@ -20,9 +20,21 @@ export default defineConfig({
         manifest: false,
         workbox: {
           navigateFallback: "/",
-          navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/],
+          navigateFallbackDenylist: [
+            /^\/api\//,
+            /^\/~oauth/,
+            /^\/auth/,
+            /^\/login/,
+            /^\/callback/,
+          ],
           globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
           runtimeCaching: [
+            {
+              // Login/OAuth: nunca cachear, sempre buscar do servidor
+              urlPattern: ({ url, sameOrigin }) =>
+                sameOrigin && /^\/(auth|login|callback|~oauth)/.test(url.pathname),
+              handler: "NetworkOnly",
+            },
             {
               urlPattern: ({ request }) => request.mode === "navigate",
               handler: "NetworkFirst",
