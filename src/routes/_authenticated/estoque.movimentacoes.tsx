@@ -10,6 +10,7 @@ import { BackButton } from "@/components/back-button";
 import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
 import { MovimentacaoForm, TIPOS, LOCAIS_ORIG_DEST, LOCAIS_TIPO } from "@/components/movimentacao-form";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { usePendingMovimentacoes } from "@/lib/offline-queue";
 
 export const Route = createFileRoute("/_authenticated/estoque/movimentacoes")({
   head: () => ({
