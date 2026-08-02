@@ -64,7 +64,7 @@ function AtmsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AtmForm>(empty);
   const [busca, setBusca] = useState("");
-  const [ordenar, setOrdenar] = useState("id_atm");
+  const [filtro, setFiltro] = useState("todos");
   const [direcao, setDirecao] = useState<"asc" | "desc">("asc");
 
   const { data: atms = [] } = useQuery({
@@ -81,15 +81,30 @@ function AtmsPage() {
   });
 
   const filtrados = useMemo(() => {
-    const f = busca.toLowerCase();
-    const arr = atms.filter((a: any) => !f || a.id_atm?.toLowerCase().includes(f) || a.modelo?.toLowerCase().includes(f) || a.estacoes?.nome?.toLowerCase().includes(f));
-    arr.sort((a: any, b: any) => {
-      const av = (a[ordenar] ?? a.estacoes?.nome ?? "").toString();
-      const bv = (b[ordenar] ?? b.estacoes?.nome ?? "").toString();
-      return direcao === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    const f = busca.trim().toLowerCase();
+    const campo = (a: any) => {
+      switch (filtro) {
+        case "modelo": return a.modelo ?? "";
+        case "id": return a.id_atm ?? "";
+        case "linha": return a.linhas?.nome ?? "";
+        case "estacao": return a.estacoes?.nome ?? a.estacao ?? "";
+        default: return [a.id_atm, a.modelo, a.linhas?.nome, a.estacoes?.nome ?? a.estacao, a.localizacao_detalhada, a.usuario_atm, statusLabel[a.status_operacional]].filter(Boolean).join(" ");
+      }
+    };
+    let arr = atms.filter((a: any) => {
+      if (filtro === "cd_sim" && !a.possui_cd) return false;
+      if (filtro === "cd_nao" && a.possui_cd) return false;
+      if (!f) return true;
+      return campo(a).toString().toLowerCase().includes(f);
+    });
+    const ordenar = filtro === "modelo" ? "modelo" : filtro === "linha" ? "linha" : filtro === "estacao" ? "estacao" : "id_atm";
+    arr = [...arr].sort((a: any, b: any) => {
+      const val = (x: any) => (ordenar === "linha" ? x.linhas?.nome ?? "" : ordenar === "estacao" ? x.estacoes?.nome ?? x.estacao ?? "" : x[ordenar] ?? "").toString();
+      return direcao === "asc" ? val(a).localeCompare(val(b)) : val(b).localeCompare(val(a));
     });
     return arr;
-  }, [atms, busca, ordenar, direcao]);
+  }, [atms, busca, filtro, direcao]);
+
 
   function startCreate() { setEditingId(null); setForm(empty); setOpen(true); }
   function startEdit(a: any) {
