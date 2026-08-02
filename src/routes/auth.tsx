@@ -72,7 +72,8 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    router.navigate({ to: alvo, replace: true });
+    // PWA instalado: força um reload para gravar/hidratar a sessão
+    window.location.replace(alvo);
   }
 
   async function signInEmail(e: React.FormEvent) {
