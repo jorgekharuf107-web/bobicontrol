@@ -102,7 +102,7 @@ function ControleEstoque() {
 
 
   function localOptions(tipo?: string) {
-    if (tipo === "CD") return cds.map((c: any) => ({ id: c.id, label: c.nome }));
+    if (tipo === "CD") return cds.map((c: any) => ({ id: c.id, label: c.nome_cd }));
     if (tipo === "ATM") return atms.map((a: any) => ({ id: a.id, label: a.id_atm }));
     return [];
   }
@@ -201,12 +201,20 @@ function ControleEstoque() {
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
 
-  // Saldo atual por item vindo da tabela Estoque (atualizada automaticamente a cada movimentação)
+  // Saldo atual por item = tabela Estoque + movimentações offline ainda não sincronizadas
+  const capacidadeTotal = (cds as any[]).reduce((a, c) => a + (c.capacidade ?? 0), 0);
   const saldos = (itens as any[]).map((i) => {
-    const saldo = (estoque as any[])
+    const base = (estoque as any[])
       .filter((e) => e.item_id === i.id)
       .reduce((acc, e) => acc + (e.total_bobinas ?? 0), 0);
-    return { ...i, saldo };
+    const delta = pendentes
+      .filter((p) => p.item_id === i.id)
+      .reduce((acc, p) => acc + (p.destino_id ? (p.qtd ?? 0) : 0) - (p.origem_id ? (p.qtd ?? 0) : 0), 0);
+    const saldo = base + delta;
+    const minimo = i.estoque_minimo ?? 0;
+    const critico = saldo <= minimo;
+    const atencao = !critico && capacidadeTotal > 0 && saldo < capacidadeTotal * 0.2;
+    return { ...i, saldo, minimo, critico, atencao };
   });
 
 
