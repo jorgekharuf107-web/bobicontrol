@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/back-button";
 
 export const Route = createFileRoute("/_authenticated/relatorio-gerencial")({
@@ -61,6 +62,10 @@ function statusCor(s: AtmStatus["status"]) {
 function RelatorioGerencial() {
   const [ordenarPor, setOrdenarPor] = useState("criticidade");
   const [direcao, setDirecao] = useState("desc");
+  const [fLinha, setFLinha] = useState("todas");
+  const [fEstacao, setFEstacao] = useState("todas");
+  const [fAtm, setFAtm] = useState("todos");
+  const [fItem, setFItem] = useState("todos");
 
   const { data: atms = [], isLoading } = useQuery({
     queryKey: ["rel-atms-status"],
@@ -107,9 +112,65 @@ function RelatorioGerencial() {
     },
   });
 
+  const linhasOpts = useMemo(
+    () => Array.from(new Set(atms.map((a) => a.linha).filter((v) => v && v !== "—"))).sort(),
+    [atms],
+  );
+  const estacoesOpts = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          atms
+            .filter((a) => fLinha === "todas" || a.linha === fLinha)
+            .map((a) => a.estacao)
+            .filter((v) => v && v !== "—"),
+        ),
+      ).sort(),
+    [atms, fLinha],
+  );
+  const atmsOpts = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          atms
+            .filter((a) => (fLinha === "todas" || a.linha === fLinha) && (fEstacao === "todas" || a.estacao === fEstacao))
+            .map((a) => a.id_atm),
+        ),
+      ).sort(),
+    [atms, fLinha, fEstacao],
+  );
+  const itensOpts = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          atms
+            .filter(
+              (a) =>
+                (fLinha === "todas" || a.linha === fLinha) &&
+                (fEstacao === "todas" || a.estacao === fEstacao) &&
+                (fAtm === "todos" || a.id_atm === fAtm),
+            )
+            .map((a) => a.modelo ?? "Bobina"),
+        ),
+      ).sort(),
+    [atms, fLinha, fEstacao, fAtm],
+  );
+
+  const filtrados = useMemo(
+    () =>
+      atms.filter(
+        (a) =>
+          (fLinha === "todas" || a.linha === fLinha) &&
+          (fEstacao === "todas" || a.estacao === fEstacao) &&
+          (fAtm === "todos" || a.id_atm === fAtm) &&
+          (fItem === "todos" || (a.modelo ?? "Bobina") === fItem),
+      ),
+    [atms, fLinha, fEstacao, fAtm, fItem],
+  );
+
   const ordenados = useMemo(() => {
     const dir = direcao === "asc" ? 1 : -1;
-    const arr = [...atms];
+    const arr = [...filtrados];
     arr.sort((a, b) => {
       switch (ordenarPor) {
         case "estacao":
@@ -127,16 +188,16 @@ function RelatorioGerencial() {
       }
     });
     return arr;
-  }, [atms, ordenarPor, direcao]);
+  }, [filtrados, ordenarPor, direcao]);
 
-  const criticos = atms.filter((a) => a.status === "Crítico");
-  const medios = atms.filter((a) => a.status === "Médio");
-  const cheios = atms.filter((a) => a.status === "Cheio");
+  const criticos = filtrados.filter((a) => a.status === "Crítico");
+  const medios = filtrados.filter((a) => a.status === "Médio");
+  const cheios = filtrados.filter((a) => a.status === "Cheio");
 
-  const maisCriticos = [...atms].sort((a, b) => a.nivel - b.nivel).slice(0, 10);
-  const menosCriticos = [...atms].sort((a, b) => b.nivel - a.nivel).slice(0, 10);
+  const maisCriticos = [...filtrados].sort((a, b) => a.nivel - b.nivel).slice(0, 10);
+  const menosCriticos = [...filtrados].sort((a, b) => b.nivel - a.nivel).slice(0, 10);
 
-  const cobertura = atms.length ? Math.round((cheios.length / atms.length) * 100) : 0;
+  const cobertura = filtrados.length ? Math.round((cheios.length / filtrados.length) * 100) : 0;
 
   return (
     <div className="space-y-4">
@@ -158,12 +219,49 @@ function RelatorioGerencial() {
 
         <TabsContent value="status" className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Total ATMs" value={atms.length} bg="#1e40af" fg="#fff" />
+            <StatCard label="Total ATMs" value={filtrados.length} bg="#1e40af" fg="#fff" />
             <StatCard label="ATMs Críticos" value={criticos.length} bg="#dc2626" fg="#fff" />
             <StatCard label="ATMs Médio" value={medios.length} bg="#60a5fa" fg="#fff" />
             <StatCard label="ATMs Cheios" value={cheios.length} bg="#0d9488" fg="#fff" />
           </div>
           <div className="flex gap-3 items-end flex-wrap">
+            <div><Label>Linha</Label>
+              <Select value={fLinha} onValueChange={(v) => { setFLinha(v); setFEstacao("todas"); setFAtm("todos"); setFItem("todos"); }}>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas as linhas</SelectItem>
+                  {linhasOpts.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Estação</Label>
+              <Select value={fEstacao} onValueChange={(v) => { setFEstacao(v); setFAtm("todos"); setFItem("todos"); }}>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas as estações</SelectItem>
+                  {estacoesOpts.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>ATM</Label>
+              <Select value={fAtm} onValueChange={(v) => { setFAtm(v); setFItem("todos"); }}>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os ATMs</SelectItem>
+                  {atmsOpts.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Item</Label>
+              <Select value={fItem} onValueChange={setFItem}>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os itens</SelectItem>
+                  {itensOpts.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" onClick={() => { setFLinha("todas"); setFEstacao("todas"); setFAtm("todos"); setFItem("todos"); }}>Limpar</Button>
             <div><Label>Ordenar por</Label>
               <Select value={ordenarPor} onValueChange={setOrdenarPor}>
                 <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
@@ -291,9 +389,9 @@ function RelatorioGerencial() {
             ["Movimentações", movs.length],
             ["Alertas Ativos", criticos.length],
             ["Cobertura", `${cobertura}%`],
-            ["ATMs Rastreados", atms.length],
+            ["ATMs Rastreados", filtrados.length],
             ["Alertas Baixo Estoque", criticos.length + medios.length],
-            ["Nível Médio", `${atms.length ? Math.round(atms.reduce((s, a) => s + a.nivel, 0) / atms.length) : 0}%`],
+            ["Nível Médio", `${filtrados.length ? Math.round(filtrados.reduce((s, a) => s + a.nivel, 0) / filtrados.length) : 0}%`],
           ] as [string, string | number][]).map(([l, v]) => (
             <Card key={l} className="p-5">
               <p className="text-xs uppercase text-muted-foreground">{l}</p>
