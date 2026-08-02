@@ -96,12 +96,20 @@ function RootComponent() {
   useEffect(() => {
     initOfflineSync();
     registerServiceWorker();
+    // Ao sincronizar a fila offline (ou voltar a internet), recarrega saldos/dashboard
+    const onQueue = () => queryClient.invalidateQueries();
+    window.addEventListener("bobi:queue-change", onQueue);
+    window.addEventListener("online", onQueue);
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      window.removeEventListener("bobi:queue-change", onQueue);
+      window.removeEventListener("online", onQueue);
+      sub.subscription.unsubscribe();
+    };
   }, [queryClient, router]);
   return (
     <QueryClientProvider client={queryClient}>
