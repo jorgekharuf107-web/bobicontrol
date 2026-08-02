@@ -105,7 +105,6 @@ function RootComponent() {
   }, [queryClient, router]);
   return (
     <QueryClientProvider client={queryClient}>
-      <OfflineBanner />
       <Outlet />
       <ConfirmDialogHost />
       <Toaster richColors position="top-right" />
