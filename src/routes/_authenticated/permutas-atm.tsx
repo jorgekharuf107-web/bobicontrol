@@ -81,8 +81,7 @@ function PermutasAtm() {
     if (!form.item_id) return toast.error("Selecione o item");
     if (form.qtd < 1) return toast.error("Quantidade deve ser ≥ 1");
     if (!form.tecnico_id) return toast.error("Selecione o técnico");
-    // Saída na origem
-    const { error: e1 } = await supabase.from("movimentacoes").insert({
+    const payload: any = {
       tipo: "Permuta", item_id: form.item_id, qtd: form.qtd,
       origem_tipo: "ATM", origem_id: form.origem_id,
       destino_tipo: "ATM", destino_id: form.destino_id,
@@ -90,13 +89,23 @@ function PermutasAtm() {
       motivo_permuta: form.motivo || null,
       tecnico_id: form.tecnico_id || user?.id || null,
       data: new Date(form.data_criacao).toISOString(),
-    });
-    if (e1) return toast.error(e1.message);
-    toast.success("Permuta ATM x ATM registrada — baixa/entrada automáticas");
+    };
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enqueue({ table: "movimentacoes", payload });
+      toast.success("Sem conexão — permuta salva localmente e sincronizará ao reconectar");
+    } else {
+      const { error: e1 } = await supabase.from("movimentacoes").insert(payload);
+      if (e1) {
+        enqueue({ table: "movimentacoes", payload });
+        toast.warning("Falha ao enviar — permuta salva localmente para sincronizar depois");
+      } else {
+        toast.success("Permuta ATM x ATM registrada — baixa/entrada automáticas");
+      }
+    }
     setOpen(false);
     setForm({ origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "", data_criacao: nowLocal(), tecnico_id: "" });
-    qc.invalidateQueries({ queryKey: ["permutas-atm"] });
-    qc.invalidateQueries({ queryKey: ["movs-all"] });
+    ["permutas-atm", "movs-all", "movs-page", "estoque", "dashboard-stats"]
+      .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
   }
 
   const filtradas = useMemo(() => {
