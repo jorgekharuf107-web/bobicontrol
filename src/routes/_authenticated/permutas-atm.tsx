@@ -16,6 +16,7 @@ import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { nowLocal } from "@/components/movimentacao-form";
+import { enqueue } from "@/lib/offline-queue";
 import { useCurrentUser } from "@/lib/use-current-user";
 
 export const Route = createFileRoute("/_authenticated/permutas-atm")({
