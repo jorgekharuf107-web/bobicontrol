@@ -129,7 +129,7 @@ function ConfiguracoesPage() {
             </div>
             <div>
               <Label>Senha de App do Google</Label>
-              <Input type="password" className="h-9" placeholder={cfg?.app_password ? "•••••••• (mantida se em branco)" : "Cole a senha de app"}
+              <Input type="password" className="h-9" placeholder={cfg?.senha_definida ? "•••••••• (mantida se em branco)" : "Cole a senha de app"}
                 value={password} onChange={(e) => setPassword(e.target.value)} />
               <p className="text-xs text-muted-foreground mt-1">
                 Gere em: myaccount.google.com → Segurança → Verificação em 2 etapas → Senhas de app.

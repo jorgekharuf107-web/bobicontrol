@@ -652,7 +652,7 @@ function AbaConfiguracoes() {
           <div className="space-y-1.5">
             <Label>Senha de App do Google</Label>
             <Input type="password" className="h-9"
-              placeholder={cfg?.app_password ? "•••••••• (mantida se em branco)" : "Cole a senha de app"}
+              placeholder={cfg?.senha_definida ? "•••••••• (mantida se em branco)" : "Cole a senha de app"}
               value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
         </div>
