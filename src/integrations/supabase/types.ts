@@ -400,6 +400,7 @@ export type Database = {
           atualizado_por: string | null
           id: string
           sender_email: string
+          senha_definida: boolean
         }
         Insert: {
           app_password?: string | null
@@ -408,6 +409,7 @@ export type Database = {
           atualizado_por?: string | null
           id?: string
           sender_email?: string
+          senha_definida?: boolean
         }
         Update: {
           app_password?: string | null
@@ -416,6 +418,7 @@ export type Database = {
           atualizado_por?: string | null
           id?: string
           sender_email?: string
+          senha_definida?: boolean
         }
         Relationships: []
       }
