@@ -331,12 +331,12 @@ function ControleEstoque() {
               const linhasAfe = linhaAfetada(m);
               return (
               <tr key={m.id}>
-                <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
-                <td>{m.tipo}</td>
-                <td>{m.itens?.nome ?? "—"}</td>
-                <td className="num">{m.qtd}</td>
-                <td>{m.origem_tipo ?? "—"}</td>
-                <td>{m.destino_tipo ?? "—"}</td>
+                <td className="text-center whitespace-normal break-words max-w-[110px]">{new Date(m.data).toLocaleString("pt-BR")}</td>
+                <td className="text-center whitespace-normal break-words max-w-[100px]">{m.tipo}</td>
+                <td className="whitespace-normal break-words max-w-[140px]">{m.itens?.nome ?? "—"}</td>
+                <td className="text-center font-semibold max-w-[70px]">{m.qtd}</td>
+                <td className="text-center whitespace-normal break-words max-w-[90px]">{m.origem_tipo ?? "—"}</td>
+                <td className="text-center whitespace-normal break-words max-w-[90px]">{m.destino_tipo ?? "—"}</td>
                 <td>
                   {linhasAfe.length === 0 ? "—" : (
                     <span className="inline-flex flex-wrap gap-1">
