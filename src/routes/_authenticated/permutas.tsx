@@ -18,6 +18,7 @@ import { useCurrentUser } from "@/lib/use-current-user";
 import { LinhaBadge } from "@/lib/use-accessible-linhas";
 import { confirmar } from "@/components/confirm-dialog";
 import { nowLocal } from "@/components/movimentacao-form";
+import { enqueue } from "@/lib/offline-queue";
 
 export const Route = createFileRoute("/_authenticated/permutas")({
   head: () => ({
@@ -77,7 +78,7 @@ function Permutas() {
     if (form.linha_origem_id === form.linha_destino_id) return toast.error("Origem e destino não podem ser iguais");
     if (!form.item_id) return toast.error("Selecione o item");
     if (form.qtd < 1) return toast.error("Quantidade deve ser ≥ 1");
-    const { error } = await supabase.from("movimentacoes").insert({
+    const payload: any = {
       tipo: "Permuta",
       data: new Date(form.data).toISOString(),
       item_id: form.item_id,
@@ -88,12 +89,22 @@ function Permutas() {
       motivo_permuta: form.observacao || null,
       tecnico_id: user?.id ?? null,
       status_aprovacao: "pendente",
-    } as any);
-    if (error) return toast.error(error.message);
-    toast.success("Permuta entre linhas registrada");
+    };
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enqueue({ table: "movimentacoes", payload });
+      toast.success("Sem conexão — permuta salva localmente e sincronizará ao reconectar");
+    } else {
+      const { error } = await supabase.from("movimentacoes").insert(payload);
+      if (error) {
+        enqueue({ table: "movimentacoes", payload });
+        toast.warning("Falha ao enviar — permuta salva localmente para sincronizar depois");
+      } else {
+        toast.success("Permuta entre linhas registrada");
+      }
+    }
     setForm({ ...emptyForm, data: nowLocal() });
-    qc.invalidateQueries({ queryKey: ["permutas"] });
-    qc.invalidateQueries({ queryKey: ["movs-all"] });
+    ["permutas", "movs-all", "movs-page", "estoque", "dashboard-stats"]
+      .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
   }
 
   async function decidir(id: string, aprovar: boolean) {

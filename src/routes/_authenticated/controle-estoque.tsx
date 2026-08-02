@@ -19,6 +19,7 @@ import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovimentacaoForm } from "@/components/movimentacao-form";
+import { usePendingMovimentacoes } from "@/lib/offline-queue";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   head: () => ({
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/_authenticated/controle-estoque")({
   component: ControleEstoque,
 });
 
-const tipos = ["Entrada", "Saida", "Transferencia", "Permuta", "Ajuste", "Abastecimento"] as const;
+const tipos = ["Recebimento", "Abastecimento"] as const;
 const locais = ["CD", "ATM"] as const;
 
 const movSchema = z.object({
@@ -53,12 +54,13 @@ const movSchema = z.object({
 
 type MovForm = z.infer<typeof movSchema>;
 const empty: MovForm = {
-  tipo: "Entrada", item_id: "", qtd: 1,
+  tipo: "Recebimento", item_id: "", qtd: 1,
   origem_tipo: "", origem_id: "", destino_tipo: "", destino_id: "", observacao: "",
 };
 
 function ControleEstoque() {
   const qc = useQueryClient();
+  const pendentes = usePendingMovimentacoes();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MovForm>(empty);
@@ -85,11 +87,11 @@ function ControleEstoque() {
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-sel"],
     queryFn: async () =>
-      (await supabase.from("itens").select("id, nome, bobinas_por_caixa, ativo").order("nome")).data ?? [],
+      (await supabase.from("itens").select("id, nome, bobinas_por_caixa, estoque_minimo, ativo").order("nome")).data ?? [],
   });
   const { data: cds = [] } = useQuery({
     queryKey: ["cds-sel"],
-    queryFn: async () => (await supabase.from("cds").select("id, nome").order("nome")).data ?? [],
+    queryFn: async () => (await supabase.from("cds").select("id, nome_cd, capacidade").order("nome_cd")).data ?? [],
   });
   const { data: atms = [] } = useQuery({
     queryKey: ["atms-sel"],
@@ -102,7 +104,7 @@ function ControleEstoque() {
 
 
   function localOptions(tipo?: string) {
-    if (tipo === "CD") return cds.map((c: any) => ({ id: c.id, label: c.nome }));
+    if (tipo === "CD") return cds.map((c: any) => ({ id: c.id, label: c.nome_cd }));
     if (tipo === "ATM") return atms.map((a: any) => ({ id: a.id, label: a.id_atm }));
     return [];
   }
@@ -201,12 +203,20 @@ function ControleEstoque() {
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
 
-  // Saldo atual por item vindo da tabela Estoque (atualizada automaticamente a cada movimentação)
+  // Saldo atual por item = tabela Estoque + movimentações offline ainda não sincronizadas
+  const capacidadeTotal = (cds as any[]).reduce((a, c) => a + (c.capacidade ?? 0), 0);
   const saldos = (itens as any[]).map((i) => {
-    const saldo = (estoque as any[])
+    const base = (estoque as any[])
       .filter((e) => e.item_id === i.id)
       .reduce((acc, e) => acc + (e.total_bobinas ?? 0), 0);
-    return { ...i, saldo };
+    const delta = pendentes
+      .filter((p) => p.item_id === i.id)
+      .reduce((acc, p) => acc + (p.destino_id ? (p.qtd ?? 0) : 0) - (p.origem_id ? (p.qtd ?? 0) : 0), 0);
+    const saldo = base + delta;
+    const minimo = i.estoque_minimo ?? 0;
+    const critico = saldo <= minimo;
+    const atencao = !critico && capacidadeTotal > 0 && saldo < capacidadeTotal * 0.2;
+    return { ...i, saldo, minimo, critico, atencao };
   });
 
 
@@ -264,19 +274,30 @@ function ControleEstoque() {
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
-          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Saldo (bobinas)</th></tr></thead>
+          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Estoque Mínimo</th><th className="num">Saldo Atual (bobinas)</th><th>Situação</th></tr></thead>
           <tbody>
-            {saldos.length === 0 && <tr><td colSpan={3} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {saldos.length === 0 && <tr><td colSpan={5} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
             {saldos.map((i: any) => (
               <tr key={i.id}>
                 <td>{i.nome}</td>
                 <td className="num">{i.bobinas_por_caixa}</td>
-                <td className="num font-semibold">{i.saldo}</td>
+                <td className="num">{i.minimo}</td>
+                <td className={`num font-bold ${i.critico ? "text-red-600" : i.atencao ? "text-orange-500" : ""}`}>{i.saldo}</td>
+                <td>
+                  {i.critico ? (
+                    <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">Abaixo do mínimo</span>
+                  ) : i.atencao ? (
+                    <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-orange-100 text-orange-700">Abaixo de 20% da capacidade</span>
+                  ) : (
+                    <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700">Normal</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </Card>
+
 
 
       <TableSearch
@@ -310,12 +331,12 @@ function ControleEstoque() {
               const linhasAfe = linhaAfetada(m);
               return (
               <tr key={m.id}>
-                <td>{new Date(m.data).toLocaleString("pt-BR")}</td>
-                <td>{m.tipo}</td>
-                <td>{m.itens?.nome ?? "—"}</td>
-                <td className="num">{m.qtd}</td>
-                <td>{m.origem_tipo ?? "—"}</td>
-                <td>{m.destino_tipo ?? "—"}</td>
+                <td className="text-center whitespace-normal break-words max-w-[110px]">{new Date(m.data).toLocaleString("pt-BR")}</td>
+                <td className="text-center whitespace-normal break-words max-w-[100px]">{m.tipo}</td>
+                <td className="whitespace-normal break-words max-w-[140px]">{m.itens?.nome ?? "—"}</td>
+                <td className="text-center font-semibold max-w-[70px]">{m.qtd}</td>
+                <td className="text-center whitespace-normal break-words max-w-[90px]">{m.origem_tipo ?? "—"}</td>
+                <td className="text-center whitespace-normal break-words max-w-[90px]">{m.destino_tipo ?? "—"}</td>
                 <td>
                   {linhasAfe.length === 0 ? "—" : (
                     <span className="inline-flex flex-wrap gap-1">
