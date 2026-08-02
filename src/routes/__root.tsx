@@ -16,6 +16,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ConfirmDialogHost } from "@/components/confirm-dialog";
 import { initOfflineSync } from "@/lib/offline-queue";
 import { registerServiceWorker } from "@/lib/register-sw";
+import { InstallPwaBanner } from "@/components/install-pwa-banner";
 
 function NotFoundComponent() {
   return (
@@ -53,7 +54,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#1e40af" },
+      { name: "theme-color", content: "#16a34a" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "Bobi Control" },
       { title: "Bobi Control" },
@@ -115,6 +116,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <ConfirmDialogHost />
+      <InstallPwaBanner />
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
