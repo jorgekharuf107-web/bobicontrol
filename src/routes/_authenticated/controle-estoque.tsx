@@ -19,6 +19,7 @@ import { useAccessibleLinhas, LinhaBadge } from "@/lib/use-accessible-linhas";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovimentacaoForm } from "@/components/movimentacao-form";
+import { usePendingMovimentacoes } from "@/lib/offline-queue";
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   head: () => ({
