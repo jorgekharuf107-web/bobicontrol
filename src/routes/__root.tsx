@@ -12,7 +12,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
-import { OfflineBanner } from "@/components/offline-banner";
+
 import { ConfirmDialogHost } from "@/components/confirm-dialog";
 import { initOfflineSync } from "@/lib/offline-queue";
 import { registerServiceWorker } from "@/lib/register-sw";
@@ -105,7 +105,6 @@ function RootComponent() {
   }, [queryClient, router]);
   return (
     <QueryClientProvider client={queryClient}>
-      <OfflineBanner />
       <Outlet />
       <ConfirmDialogHost />
       <Toaster richColors position="top-right" />
