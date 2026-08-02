@@ -1,18 +1,17 @@
 import { useRouter } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 /**
- * Botão Voltar: sempre retorna à tela imediatamente anterior do histórico.
+ * Botão Fechar (X): fecha o módulo atual e volta para a tela anterior do histórico.
  * `to` é usado APENAS como fallback quando não existe histórico anterior.
+ * Renderizado no canto superior direito da área de conteúdo.
  */
 export function BackButton({ to }: { to?: string }) {
   const router = useRouter();
 
-  function voltar() {
+  function fechar() {
     const history = router.history as any;
 
-    // 1) Histórico interno do router (funciona em qualquer profundidade)
     const canGoBack =
       typeof history?.canGoBack === "function" ? history.canGoBack() : (history?.length ?? 0) > 1;
 
@@ -21,19 +20,23 @@ export function BackButton({ to }: { to?: string }) {
       return;
     }
 
-    // 2) Histórico do navegador
     if (typeof window !== "undefined" && window.history.length > 1) {
       window.history.back();
       return;
     }
 
-    // 3) Fallback final
     router.navigate({ to: to ?? "/dashboard" });
   }
 
   return (
-    <Button type="button" variant="outline" size="sm" onClick={voltar}>
-      <ArrowLeft className="h-4 w-4" /> Voltar
-    </Button>
+    <button
+      type="button"
+      onClick={fechar}
+      aria-label="Fechar módulo"
+      title="Fechar"
+      className="absolute right-4 top-4 sm:right-6 sm:top-6 z-30 inline-flex h-10 w-10 items-center justify-center rounded-md border bg-card text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+    >
+      <X className="h-5 w-5" strokeWidth={2.5} />
+    </button>
   );
 }
