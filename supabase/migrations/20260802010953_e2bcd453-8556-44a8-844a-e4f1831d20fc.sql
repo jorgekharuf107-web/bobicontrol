@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.movimentacao_before_write() FROM PUBLIC, anon, authenticated;
