@@ -12,6 +12,7 @@ import { LogOut, User as UserIcon, Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
 import { APP_FOOTER } from "@/lib/app-config";
 import { SidebarProvider, useSidebar } from "@/lib/use-sidebar";
+import { ConnectionIndicator } from "@/components/connection-indicator";
 
 
 export const Route = createFileRoute("/_authenticated")({
@@ -60,6 +61,7 @@ function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
       <div className="flex-1" />
       <span className="text-sm text-muted-foreground hidden sm:inline">Olá, <span className="font-medium text-foreground">{display}</span></span>
 
+      <ConnectionIndicator />
       {perfil && <Badge variant="outline" className={papelBadge(perfil === "SUPER_ADMIN" ? "Administrador" : perfil)}>{perfil === "SUPER_ADMIN" ? "Administrador" : perfil}</Badge>}
       <button
         type="button"
