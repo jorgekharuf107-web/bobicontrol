@@ -31,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/estoque/movimentacoes")({
 
 function MovimentacoesPage() {
   const { user, isAdmin, isGestor } = useCurrentUser();
+  const pendentes = usePendingMovimentacoes();
   const [fTipo, setFTipo] = useState<string>("todos");
   const [fItem, setFItem] = useState<string>("todos");
   const [fTec, setFTec] = useState<string>("todos");
