@@ -64,7 +64,7 @@ function AtmsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AtmForm>(empty);
   const [busca, setBusca] = useState("");
-  const [ordenar, setOrdenar] = useState("id_atm");
+  const [filtro, setFiltro] = useState("todos");
   const [direcao, setDirecao] = useState<"asc" | "desc">("asc");
 
   const { data: atms = [] } = useQuery({
@@ -81,15 +81,31 @@ function AtmsPage() {
   });
 
   const filtrados = useMemo(() => {
-    const f = busca.toLowerCase();
-    const arr = atms.filter((a: any) => !f || a.id_atm?.toLowerCase().includes(f) || a.modelo?.toLowerCase().includes(f) || a.estacoes?.nome?.toLowerCase().includes(f));
-    arr.sort((a: any, b: any) => {
-      const av = (a[ordenar] ?? a.estacoes?.nome ?? "").toString();
-      const bv = (b[ordenar] ?? b.estacoes?.nome ?? "").toString();
-      return direcao === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    const f = busca.trim().toLowerCase();
+    const campo = (a: any) => {
+      switch (filtro) {
+        case "nome": return [a.id_atm, a.localizacao_detalhada].filter(Boolean).join(" ");
+        case "modelo": return a.modelo ?? "";
+        case "id": return a.id_atm ?? "";
+        case "linha": return a.linhas?.nome ?? "";
+        case "estacao": return a.estacoes?.nome ?? a.estacao ?? "";
+        default: return [a.id_atm, a.modelo, a.linhas?.nome, a.estacoes?.nome ?? a.estacao, a.localizacao_detalhada, a.usuario_atm, statusLabel[a.status_operacional]].filter(Boolean).join(" ");
+      }
+    };
+    let arr = atms.filter((a: any) => {
+      if (filtro === "cd_sim" && !a.possui_cd) return false;
+      if (filtro === "cd_nao" && a.possui_cd) return false;
+      if (!f) return true;
+      return campo(a).toString().toLowerCase().includes(f);
+    });
+    const ordenar = filtro === "modelo" ? "modelo" : filtro === "linha" ? "linha" : filtro === "estacao" ? "estacao" : "id_atm";
+    arr = [...arr].sort((a: any, b: any) => {
+      const val = (x: any) => (ordenar === "linha" ? x.linhas?.nome ?? "" : ordenar === "estacao" ? x.estacoes?.nome ?? x.estacao ?? "" : x[ordenar] ?? "").toString();
+      return direcao === "asc" ? val(a).localeCompare(val(b)) : val(b).localeCompare(val(a));
     });
     return arr;
-  }, [atms, busca, ordenar, direcao]);
+  }, [atms, busca, filtro, direcao]);
+
 
   function startCreate() { setEditingId(null); setForm(empty); setOpen(true); }
   function startEdit(a: any) {
@@ -150,35 +166,34 @@ function AtmsPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 items-end">
-        <div className="flex-1 min-w-[240px]">
-          <Label>Pesquisar</Label>
-          <div className="relative">
-            <Search className="h-4 w-4 absolute left-2 top-2.5 text-muted-foreground" />
-            <Input placeholder="Pesquisar ATMs..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-8" />
-          </div>
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Pesquisar ATMs..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-8" />
         </div>
-        <div><Label>Ordenar</Label>
-          <Select value={ordenar} onValueChange={setOrdenar}>
-            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="id_atm">ID</SelectItem>
-              <SelectItem value="modelo">Modelo</SelectItem>
-              <SelectItem value="estacao">Estação</SelectItem>
-              <SelectItem value="criado_em">Data Criação</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div><Label>Direção</Label>
-          <Select value={direcao} onValueChange={(v: any) => setDirecao(v)}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="asc">Ascendente ↑</SelectItem>
-              <SelectItem value="desc">Descendente ↓</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={filtro} onValueChange={setFiltro}>
+          <SelectTrigger className="w-auto min-w-0 gap-2"><SelectValue placeholder="Filtros" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todas as ATMs</SelectItem>
+            <SelectItem value="nome">Por Nome da ATM</SelectItem>
+            <SelectItem value="modelo">Por Modelo da ATM</SelectItem>
+            <SelectItem value="id">Por ID da ATM</SelectItem>
+            <SelectItem value="linha">Por Linha</SelectItem>
+            <SelectItem value="estacao">Por Nome da Estação</SelectItem>
+            <SelectItem value="cd_sim">Possui CD: Sim</SelectItem>
+            <SelectItem value="cd_nao">Possui CD: Não</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={direcao} onValueChange={(v: any) => setDirecao(v)}>
+          <SelectTrigger className="w-auto min-w-0 gap-2"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Ascendente ↑</SelectItem>
+            <SelectItem value="desc">Descendente ↓</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="outline" onClick={() => { setBusca(""); setFiltro("todos"); setDirecao("asc"); }}>Limpar</Button>
       </div>
+
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">

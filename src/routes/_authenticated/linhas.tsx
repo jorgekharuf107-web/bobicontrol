@@ -118,9 +118,20 @@ function LinhasPage() {
             )}
             {linhas.map((l) => (
               <TableRow key={l.id}>
-                <TableCell className="font-medium">{l.nome}</TableCell>
+                <TableCell className="font-medium">
+                  <span className="inline-flex items-center gap-2">
+                    {l.nome}
+                    <span
+                      className="inline-block"
+                      style={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: l.cor_hex, border: "1px solid rgba(0,0,0,.15)" }}
+                    />
+                  </span>
+                </TableCell>
                 <TableCell>
-                  <div style={{ width: 16, height: 16, borderRadius: "50%", backgroundColor: l.cor_hex }} />
+                  <span className="inline-flex items-center gap-2">
+                    <span style={{ width: 16, height: 16, borderRadius: "50%", backgroundColor: l.cor_hex, display: "inline-block" }} />
+                    <span className="text-xs text-muted-foreground">{l.cor_hex}</span>
+                  </span>
                 </TableCell>
                 <TableCell>{l.linha_ativa_sim_nao ? "Ativa" : "Inativa"}</TableCell>
                 <TableCell className="text-right">
