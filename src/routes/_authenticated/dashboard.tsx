@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAccessibleLinhas } from "@/lib/use-accessible-linhas";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { usePendingMovimentacoes } from "@/lib/offline-queue";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -99,6 +100,9 @@ function Dashboard() {
 
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
     queryFn: async () => {
       const [atms, movs, tecnicos] = await Promise.all([
         supabase.from("atms").select("id, id_atm, capacidade_bobinas, nivel_minimo, linha_id"),
@@ -129,10 +133,11 @@ function Dashboard() {
   }, [stats, linhaFiltro]);
 
   const movsFiltradas = useMemo(() => {
-    const all = stats?.movs ?? [];
+    // Inclui movimentações offline pendentes para os cards refletirem lançamentos sem internet
+    const all = [...pendentes, ...(stats?.movs ?? [])];
     if (linhaFiltro === "todas") return all;
     return all.filter((m: any) => m.linha_origem_id === linhaFiltro || m.linha_destino_id === linhaFiltro);
-  }, [stats, linhaFiltro]);
+  }, [stats, pendentes, linhaFiltro]);
 
   // Nomes de técnicos
   const nomesTec = useMemo(() => {
