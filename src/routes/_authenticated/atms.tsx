@@ -84,6 +84,7 @@ function AtmsPage() {
     const f = busca.trim().toLowerCase();
     const campo = (a: any) => {
       switch (filtro) {
+        case "nome": return [a.id_atm, a.localizacao_detalhada].filter(Boolean).join(" ");
         case "modelo": return a.modelo ?? "";
         case "id": return a.id_atm ?? "";
         case "linha": return a.linhas?.nome ?? "";
@@ -174,6 +175,7 @@ function AtmsPage() {
           <SelectTrigger className="w-auto min-w-0 gap-2"><SelectValue placeholder="Filtros" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todas as ATMs</SelectItem>
+            <SelectItem value="nome">Por Nome da ATM</SelectItem>
             <SelectItem value="modelo">Por Modelo da ATM</SelectItem>
             <SelectItem value="id">Por ID da ATM</SelectItem>
             <SelectItem value="linha">Por Linha</SelectItem>
