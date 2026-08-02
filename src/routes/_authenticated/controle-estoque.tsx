@@ -37,7 +37,7 @@ export const Route = createFileRoute("/_authenticated/controle-estoque")({
   component: ControleEstoque,
 });
 
-const tipos = ["Entrada", "Saida", "Transferencia", "Permuta", "Ajuste", "Abastecimento"] as const;
+const tipos = ["Recebimento", "Abastecimento"] as const;
 const locais = ["CD", "ATM"] as const;
 
 const movSchema = z.object({
@@ -53,7 +53,7 @@ const movSchema = z.object({
 
 type MovForm = z.infer<typeof movSchema>;
 const empty: MovForm = {
-  tipo: "Entrada", item_id: "", qtd: 1,
+  tipo: "Recebimento", item_id: "", qtd: 1,
   origem_tipo: "", origem_id: "", destino_tipo: "", destino_id: "", observacao: "",
 };
 
@@ -85,11 +85,11 @@ function ControleEstoque() {
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-sel"],
     queryFn: async () =>
-      (await supabase.from("itens").select("id, nome, bobinas_por_caixa, ativo").order("nome")).data ?? [],
+      (await supabase.from("itens").select("id, nome, bobinas_por_caixa, estoque_minimo, ativo").order("nome")).data ?? [],
   });
   const { data: cds = [] } = useQuery({
     queryKey: ["cds-sel"],
-    queryFn: async () => (await supabase.from("cds").select("id, nome").order("nome")).data ?? [],
+    queryFn: async () => (await supabase.from("cds").select("id, nome_cd, capacidade").order("nome_cd")).data ?? [],
   });
   const { data: atms = [] } = useQuery({
     queryKey: ["atms-sel"],
