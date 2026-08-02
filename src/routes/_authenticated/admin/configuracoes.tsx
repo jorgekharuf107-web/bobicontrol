@@ -40,7 +40,12 @@ function ConfiguracoesPage() {
   const { data: cfg } = useQuery({
     queryKey: ["email-config"],
     enabled: isAdmin,
-    queryFn: async () => (await supabase.from("email_config").select("*").limit(1).maybeSingle()).data,
+    queryFn: async () =>
+      (await supabase
+        .from("email_config")
+        .select("id, sender_email, ativo, senha_definida")
+        .limit(1)
+        .maybeSingle()).data,
   });
 
   const [sender, setSender] = useState("jorgekharuf107@gmail.com");
