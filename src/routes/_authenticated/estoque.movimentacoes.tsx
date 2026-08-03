@@ -11,6 +11,8 @@ import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
 import { MovimentacaoForm, TIPOS, LOCAIS_ORIG_DEST, LOCAIS_TIPO } from "@/components/movimentacao-form";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { usePendingMovimentacoes } from "@/lib/offline-queue";
+import { GlossarioEstoque } from "@/components/glossario-estoque";
+
 
 export const Route = createFileRoute("/_authenticated/estoque/movimentacoes")({
   head: () => ({
@@ -46,8 +48,10 @@ function MovimentacoesPage() {
   });
   const { data: tecnicos = [] } = useQuery({
     queryKey: ["tecs-mov"],
-    queryFn: async () => (await supabase.from("usuarios").select("id, nome_completo").order("nome_completo")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("usuarios").select("id, nome_completo").eq("perfil", "tecnico_estacao").eq("ativo", true).order("nome_completo")).data ?? [],
   });
+
   const { data: movs = [] } = useQuery({
     queryKey: ["movs-page"],
     queryFn: async () =>
@@ -110,7 +114,13 @@ function MovimentacoesPage() {
         <TabsList>
           <TabsTrigger value="nova">Nova Movimentação</TabsTrigger>
           <TabsTrigger value="historico">Histórico de Movimentação</TabsTrigger>
+          <TabsTrigger value="glossario">Glossário do Estoque</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="glossario" className="pt-3">
+          <GlossarioEstoque />
+        </TabsContent>
+
 
         <TabsContent value="nova" className="space-y-3 pt-3">
           <MovimentacaoForm />
