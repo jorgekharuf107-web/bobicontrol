@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSaldoReal, corSaldo } from "@/lib/use-estoque-saldo";
 
 type AtmRow = {
   id: string;
@@ -14,9 +15,13 @@ type AtmRow = {
   modelo: string | null;
   linha_id: string | null;
   estacao_id: string | null;
+  capacidade_bobinas?: number | null;
+  nivel_minimo?: number | null;
+  cd_id?: string | null;
 };
 
 const TIPOS_BOBINA = ["Caixa (6 bobinas)", "Bobina Avulsa 100%", "Bobina Avulsa < 50%"];
+
 
 export function AssistenteReposicao() {
   const [linhaId, setLinhaId] = useState("");
