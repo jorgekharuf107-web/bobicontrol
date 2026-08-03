@@ -219,6 +219,7 @@ function AgendamentosEntregaPage() {
     setEditingId(row.id);
     setHeader({
       estacao_cd_id: row.estacao_cd_id,
+      atm_id: row.atm_id ?? "",
       data_hora_entrega: row.data_hora_entrega?.slice(0, 16) ?? "",
       nome_motorista: row.nome_motorista ?? "",
       celular_motorista: row.celular_motorista ?? "",
@@ -238,14 +239,39 @@ function AgendamentosEntregaPage() {
     setAba("novo");
   }
 
+  /** Reserva já lançada por este agendamento (ao editar não deve contar duas vezes). */
+  function reservaPropria(itemId: string) {
+    if (!editingId) return 0;
+    const orig = (agendamentos as any[]).find((a) => a.id === editingId);
+    if (!orig || !STATUS_RESERVA.includes(orig.status)) return 0;
+    return (orig.agendamento_itens ?? [])
+      .filter((i: any) => i.item_id === itemId)
+      .reduce((s: number, i: any) => s + (i.qtd_caixas ?? 0) * fatorCaixa(itemId) + (i.qtd_bobina_100 ?? 0) + (i.qtd_bobina_50 ?? 0), 0);
+  }
+
+  /** Saldo disponível do CD para o item, já considerando reservas de outros agendamentos. */
+  function disponivelCd(itemId: string) {
+    if (!header.estacao_cd_id || !itemId) return 0;
+    return disponivel("CD", header.estacao_cd_id, itemId) + reservaPropria(itemId);
+  }
+
   function addItem() {
     if (!novoItem.item_id) return toast.error("Selecione o item");
-    const total = novoItem.qtd_caixas + novoItem.qtd_bobina_100 + novoItem.qtd_bobina_50;
+    const total = totalItemForm(novoItem);
     if (total <= 0) return toast.error("Informe pelo menos uma quantidade");
+    if (!header.estacao_cd_id) return toast.error("Selecione primeiro o CD de origem");
+    const jaNoForm = itens
+      .filter((i) => i.item_id === novoItem.item_id)
+      .reduce((s, i) => s + totalItemForm(i), 0);
+    const livre = disponivelCd(novoItem.item_id) - jaNoForm;
+    if (total > livre) {
+      return toast.error(`Saldo disponível insuficiente: ${livre} bobina(s) livres de ${nomeItem(novoItem.item_id)} neste CD`);
+    }
     setItens((arr) => [...arr, novoItem]);
     setNovoItem(emptyItem);
   }
   function removeItem(idx: number) { setItens((arr) => arr.filter((_, i) => i !== idx)); }
+
 
   async function criarMovimentacoesRecebimento(agId: string, cdId: string, itensList: ItemForm[]) {
     const rows = itensList.map((i) => {
