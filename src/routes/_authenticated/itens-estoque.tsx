@@ -140,6 +140,7 @@ function ItensPage() {
               { header: "Unidade", accessor: (i: any) => i.unidade },
               { header: "Qtd por Unidade", accessor: (i: any) => i.qtd_por_unidade },
               { header: "Estoque Mínimo", accessor: (i: any) => i.estoque_minimo },
+              { header: "QTD REAL TOTAL ATUAL", accessor: (i: any) => porItem(i.id) },
               { header: "Status", accessor: (i: any) => (i.ativo ? "Ativo" : "Inativo") },
             ]}
             filename="itens-estoque"
@@ -152,7 +153,13 @@ function ItensPage() {
         <TabsList>
           <TabsTrigger value="pesquisa">Pesquisa</TabsTrigger>
           <TabsTrigger value="novo">Novo Item</TabsTrigger>
+          <TabsTrigger value="glossario">Glossário do Estoque</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="glossario" className="pt-3">
+          <GlossarioEstoque />
+        </TabsContent>
+
 
         <TabsContent value="pesquisa" className="space-y-3 pt-3">
       <div className="flex flex-wrap gap-3 items-end">
@@ -187,15 +194,17 @@ function ItensPage() {
       <Card className="p-0 overflow-hidden">
         <table className="excel-table text-[14px]">
           <thead><tr>
-            <th>Código</th><th>Nome</th><th>Unidade</th><th className="num">Qtd por Unidade</th><th className="num">Estoque Mínimo</th><th>Status</th><th>Ações</th>
+            <th>Código</th><th>Nome</th><th>Unidade</th><th className="num">Qtd por Unidade</th><th className="num">Estoque Mínimo</th><th className="num">QTD REAL TOTAL ATUAL</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody>
-            {filtrados.length === 0 && <tr><td colSpan={7} className="text-center py-8 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {filtrados.length === 0 && <tr><td colSpan={8} className="text-center py-8 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
             {filtrados.map((i: any) => (
               <tr key={i.id}>
                 <td>{i.codigo}</td><td>{i.nome}</td>
                 <td>{i.unidade}</td><td className="num">{i.qtd_por_unidade}</td><td className="num">{i.estoque_minimo}</td>
+                <td className={`num font-bold ${corSaldo(porItem(i.id))}`}>{porItem(i.id)}</td>
                 <td>{i.ativo ? "Ativo" : "Inativo"}</td>
+
                 <td className="whitespace-nowrap">
                   <Button variant="ghost" size="icon" onClick={() => startEdit(i)}><Pencil className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => excluir(i.id)}><Trash2 className="h-4 w-4" /></Button>
