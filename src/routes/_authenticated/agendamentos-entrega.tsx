@@ -340,11 +340,13 @@ function AgendamentosEntregaPage() {
 
   function htmlAgendamento(h: Header, tituloExtra = "") {
     const cd = (cds as any[]).find((c) => c.id === h.estacao_cd_id);
-    const totalItens = itens.reduce((s, i) => s + i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50, 0);
+    const atm = (atms as any[]).find((a) => a.id === h.atm_id);
+    const totalItens = itens.reduce((s, i) => s + totalItemForm(i), 0);
     return `
       <div style="font-family:Arial,sans-serif">
         <h2>Bobi Control — Agendamento de Entrega ${tituloExtra}</h2>
         <p><b>CD/Estação:</b> ${cd?.nome_cd ?? "—"} / ${cd?.estacoes?.nome ?? "—"}</p>
+        <p><b>ATM destino:</b> ${atm?.id_atm ?? "—"}</p>
         <p><b>Data/Hora:</b> ${new Date(h.data_hora_entrega).toLocaleString("pt-BR")}</p>
         <p><b>Motorista:</b> ${h.nome_motorista} ${h.celular_motorista ? "(" + h.celular_motorista + ")" : ""}</p>
         <p><b>Transportadora:</b> ${h.transportadora || "—"} · <b>NF:</b> ${h.numero_nf || "—"}</p>
@@ -354,13 +356,24 @@ function AgendamentosEntregaPage() {
   }
 
   async function salvar() {
-    if (!header.estacao_cd_id) return toast.error("Selecione o CD de destino");
+    if (!header.estacao_cd_id) return toast.error("Selecione o CD de origem/destino");
     if (!header.data_hora_entrega) return toast.error("Informe a data/hora de entrega");
     if (!header.nome_motorista.trim()) return toast.error("Informe o nome do motorista");
     if (itens.length === 0) return toast.error("Adicione ao menos um item");
 
+    // Regra de reserva: a soma por item não pode ultrapassar o saldo disponível do CD
+    if (STATUS_RESERVA.includes(header.status)) {
+      const porItem = new Map<string, number>();
+      itens.forEach((i) => porItem.set(i.item_id, (porItem.get(i.item_id) ?? 0) + totalItemForm(i)));
+      for (const [itemId, qtd] of porItem) {
+        const livre = disponivelCd(itemId);
+        if (qtd > livre) return toast.error(`Saldo disponível insuficiente de ${nomeItem(itemId)}: ${livre} bobina(s) livres no CD`);
+      }
+    }
+
     const payload = {
       estacao_cd_id: header.estacao_cd_id,
+      atm_id: header.atm_id || null,
       data_hora_entrega: new Date(header.data_hora_entrega).toISOString(),
       nome_motorista: header.nome_motorista.trim(),
       celular_motorista: header.celular_motorista || null,
@@ -377,22 +390,30 @@ function AgendamentosEntregaPage() {
     if (editingId) {
       const { data: prev } = await supabase.from("agendamentos_entrega").select("status").eq("id", editingId).maybeSingle();
       previous = prev;
-      const { error } = await supabase.from("agendamentos_entrega").update(payload).eq("id", editingId);
+      const { error } = await supabase.from("agendamentos_entrega").update(payload as any).eq("id", editingId);
       if (error) return toast.error(error.message);
       await supabase.from("agendamento_itens").delete().eq("agendamento_id", editingId);
       const itRows = itens.map((i) => ({ agendamento_id: editingId, ...i }));
       if (itRows.length) await supabase.from("agendamento_itens").insert(itRows);
     } else {
-      const { data: ins, error } = await supabase.from("agendamentos_entrega").insert(payload).select("id").maybeSingle();
+      const { data: ins, error } = await supabase.from("agendamentos_entrega").insert(payload as any).select("id").maybeSingle();
       if (error || !ins) return toast.error(error?.message ?? "Erro ao criar");
       currentId = ins.id;
       const itRows = itens.map((i) => ({ agendamento_id: ins.id, ...i }));
       if (itRows.length) await supabase.from("agendamento_itens").insert(itRows);
-      previous = { status: "Agendado" };
-      // e-mail: criação
+      previous = { status: null };
       enviarEmailSeguro(emailTecnico(header.tecnico_id), "Novo agendamento de entrega", htmlAgendamento(header, "— Novo"));
     }
 
+    // Baixa no CD + abastecimento na ATM quando a entrega é concluída
+    const virouEntregue = previous?.status !== "Entregue" && header.status === "Entregue";
+    if (virouEntregue && currentId) {
+      try { await criarMovimentacoesEntrega(currentId, header.estacao_cd_id, header.atm_id || null, itens); }
+      catch (e: any) { toast.error("Falha ao gerar movimentação: " + e.message); }
+      enviarEmailSeguro(emailTecnico(header.tecnico_id), "Entrega concluída", htmlAgendamento(header, "— Entregue"));
+    }
+
+    // Recebimento de carga no CD (entrada de fornecedor)
     const virouRecebido = previous?.status !== "Recebido" && header.status === "Recebido";
     if (virouRecebido && currentId) {
       try { await criarMovimentacoesRecebimento(currentId, header.estacao_cd_id, itens); }
@@ -400,28 +421,55 @@ function AgendamentosEntregaPage() {
       enviarEmailSeguro(emailTecnico(header.tecnico_id), "Entrega confirmada como recebida", htmlAgendamento(header, "— Recebido"));
     }
 
+    if (previous?.status !== "Cancelado" && header.status === "Cancelado") {
+      toast.info("Agendamento cancelado — reserva liberada no CD");
+    }
+
     toast.success(editingId ? "Agendamento atualizado" : "Agendamento criado");
-    qc.invalidateQueries({ queryKey: ["agendamentos"] });
+    invalidarEstoque();
     resetForm();
     setAba("lista");
   }
 
-  async function marcarRecebido(row: any) {
-    const { error } = await supabase.from("agendamentos_entrega").update({ status: "Recebido" }).eq("id", row.id);
-    if (error) return toast.error(error.message);
-    const itensList: ItemForm[] = (row.agendamento_itens ?? []).map((i: any) => ({
+  function itensDaLinha(row: any): ItemForm[] {
+    return (row.agendamento_itens ?? []).map((i: any) => ({
       item_id: i.item_id,
       qtd_caixas: i.qtd_caixas ?? 0,
       qtd_bobina_100: i.qtd_bobina_100 ?? 0,
       qtd_bobina_50: i.qtd_bobina_50 ?? 0,
     })).filter((i: ItemForm) => i.item_id);
-    try { await criarMovimentacoesRecebimento(row.id, row.estacao_cd_id, itensList); }
+  }
+
+  /** Conclui a entrega: baixa no CD e abastecimento na ATM. */
+  async function marcarEntregue(row: any) {
+    const { error } = await supabase.from("agendamentos_entrega").update({ status: "Entregue" }).eq("id", row.id);
+    if (error) return toast.error(error.message);
+    try { await criarMovimentacoesEntrega(row.id, row.estacao_cd_id, row.atm_id ?? null, itensDaLinha(row)); }
+    catch (e: any) { toast.error("Falha ao gerar movimentação: " + e.message); }
+    enviarEmailSeguro(emailTecnico(row.tecnico_id), "Entrega concluída",
+      `<p>Agendamento <b>#${row.id.slice(0, 8)}</b> marcado como <b>Entregue</b>.</p>`);
+    toast.success("Entrega concluída — baixa no CD e abastecimento gerados");
+    invalidarEstoque();
+  }
+
+  async function cancelarAgendamento(row: any) {
+    const { error } = await supabase.from("agendamentos_entrega").update({ status: "Cancelado" }).eq("id", row.id);
+    if (error) return toast.error(error.message);
+    toast.success("Agendamento cancelado — reserva liberada");
+    invalidarEstoque();
+  }
+
+  async function marcarRecebido(row: any) {
+    const { error } = await supabase.from("agendamentos_entrega").update({ status: "Recebido" }).eq("id", row.id);
+    if (error) return toast.error(error.message);
+    try { await criarMovimentacoesRecebimento(row.id, row.estacao_cd_id, itensDaLinha(row)); }
     catch (e: any) { toast.error("Falha ao gerar entrada: " + e.message); }
     enviarEmailSeguro(emailTecnico(row.tecnico_id), "Entrega confirmada como recebida",
       `<p>Agendamento <b>#${row.id.slice(0,8)}</b> marcado como <b>Recebido</b>.</p>`);
     toast.success("Marcado como Recebido e entrada gerada no CD");
-    qc.invalidateQueries({ queryKey: ["agendamentos"] });
+    invalidarEstoque();
   }
+
 
   async function excluir(id: string) {
     if (!(await confirmarExclusao("agendamento"))) return;
