@@ -298,7 +298,7 @@ function AgendamentosEntregaPage() {
   /** Entrega concluída: baixa no CD e abastecimento na ATM (quando informada). */
   async function criarMovimentacoesEntrega(agId: string, cdId: string, atmId: string | null, itensList: ItemForm[]) {
     const rows = itensList.filter((i) => i.item_id).map((i) => ({
-      tipo: (atmId ? "Abastecimento" : "Retirada") as const,
+      tipo: atmId ? "Abastecimento" : "Retirada",
       item_id: i.item_id,
       qtd: totalItemForm(i),
       qtd_caixas: i.qtd_caixas,
