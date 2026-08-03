@@ -534,35 +534,56 @@ function AgendamentosEntregaPage() {
     { header: "Status", cell: (i) => i.status, csv: (i) => i.status },
   ];
 
+  const atmsDoCd = (atms as any[]).filter((a) => !header.estacao_cd_id || !a.cd_id || a.cd_id === header.estacao_cd_id);
+  const bloqueado = editingId != null && (header.status === "Entregue" || header.status === "Recebido" || header.status === "Cancelado");
+
   const formAgendamento = (
-    <Card className="p-3 space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="sm:col-span-2">
-          <Label>CD / Estação de recebimento *</Label>
-          <Select value={header.estacao_cd_id} onValueChange={(v) => setHeader({ ...header, estacao_cd_id: v })}>
-            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o CD" /></SelectTrigger>
-            <SelectContent>
+    <Card className="p-3 space-y-3 text-[13px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 items-start">
+        <div className="min-w-0">
+          <Label className="text-[11px]">CD de origem / recebimento *</Label>
+          <Select value={header.estacao_cd_id} onValueChange={(v) => setHeader({ ...header, estacao_cd_id: v, atm_id: "" })}>
+            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Selecione o CD" /></SelectTrigger>
+            <SelectContent className="max-w-[min(92vw,420px)]">
               {cds.map((c: any) => (
-                <SelectItem key={c.id} value={c.id}>{c.nome_cd} — {c.estacoes?.nome ?? "—"}</SelectItem>
+                <SelectItem key={c.id} value={c.id} className="whitespace-normal break-words">
+                  {c.nome_cd} — {c.estacoes?.nome ?? "—"}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div className="sm:col-span-2 rounded border bg-muted/40 p-2 space-y-2">
+        <div className="min-w-0">
+          <Label className="text-[11px]">ATM de destino (abastecimento)</Label>
+          <Select value={header.atm_id || undefined} onValueChange={(v) => setHeader({ ...header, atm_id: v })}>
+            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Opcional" /></SelectTrigger>
+            <SelectContent className="max-w-[min(92vw,420px)]">
+              {atmsDoCd.map((a: any) => (
+                <SelectItem key={a.id} value={a.id} className="whitespace-normal break-words">
+                  {a.id_atm}{a.modelo ? ` — ${a.modelo}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="md:col-span-2 rounded border bg-muted/40 p-2 space-y-2">
           <Label className="text-[11px]">Fornecedor / Transportadora (auto-preenche motorista)</Label>
           <Select value={fornecedorId || undefined} onValueChange={aplicarFornecedor}>
-            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
-            <SelectContent>
+            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
+            <SelectContent className="max-w-[min(92vw,480px)]">
               {fornecedores.map((f: any) => (
-                <SelectItem key={f.id} value={f.id}>{f.razao_social}{f.fornecedor_padrao ? " (padrão)" : ""}</SelectItem>
+                <SelectItem key={f.id} value={f.id} className="whitespace-normal break-words">
+                  {f.razao_social}{f.fornecedor_padrao ? " (padrão)" : ""}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {contatosFornecedor.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {contatosFornecedor.map((m: any, idx: number) => (
-                <Button key={m.id} type="button" size="sm" variant="outline"
+                <Button key={m.id} type="button" size="sm" variant="outline" className="h-8 text-[12px]"
                   onClick={() => usarContato(m)}>
                   {idx + 1}º contato: {m.nome_completo}{m.celular ? ` · ${m.celular}` : ""}
                 </Button>
@@ -571,97 +592,106 @@ function AgendamentosEntregaPage() {
           )}
         </div>
 
-        <div>
-          <Label>Data/Hora *</Label>
-          <Input type="datetime-local" className="h-9"
+        <div className="min-w-0">
+          <Label className="text-[11px]">Data/Hora *</Label>
+          <Input type="datetime-local" className="h-9 w-auto min-w-[190px]"
             value={header.data_hora_entrega}
             onChange={(e) => setHeader({ ...header, data_hora_entrega: e.target.value })} />
         </div>
-        <div>
-          <Label>Status</Label>
+        <div className="min-w-0">
+          <Label className="text-[11px]">Status</Label>
           <Select value={header.status} onValueChange={(v: any) => setHeader({ ...header, status: v })}>
-            <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-9 w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="Agendado">Agendado</SelectItem>
-              <SelectItem value="Recebido">Recebido</SelectItem>
-              <SelectItem value="Cancelado">Cancelado</SelectItem>
+              {STATUS_LISTA.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <Label>Motorista *</Label>
-          <Input className="h-9" value={header.nome_motorista}
+        <div className="min-w-0">
+          <Label className="text-[11px]">Motorista *</Label>
+          <Input className="h-9" maxLength={50} value={header.nome_motorista}
             onChange={(e) => setHeader({ ...header, nome_motorista: e.target.value })} />
         </div>
-        <div>
-          <Label>Celular Motorista</Label>
-          <Input className="h-9" value={header.celular_motorista}
+        <div className="min-w-0">
+          <Label className="text-[11px]">Celular Motorista</Label>
+          <Input className="h-9" maxLength={50} value={header.celular_motorista}
             onChange={(e) => setHeader({ ...header, celular_motorista: e.target.value })} />
         </div>
-        <div>
-          <Label>Transportadora</Label>
-          <Input className="h-9" value={header.transportadora}
+        <div className="min-w-0">
+          <Label className="text-[11px]">Transportadora</Label>
+          <Input className="h-9" maxLength={50} value={header.transportadora}
             onChange={(e) => setHeader({ ...header, transportadora: e.target.value })} />
         </div>
-        <div>
-          <Label>Nº NF</Label>
-          <Input className="h-9" value={header.numero_nf}
+        <div className="min-w-0">
+          <Label className="text-[11px]">Nº NF</Label>
+          <Input className="h-9" maxLength={50} value={header.numero_nf}
             onChange={(e) => setHeader({ ...header, numero_nf: e.target.value })} />
         </div>
-        <div className="sm:col-span-2">
-          <Label>Técnico Responsável</Label>
+        <div className="min-w-0">
+          <Label className="text-[11px]">Técnico Responsável</Label>
           <Select value={header.tecnico_id} onValueChange={(v) => setHeader({ ...header, tecnico_id: v })}>
-            <SelectTrigger className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger>
-            <SelectContent>
-              {tecnicos.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.nome_completo}</SelectItem>)}
+            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
+            <SelectContent className="max-w-[min(92vw,420px)]">
+              {tecnicos.map((t: any) => (
+                <SelectItem key={t.id} value={t.id} className="whitespace-normal break-words">{t.nome_completo}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="sm:col-span-2 flex items-center gap-2">
+        <div className="min-w-0 flex items-center gap-2 md:pt-5">
           <Checkbox id="offline" checked={header.modo_offline}
             onCheckedChange={(c) => setHeader({ ...header, modo_offline: !!c })} />
-          <Label htmlFor="offline" className="cursor-pointer flex items-center gap-1">
+          <Label htmlFor="offline" className="cursor-pointer flex items-center gap-1 text-[12px]">
             <CloudOff className="h-4 w-4" /> Técnico estará Offline em campo
           </Label>
         </div>
-        <div className="sm:col-span-2">
-          <Label>Observação</Label>
-          <Textarea rows={2} value={header.observacao}
+        <div className="md:col-span-2">
+          <Label className="text-[11px]">Observação</Label>
+          <Textarea rows={2} maxLength={200} value={header.observacao}
             onChange={(e) => setHeader({ ...header, observacao: e.target.value })} />
         </div>
       </div>
 
       <div className="border-t pt-3 space-y-2">
         <p className="text-sm font-semibold">Itens do Agendamento</p>
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_90px_90px_90px_auto] gap-2 items-end">
-          <div>
-            <Label>Item</Label>
+        <div className="grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_84px_84px_84px_auto] gap-2 items-end">
+          <div className="col-span-2 md:col-span-1 min-w-0">
+            <Label className="text-[11px]">Item</Label>
             <Select value={novoItem.item_id} onValueChange={(v) => setNovoItem({ ...novoItem, item_id: v })}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>
+              <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent className="max-w-[min(92vw,420px)]">
                 {itensCatalogo.map((t: any) => (
-                  <SelectItem key={t.id} value={t.id}>{t.tipo_bobina ?? t.descricao}</SelectItem>
+                  <SelectItem key={t.id} value={t.id} className="whitespace-normal break-words">{t.nome ?? t.descricao}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Caixas</Label>
+            <Label className="text-[11px]">Caixas</Label>
             <Input type="number" min={0} className="h-9" value={novoItem.qtd_caixas}
               onChange={(e) => setNovoItem({ ...novoItem, qtd_caixas: Number(e.target.value) || 0 })} />
           </div>
           <div>
-            <Label>Bob. 100%</Label>
+            <Label className="text-[11px]">Bob. 100%</Label>
             <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_100}
               onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_100: Number(e.target.value) || 0 })} />
           </div>
           <div>
-            <Label>Bob. &lt;50%</Label>
+            <Label className="text-[11px]">Bob. &lt;50%</Label>
             <Input type="number" min={0} className="h-9" value={novoItem.qtd_bobina_50}
               onChange={(e) => setNovoItem({ ...novoItem, qtd_bobina_50: Number(e.target.value) || 0 })} />
           </div>
-          <Button type="button" onClick={addItem}><Plus className="h-4 w-4" /></Button>
+          <Button type="button" className="h-9" onClick={addItem}><Plus className="h-4 w-4" /></Button>
         </div>
+
+        {novoItem.item_id && header.estacao_cd_id && (
+          <p className="text-[11px] text-muted-foreground">
+            No CD: QTD real <b>{real("CD", header.estacao_cd_id, novoItem.item_id)}</b> ·
+            reservado <b>{reservado("CD", header.estacao_cd_id, novoItem.item_id)}</b> ·
+            <span className="text-primary"> disponível <b>{disponivelCd(novoItem.item_id)}</b></span>
+          </p>
+        )}
+
         <Card className="p-0 overflow-hidden">
           <table className="excel-table">
             <thead>
@@ -671,33 +701,46 @@ function AgendamentosEntregaPage() {
               {itens.length === 0 && (
                 <tr><td colSpan={6} className="text-center py-4 text-muted-foreground">Nenhum item</td></tr>
               )}
-              {itens.map((i, idx) => {
-                const item = (itensCatalogo as any[]).find((x) => x.id === i.item_id);
-                const total = i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50;
-                return (
-                  <tr key={idx}>
-                    <td>{item?.tipo_bobina ?? item?.descricao ?? "—"}</td>
-                    <td className="num">{i.qtd_caixas}</td>
-                    <td className="num">{i.qtd_bobina_100}</td>
-                    <td className="num">{i.qtd_bobina_50}</td>
-                    <td className="num"><b>{total}</b></td>
-                    <td>
-                      <Button size="sm" variant="ghost" onClick={() => removeItem(idx)}>
-                        <X className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {itens.map((i, idx) => (
+                <tr key={idx}>
+                  <td className="whitespace-normal break-words">{nomeItem(i.item_id)}</td>
+                  <td className="num">{i.qtd_caixas}</td>
+                  <td className="num">{i.qtd_bobina_100}</td>
+                  <td className="num">{i.qtd_bobina_50}</td>
+                  <td className="num"><b>{totalItemForm(i)}</b></td>
+                  <td>
+                    <Button size="sm" variant="ghost" onClick={() => removeItem(idx)}>
+                      <X className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </Card>
+
+        {STATUS_RESERVA.includes(header.status) && (
+          <p className="text-xs text-blue-800 bg-blue-50 rounded p-2">
+            Status <b>{header.status}</b>: os itens ficam <b>reservados</b> no CD e saem do saldo disponível até a entrega ou o cancelamento.
+          </p>
+        )}
+        {header.status === "Entregue" && (
+          <p className="text-xs text-green-800 bg-green-50 rounded p-2">
+            Ao salvar como "Entregue", será gerada a <b>baixa no CD</b>{header.atm_id ? " e o abastecimento na ATM" : ""} em Nova Movimentação.
+          </p>
+        )}
+        {header.status === "Cancelado" && (
+          <p className="text-xs text-red-800 bg-red-50 rounded p-2">
+            Ao salvar como "Cancelado", a <b>reserva é liberada</b> e o saldo volta a ficar disponível no CD.
+          </p>
+        )}
         {header.status === "Recebido" && (
           <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">
             Ao salvar como "Recebido", será gerada uma Movimentação de <b>Recebimento</b> no CD para cada item.
           </p>
         )}
       </div>
+
 
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={resetForm}>Cancelar</Button>
