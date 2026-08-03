@@ -17,6 +17,7 @@ import { BackButton } from "@/components/back-button";
 import { TabelaCrud, type Coluna } from "@/components/tabela-crud";
 import { TableSearch } from "@/components/table-search";
 import { useCurrentUser } from "@/lib/use-current-user";
+import { useEstoqueDisponivel } from "@/lib/use-estoque-disponivel";
 import { useServerFn } from "@tanstack/react-start";
 import { sendEmail } from "@/lib/email.functions";
 import { confirmarExclusao } from "@/components/confirm-dialog";
