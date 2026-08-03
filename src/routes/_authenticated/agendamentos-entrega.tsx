@@ -822,9 +822,7 @@ function AgendamentosEntregaPage() {
                   <SelectTrigger className="h-7 text-xs w-auto min-w-[120px]"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="Agendado">Agendado</SelectItem>
-                    <SelectItem value="Recebido">Recebido</SelectItem>
-                    <SelectItem value="Cancelado">Cancelado</SelectItem>
+                    {STATUS_LISTA.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
