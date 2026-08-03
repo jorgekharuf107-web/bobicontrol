@@ -20,6 +20,9 @@ import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovimentacaoForm } from "@/components/movimentacao-form";
 import { usePendingMovimentacoes } from "@/lib/offline-queue";
+import { GlossarioEstoque } from "@/components/glossario-estoque";
+import { useSaldoReal, corSaldo } from "@/lib/use-estoque-saldo";
+
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   head: () => ({
@@ -61,6 +64,8 @@ const empty: MovForm = {
 function ControleEstoque() {
   const qc = useQueryClient();
   const pendentes = usePendingMovimentacoes();
+  const { rows: rowsSaldo, porItem } = useSaldoReal();
+
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MovForm>(empty);
