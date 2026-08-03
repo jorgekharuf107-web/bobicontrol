@@ -92,6 +92,30 @@ export function AssistenteReposicao() {
     return Array.from(set).sort();
   }, [atmsFiltrados]);
 
+  /** Necessidade = capacidade do ATM − saldo real do ATM − bobinas já agendadas para o CD que o atende. */
+  const analise = useMemo(() => {
+    const atm = atms.find((a) => a.id === atmId);
+    if (!atm) return null;
+    const saldoAtm = porLocal("ATM", atm.id);
+    const capacidade = atm.capacidade_bobinas || 0;
+    const saldoCd = atm.cd_id ? porLocal("CD", atm.cd_id) : 0;
+    const emTransito = (agendamentos as any[])
+      .filter((ag) => !atm.cd_id || ag.estacao_cd_id === atm.cd_id)
+      .reduce(
+        (acc, ag) =>
+          acc +
+          (ag.agendamento_itens ?? []).reduce(
+            (s: number, it: any) => s + (it.qtd_caixas ?? 0) * 6 + (it.qtd_bobina_100 ?? 0) + (it.qtd_bobina_50 ?? 0),
+            0,
+          ),
+        0,
+      );
+    const necessidade = Math.max(0, capacidade - saldoAtm - emTransito);
+    return { saldoAtm, capacidade, saldoCd, emTransito, necessidade, minimo: atm.nivel_minimo ?? 0 };
+  }, [atms, atmId, agendamentos, porLocal]);
+
+
+
   async function registrar() {
     if (!atmId || !tipo) {
       toast.error("Selecione o ATM e o tipo de bobina");
