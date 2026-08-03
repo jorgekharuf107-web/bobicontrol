@@ -482,7 +482,7 @@ function AgendamentosEntregaPage() {
   function totalBobinas(r: any) {
     return (r.agendamento_itens ?? []).reduce((s: number, i: any) => {
       const legado = i.quantidade ?? 0;
-      return s + (i.qtd_caixas ?? 0) * 3 + (i.qtd_bobina_100 ?? 0) + (i.qtd_bobina_50 ?? 0) + legado;
+      return s + (i.qtd_caixas ?? 0) * fatorCaixa(i.item_id) + (i.qtd_bobina_100 ?? 0) + (i.qtd_bobina_50 ?? 0) + legado;
     }, 0);
   }
 
@@ -491,6 +491,7 @@ function AgendamentosEntregaPage() {
       csv: (r) => new Date(r.data_hora_entrega).toLocaleString("pt-BR") },
     { header: "CD / Estação", cell: (r) => `${r.cds?.nome_cd ?? "—"} / ${r.cds?.estacoes?.nome ?? "—"}`,
       csv: (r) => `${r.cds?.nome_cd ?? ""} / ${r.cds?.estacoes?.nome ?? ""}` },
+    { header: "ATM", cell: (r) => r.atms?.id_atm ?? "—", csv: (r) => r.atms?.id_atm ?? "" },
     { header: "Motorista", cell: (r) => r.nome_motorista, csv: (r) => r.nome_motorista },
     { header: "Transportadora", cell: (r) => r.transportadora ?? "—", csv: (r) => r.transportadora ?? "" },
     { header: "NF", cell: (r) => r.numero_nf ?? "—", csv: (r) => r.numero_nf ?? "" },
@@ -508,14 +509,15 @@ function AgendamentosEntregaPage() {
       id: i.id,
       data_hora: r.data_hora_entrega,
       cd: `${r.cds?.nome_cd ?? "—"} / ${r.cds?.estacoes?.nome ?? "—"}`,
-      item: i.itens?.tipo_bobina ?? "—",
+      item: i.itens?.nome ?? nomeItem(i.item_id),
       qtd_caixas: i.qtd_caixas ?? 0,
       qtd_bobina_100: i.qtd_bobina_100 ?? 0,
       qtd_bobina_50: i.qtd_bobina_50 ?? 0,
-      total: (i.qtd_caixas ?? 0) * 3 + (i.qtd_bobina_100 ?? 0) + (i.qtd_bobina_50 ?? 0) + (i.quantidade ?? 0),
+      total: (i.qtd_caixas ?? 0) * fatorCaixa(i.item_id) + (i.qtd_bobina_100 ?? 0) + (i.qtd_bobina_50 ?? 0) + (i.quantidade ?? 0),
       status: r.status,
     })),
   );
+
   const itensFlatFiltrados = itensFlat.filter((i) => {
     if (!fItemDataHora) return true;
     return String(i.data_hora ?? "").startsWith(fItemDataHora);
