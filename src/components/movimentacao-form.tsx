@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { useSaldoReal } from "@/lib/use-estoque-saldo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -100,10 +101,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       return Array.from(new Set((data ?? []).map((r: any) => r.transportadora).filter(Boolean))).sort() as string[];
     },
   });
-  const { data: estoque = [] } = useQuery({
-    queryKey: ["estoque"],
-    queryFn: async () => (await supabase.from("estoque").select("*")).data ?? [],
-  });
+  const { porLocal } = useSaldoReal();
 
   const cdsFiltrados = (cds as any[]).filter((c) => !linhaId || c.linha_id === linhaId);
   const atmsFiltrados = (atms as any[]).filter((a) => !linhaId || a.linha_id === linhaId);
@@ -128,8 +126,8 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   /** Saldo real do CD de origem — vem da view estoque_saldo (já inclui a fila offline). */
   const saldoOrigem = useMemo(() => {
     if (isRecebimento || !form.origem_id || !form.item_id) return null;
-    return porLocalItem("CD", form.origem_id, form.item_id);
-  }, [porLocalItem, form.origem_id, form.item_id, isRecebimento]);
+    return porLocal("CD", form.origem_id, form.item_id);
+  }, [porLocal, form.origem_id, form.item_id, isRecebimento]);
 
 
   function limpar() {
