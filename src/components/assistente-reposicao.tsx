@@ -52,11 +52,26 @@ export function AssistenteReposicao() {
     queryFn: async () => {
       const { data } = await supabase
         .from("atms")
-        .select("id, id_atm, modelo, linha_id, estacao_id")
+        .select("id, id_atm, modelo, linha_id, estacao_id, capacidade_bobinas, nivel_minimo, cd_id")
         .order("id_atm");
       return (data ?? []) as AtmRow[];
     },
   });
+
+  /** Entregas agendadas ainda não recebidas — entram no cálculo da necessidade. */
+  const { data: agendamentos = [] } = useQuery({
+    queryKey: ["ar-agendamentos"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("agendamentos_entrega")
+        .select("id, estacao_cd_id, status, agendamento_itens(qtd_caixas, qtd_bobina_100, qtd_bobina_50)")
+        .neq("status", "Recebido");
+      return data ?? [];
+    },
+  });
+
+  const { porLocal } = useSaldoReal();
+
 
   const estacoesFiltradas = useMemo(
     () => (linhaId ? estacoes.filter((e: any) => e.linha_id === linhaId) : estacoes),
