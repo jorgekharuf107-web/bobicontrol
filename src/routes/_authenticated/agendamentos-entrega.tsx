@@ -742,7 +742,12 @@ function AgendamentosEntregaPage() {
       </div>
 
 
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap justify-end items-center gap-2">
+        {bloqueado && (
+          <span className="text-[11px] text-muted-foreground mr-auto">
+            Agendamento finalizado — alterações não geram novas reservas.
+          </span>
+        )}
         <Button variant="outline" onClick={resetForm}>Cancelar</Button>
         <Button onClick={salvar}>{editingId ? "Salvar" : "Criar"}</Button>
       </div>
