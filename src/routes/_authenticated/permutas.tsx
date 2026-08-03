@@ -104,7 +104,7 @@ function Permutas() {
       }
     }
     setForm({ ...emptyForm, data: nowLocal() });
-    ["permutas", "movs-all", "movs-page", "estoque", "dashboard-stats"]
+    ["permutas", "movs-all", "movs-page", "estoque", "estoque-saldo", "dashboard-stats"]
       .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
   }
 

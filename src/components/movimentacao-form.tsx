@@ -208,7 +208,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       }
     }
     limpar();
-    ["movs-page", "movs-all", "saldo-itens", "estoque", "dashboard-stats", "permutas", "permutas-atm"]
+    ["movs-page", "movs-all", "saldo-itens", "estoque", "estoque-saldo", "dashboard-stats", "permutas", "permutas-atm"]
       .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
     onSaved?.();
   }

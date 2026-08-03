@@ -108,7 +108,7 @@ function PermutasAtm() {
     }
     setOpen(false);
     setForm({ origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "", data_criacao: nowLocal(), tecnico_id: "" });
-    ["permutas-atm", "movs-all", "movs-page", "estoque", "dashboard-stats"]
+    ["permutas-atm", "movs-all", "movs-page", "estoque", "estoque-saldo", "dashboard-stats"]
       .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
   }
 
