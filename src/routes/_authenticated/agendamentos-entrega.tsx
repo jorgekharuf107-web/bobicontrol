@@ -153,15 +153,32 @@ function AgendamentosEntregaPage() {
   const { data: itensCatalogo = [] } = useQuery({
     queryKey: ["itens-agend"],
     queryFn: async () =>
-      (await supabase.from("itens").select("id, tipo_bobina, descricao").order("tipo_bobina")).data ?? [],
+      (await supabase.from("itens").select("id, nome, bobinas_por_caixa, descricao").eq("ativo", true).order("nome")).data ?? [],
   });
+
+  const { data: atms = [] } = useQuery({
+    queryKey: ["atms-agend"],
+    queryFn: async () =>
+      (await supabase.from("atms").select("id, id_atm, modelo, cd_id, estacao_id").order("id_atm")).data ?? [],
+  });
+
+  const nomeItem = (id: string) => {
+    const i = (itensCatalogo as any[]).find((x) => x.id === id);
+    return i?.nome ?? i?.descricao ?? "—";
+  };
+  const fatorCaixa = (id: string) =>
+    Number((itensCatalogo as any[]).find((x) => x.id === id)?.bobinas_por_caixa ?? 1) || 1;
+  const totalItemForm = (i: ItemForm) =>
+    i.qtd_caixas * fatorCaixa(i.item_id) + i.qtd_bobina_100 + i.qtd_bobina_50;
+
+  const { disponivel, real, reservado } = useEstoqueDisponivel();
 
   const { data: agendamentos = [] } = useQuery({
     queryKey: ["agendamentos", fCd, fData, fDataFim, fTecnico, fStatus],
     queryFn: async () => {
       let q = supabase
         .from("agendamentos_entrega")
-        .select("*, cds(nome_cd, estacoes(nome)), agendamento_itens(id, item_id, qtd_caixas, qtd_bobina_100, qtd_bobina_50, tipo_bobina, quantidade, itens(tipo_bobina))")
+        .select("*, cds(nome_cd, estacoes(nome)), atms(id_atm), agendamento_itens(id, item_id, qtd_caixas, qtd_bobina_100, qtd_bobina_50, tipo_bobina, quantidade, itens(nome))")
         .order("data_hora_entrega", { ascending: false });
       if (fCd !== "todos") q = q.eq("estacao_cd_id", fCd);
       if (fTecnico !== "todos") q = q.eq("tecnico_id", fTecnico);
@@ -171,6 +188,7 @@ function AgendamentosEntregaPage() {
       return (await q).data ?? [];
     },
   });
+
 
   const agendamentosFiltrados = (() => {
     const t = busca.trim().toLowerCase();
