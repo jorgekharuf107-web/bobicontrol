@@ -975,7 +975,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      estoque_saldo: {
+        Row: {
+          item_id: string | null
+          local_id: string | null
+          local_tipo: string | null
+          saldo_total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       aplicar_saldo_estoque: {
