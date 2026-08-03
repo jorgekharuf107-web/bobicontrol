@@ -203,21 +203,18 @@ function ControleEstoque() {
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
 
-  // Saldo atual por item = tabela Estoque + movimentações offline ainda não sincronizadas
+  // Saldo REAL por item — sempre calculado pela visão estoque_saldo (+ fila offline)
   const capacidadeTotal = (cds as any[]).reduce((a, c) => a + (c.capacidade ?? 0), 0);
   const saldos = (itens as any[]).map((i) => {
-    const base = (estoque as any[])
-      .filter((e) => e.item_id === i.id)
-      .reduce((acc, e) => acc + (e.total_bobinas ?? 0), 0);
-    const delta = pendentes
-      .filter((p) => p.item_id === i.id)
-      .reduce((acc, p) => acc + (p.destino_id ? (p.qtd ?? 0) : 0) - (p.origem_id ? (p.qtd ?? 0) : 0), 0);
-    const saldo = base + delta;
+    const saldo = porItem(i.id);
+    const saldoCd = rowsSaldo.filter((r) => r.local_tipo === "CD" && r.item_id === i.id).reduce((a, r) => a + r.saldo_total, 0);
+    const saldoAtm = rowsSaldo.filter((r) => r.local_tipo === "ATM" && r.item_id === i.id).reduce((a, r) => a + r.saldo_total, 0);
     const minimo = i.estoque_minimo ?? 0;
     const critico = saldo <= minimo;
     const atencao = !critico && capacidadeTotal > 0 && saldo < capacidadeTotal * 0.2;
-    return { ...i, saldo, minimo, critico, atencao };
+    return { ...i, saldo, saldoCd, saldoAtm, minimo, critico, atencao };
   });
+
 
 
 
@@ -233,7 +230,13 @@ function ControleEstoque() {
         <TabsList>
           <TabsTrigger value="controle">Controle de Estoque</TabsTrigger>
           <TabsTrigger value="nova">Nova Movimentação</TabsTrigger>
+          <TabsTrigger value="glossario">Glossário do Estoque</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="glossario" className="pt-3">
+          <GlossarioEstoque />
+        </TabsContent>
+
 
         <TabsContent value="nova" className="pt-3">
           <MovimentacaoForm />
