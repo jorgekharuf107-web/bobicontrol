@@ -125,22 +125,12 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   const q50 = t50 ? form.qtd_bobina_50 : 0;
   const totalBobinas = qCaixas * porCaixa + q100 + q50;
 
-  /** Saldo do CD de origem (banco + movimentações offline pendentes). */
+  /** Saldo real do CD de origem — vem da view estoque_saldo (já inclui a fila offline). */
   const saldoOrigem = useMemo(() => {
     if (isRecebimento || !form.origem_id || !form.item_id) return null;
-    const base = (estoque as any[])
-      .filter((e) => e.local_tipo === "CD" && e.local_id === form.origem_id && e.item_id === form.item_id)
-      .reduce((a, e) => a + (e.total_bobinas ?? 0), 0);
-    const delta = pendentes
-      .filter((p) => p.item_id === form.item_id)
-      .reduce((a, p) => {
-        let d = 0;
-        if (p.destino_tipo === "CD" && p.destino_id === form.origem_id) d += p.qtd ?? 0;
-        if (p.origem_tipo === "CD" && p.origem_id === form.origem_id) d -= p.qtd ?? 0;
-        return a + d;
-      }, 0);
-    return base + delta;
-  }, [estoque, pendentes, form.origem_id, form.item_id, isRecebimento]);
+    return porLocalItem("CD", form.origem_id, form.item_id);
+  }, [porLocalItem, form.origem_id, form.item_id, isRecebimento]);
+
 
   function limpar() {
     setForm({ ...empty, data: nowLocal() });
