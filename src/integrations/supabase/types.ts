@@ -64,6 +64,7 @@ export type Database = {
       }
       agendamentos_entrega: {
         Row: {
+          atm_id: string | null
           celular_motorista: string | null
           created_at: string
           data_hora_entrega: string
@@ -78,6 +79,7 @@ export type Database = {
           transportadora: string | null
         }
         Insert: {
+          atm_id?: string | null
           celular_motorista?: string | null
           created_at?: string
           data_hora_entrega: string
@@ -92,6 +94,7 @@ export type Database = {
           transportadora?: string | null
         }
         Update: {
+          atm_id?: string | null
           celular_motorista?: string | null
           created_at?: string
           data_hora_entrega?: string
@@ -106,6 +109,13 @@ export type Database = {
           transportadora?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "agendamentos_entrega_atm_id_fkey"
+            columns: ["atm_id"]
+            isOneToOne: false
+            referencedRelation: "atms"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "agendamentos_entrega_estacao_cd_id_fkey"
             columns: ["estacao_cd_id"]
@@ -975,6 +985,41 @@ export type Database = {
       }
     }
     Views: {
+      estoque_disponivel: {
+        Row: {
+          item_id: string | null
+          local_id: string | null
+          local_tipo: string | null
+          reservado: number | null
+          saldo_disponivel: number | null
+          saldo_total: number | null
+        }
+        Relationships: []
+      }
+      estoque_reservado: {
+        Row: {
+          item_id: string | null
+          local_id: string | null
+          local_tipo: string | null
+          reservado: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamento_itens_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamentos_entrega_estacao_cd_id_fkey"
+            columns: ["local_id"]
+            isOneToOne: false
+            referencedRelation: "cds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       estoque_saldo: {
         Row: {
           item_id: string | null
