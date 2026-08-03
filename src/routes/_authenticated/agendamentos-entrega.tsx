@@ -844,9 +844,19 @@ function AgendamentosEntregaPage() {
             acoes={(r) => (
               <div className="flex items-center gap-1">
                 <span className="text-xs mr-1">{r.observacao || "—"}</span>
+                {STATUS_RESERVA.includes(r.status) && canManageEstoque && (
+                  <>
+                    <Button size="sm" variant="outline" title="Marcar Entregue (baixa no CD)" onClick={() => marcarEntregue(r)}>
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" title="Cancelar (libera reserva)" onClick={() => cancelarAgendamento(r)}>
+                      <X className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </>
+                )}
                 {r.status === "Agendado" && canManageEstoque && (
-                  <Button size="sm" variant="outline" title="Marcar Recebido" onClick={() => marcarRecebido(r)}>
-                    <Check className="h-4 w-4" />
+                  <Button size="sm" variant="outline" title="Recebimento no CD" onClick={() => marcarRecebido(r)}>
+                    <CloudOff className="h-4 w-4 rotate-180" />
                   </Button>
                 )}
                 <Button size="sm" variant="ghost" onClick={() => abrirEditar(r)}><Pencil className="h-4 w-4" /></Button>
@@ -854,6 +864,7 @@ function AgendamentosEntregaPage() {
                   <Button size="sm" variant="ghost" onClick={() => excluir(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 )}
               </div>
+
             )}
           />
         </TabsContent>
