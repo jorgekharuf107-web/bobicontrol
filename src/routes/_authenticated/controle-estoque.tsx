@@ -282,15 +282,18 @@ function ControleEstoque() {
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
-          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Estoque Mínimo</th><th className="num">Saldo Atual (bobinas)</th><th>Situação</th></tr></thead>
+          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Estoque Mínimo</th><th className="num">Saldo CD</th><th className="num">Saldo ATM</th><th className="num">QTD REAL TOTAL ATUAL</th><th>Situação</th></tr></thead>
           <tbody>
-            {saldos.length === 0 && <tr><td colSpan={5} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {saldos.length === 0 && <tr><td colSpan={7} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
             {saldos.map((i: any) => (
               <tr key={i.id}>
                 <td>{i.nome}</td>
                 <td className="num">{i.bobinas_por_caixa}</td>
                 <td className="num">{i.minimo}</td>
-                <td className={`num font-bold ${i.critico ? "text-red-600" : i.atencao ? "text-orange-500" : ""}`}>{i.saldo}</td>
+                <td className="num">{i.saldoCd}</td>
+                <td className="num">{i.saldoAtm}</td>
+                <td className={`num font-bold ${corSaldo(i.saldo)}`}>{i.saldo}</td>
+
                 <td>
                   {i.critico ? (
                     <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">Abaixo do mínimo</span>
