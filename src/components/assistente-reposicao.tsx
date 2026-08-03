@@ -235,6 +235,18 @@ export function AssistenteReposicao() {
           </Select>
         </div>
       </div>
+
+      {analise && (
+        <div className="rounded-md border p-3 text-sm space-y-1 bg-muted/40">
+          <p className="font-semibold">Cálculo automático (saldo real + agendamentos)</p>
+          <p>Saldo real no ATM: <span className={`font-bold ${corSaldo(analise.saldoAtm)}`}>{analise.saldoAtm}</span> bobina(s)</p>
+          <p>Saldo real no CD que atende: <span className={`font-bold ${corSaldo(analise.saldoCd)}`}>{analise.saldoCd}</span> bobina(s)</p>
+          <p>Entregas agendadas ainda não recebidas: <span className="font-bold">{analise.emTransito}</span> bobina(s)</p>
+          <p>Capacidade do ATM: <span className="font-bold">{analise.capacidade}</span> bobina(s)</p>
+          <p>Necessidade de reposição: <span className="font-bold text-primary">{analise.necessidade}</span> bobina(s)</p>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <Button onClick={registrar} disabled={saving} size="sm">
           <Send className="h-4 w-4" /> Registrar Solicitação
