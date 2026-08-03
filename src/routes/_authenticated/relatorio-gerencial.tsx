@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/back-button";
+import { useSaldoReal } from "@/lib/use-estoque-saldo";
 
 export const Route = createFileRoute("/_authenticated/relatorio-gerencial")({
   head: () => ({
