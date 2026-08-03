@@ -67,9 +67,11 @@ function RelatorioGerencial() {
   const [fAtm, setFAtm] = useState("todos");
   const [fItem, setFItem] = useState("todos");
 
-  const { data: atms = [], isLoading } = useQuery({
+  const { porLocal } = useSaldoReal();
+
+  const { data: atmsRaw = [], isLoading } = useQuery({
     queryKey: ["rel-atms-status"],
-    queryFn: async (): Promise<AtmStatus[]> => {
+    queryFn: async () => {
       const [{ data: rows }, { data: linhas }, { data: estacoes }] = await Promise.all([
         supabase
           .from("atms")
@@ -79,26 +81,29 @@ function RelatorioGerencial() {
       ]);
       const mapL = new Map((linhas ?? []).map((l: Linha) => [l.id, l.nome]));
       const mapE = new Map((estacoes ?? []).map((e: Estacao) => [e.id, e.nome]));
-      return (rows ?? []).map((a: any) => {
-        const total = (a.caixas ?? 0) * BOBINAS_POR_CAIXA + (a.avulsas ?? 0);
-        const capacidade = Math.max(1, (a.capacidade_bobinas ?? 1) * BOBINAS_POR_CAIXA);
-        const nivel = Math.min(100, Math.round((total / capacidade) * 100));
-        const status: AtmStatus["status"] = nivel < 50 ? "Crítico" : nivel < 80 ? "Médio" : "Cheio";
-        return {
-          id: a.id,
-          id_atm: a.id_atm,
-          modelo: a.modelo,
-          estacao: mapE.get(a.estacao_id) ?? a.estacao ?? "—",
-          linha: mapL.get(a.linha_id) ?? "—",
-          total,
-          capacidade,
-          nivel,
-          status,
-          criado_em: a.criado_em,
-        };
-      });
+      return (rows ?? []).map((a: any) => ({
+        id: a.id,
+        id_atm: a.id_atm,
+        modelo: a.modelo,
+        estacao: mapE.get(a.estacao_id) ?? a.estacao ?? "—",
+        linha: mapL.get(a.linha_id) ?? "—",
+        capacidade: Math.max(1, (a.capacidade_bobinas ?? 1) * BOBINAS_POR_CAIXA),
+        criado_em: a.criado_em,
+      }));
     },
   });
+
+  /** Nível sempre calculado pelo saldo real (estoque_saldo) — nunca por valores fixos. */
+  const atms: AtmStatus[] = useMemo(
+    () =>
+      atmsRaw.map((a: any) => {
+        const total = Math.max(0, porLocal("ATM", a.id));
+        const nivel = Math.min(100, Math.round((total / a.capacidade) * 100));
+        const status: AtmStatus["status"] = nivel < 50 ? "Crítico" : nivel < 80 ? "Médio" : "Cheio";
+        return { ...a, total, nivel, status };
+      }),
+    [atmsRaw, porLocal],
+  );
 
   const { data: movs = [] } = useQuery({
     queryKey: ["rel-movs"],
@@ -107,9 +112,10 @@ function RelatorioGerencial() {
         .from("movimentacoes")
         .select("id, data, criado_em, tipo, qtd, qtd_caixas, qtd_bobina_100, qtd_bobina_50, origem_tipo, destino_tipo, observacao")
         .order("criado_em", { ascending: false })
-        .limit(100);
+        .limit(1000);
       return data ?? [];
     },
+
   });
 
   const linhasOpts = useMemo(
