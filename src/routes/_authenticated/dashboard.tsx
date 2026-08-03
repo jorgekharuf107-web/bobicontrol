@@ -78,6 +78,7 @@ function Dashboard() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
   const pendentes = usePendingMovimentacoes();
+  const { rows: rowsSaldo } = useSaldoReal();
   const { user, isAdmin, isGestor } = useCurrentUser();
   const podeAprovar = isAdmin || isGestor;
   const { data: linhas = [] } = useAccessibleLinhas();
