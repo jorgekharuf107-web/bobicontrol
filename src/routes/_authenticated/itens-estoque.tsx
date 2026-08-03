@@ -16,6 +16,9 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GlossarioEstoque } from "@/components/glossario-estoque";
+import { useSaldoReal, corSaldo } from "@/lib/use-estoque-saldo";
+
 
 export const Route = createFileRoute("/_authenticated/itens-estoque")({
   head: () => ({
@@ -57,6 +60,8 @@ const empty: ItemForm = { nome: "", codigo: "", unidade: "Unidade", qtd_por_unid
 function ItensPage() {
   const qc = useQueryClient();
   const [aba, setAba] = useState("pesquisa");
+  const { porItem } = useSaldoReal();
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ItemForm>(empty);
   const [busca, setBusca] = useState("");
