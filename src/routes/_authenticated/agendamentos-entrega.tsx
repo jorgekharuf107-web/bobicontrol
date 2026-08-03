@@ -273,29 +273,59 @@ function AgendamentosEntregaPage() {
   function removeItem(idx: number) { setItens((arr) => arr.filter((_, i) => i !== idx)); }
 
 
+  /** Recebimento de fornecedor: entrada de bobinas no CD. */
   async function criarMovimentacoesRecebimento(agId: string, cdId: string, itensList: ItemForm[]) {
-    const rows = itensList.map((i) => {
-      const qtd = i.qtd_caixas * 3 + i.qtd_bobina_100 + i.qtd_bobina_50;
-      return {
-        tipo: "Recebimento" as const,
-        item_id: i.item_id,
-        qtd,
-        qtd_caixas: i.qtd_caixas,
-        qtd_bobina_100: i.qtd_bobina_100,
-        qtd_bobina_50: i.qtd_bobina_50,
-        destino_tipo: "CD" as const,
-        destino_id: cdId,
-        tecnico_id: user?.id ?? null,
-        observacao: `Recebimento agendamento #${agId.slice(0, 8)}`,
-        data: new Date().toISOString(),
-        status_aprovacao: "aprovado",
-      };
-    });
+    const rows = itensList.map((i) => ({
+      tipo: "Recebimento" as const,
+      item_id: i.item_id,
+      qtd: totalItemForm(i),
+      qtd_caixas: i.qtd_caixas,
+      qtd_bobina_100: i.qtd_bobina_100,
+      qtd_bobina_50: i.qtd_bobina_50,
+      destino_tipo: "CD" as const,
+      destino_id: cdId,
+      tecnico_id: user?.id ?? null,
+      observacao: `Recebimento agendamento #${agId.slice(0, 8)}`,
+      data: new Date().toISOString(),
+      status_aprovacao: "aprovado",
+    }));
     if (rows.length) {
       const { error } = await supabase.from("movimentacoes").insert(rows as any);
       if (error) throw error;
     }
   }
+
+  /** Entrega concluída: baixa no CD e abastecimento na ATM (quando informada). */
+  async function criarMovimentacoesEntrega(agId: string, cdId: string, atmId: string | null, itensList: ItemForm[]) {
+    const rows = itensList.filter((i) => i.item_id).map((i) => ({
+      tipo: (atmId ? "Abastecimento" : "Retirada") as const,
+      item_id: i.item_id,
+      qtd: totalItemForm(i),
+      qtd_caixas: i.qtd_caixas,
+      qtd_bobina_100: i.qtd_bobina_100,
+      qtd_bobina_50: i.qtd_bobina_50,
+      origem_tipo: "CD" as const,
+      origem_id: cdId,
+      destino_tipo: atmId ? ("ATM" as const) : null,
+      destino_id: atmId,
+      tecnico_id: user?.id ?? null,
+      observacao: `Entrega agendamento #${agId.slice(0, 8)}`,
+      data: new Date().toISOString(),
+      status_aprovacao: "aprovado",
+    }));
+    if (rows.length) {
+      const { error } = await supabase.from("movimentacoes").insert(rows as any);
+      if (error) throw error;
+    }
+  }
+
+  function invalidarEstoque() {
+    qc.invalidateQueries({ queryKey: ["agendamentos"] });
+    qc.invalidateQueries({ queryKey: ["estoque-saldo"] });
+    qc.invalidateQueries({ queryKey: ["estoque-disponivel"] });
+    qc.invalidateQueries({ queryKey: ["movs-page"] });
+  }
+
 
   async function enviarEmailSeguro(to: string | null | undefined, subject: string, html: string) {
     if (!to) return;
