@@ -20,6 +20,9 @@ import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MovimentacaoForm } from "@/components/movimentacao-form";
 import { usePendingMovimentacoes } from "@/lib/offline-queue";
+import { GlossarioEstoque } from "@/components/glossario-estoque";
+import { useSaldoReal, corSaldo } from "@/lib/use-estoque-saldo";
+
 
 export const Route = createFileRoute("/_authenticated/controle-estoque")({
   head: () => ({
@@ -61,6 +64,8 @@ const empty: MovForm = {
 function ControleEstoque() {
   const qc = useQueryClient();
   const pendentes = usePendingMovimentacoes();
+  const { rows: rowsSaldo, porItem } = useSaldoReal();
+
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<MovForm>(empty);
@@ -203,21 +208,18 @@ function ControleEstoque() {
     return ids.map((id) => linhaMap.get(id)).filter(Boolean);
   };
 
-  // Saldo atual por item = tabela Estoque + movimentações offline ainda não sincronizadas
+  // Saldo REAL por item — sempre calculado pela visão estoque_saldo (+ fila offline)
   const capacidadeTotal = (cds as any[]).reduce((a, c) => a + (c.capacidade ?? 0), 0);
   const saldos = (itens as any[]).map((i) => {
-    const base = (estoque as any[])
-      .filter((e) => e.item_id === i.id)
-      .reduce((acc, e) => acc + (e.total_bobinas ?? 0), 0);
-    const delta = pendentes
-      .filter((p) => p.item_id === i.id)
-      .reduce((acc, p) => acc + (p.destino_id ? (p.qtd ?? 0) : 0) - (p.origem_id ? (p.qtd ?? 0) : 0), 0);
-    const saldo = base + delta;
+    const saldo = porItem(i.id);
+    const saldoCd = rowsSaldo.filter((r) => r.local_tipo === "CD" && r.item_id === i.id).reduce((a, r) => a + r.saldo_total, 0);
+    const saldoAtm = rowsSaldo.filter((r) => r.local_tipo === "ATM" && r.item_id === i.id).reduce((a, r) => a + r.saldo_total, 0);
     const minimo = i.estoque_minimo ?? 0;
     const critico = saldo <= minimo;
     const atencao = !critico && capacidadeTotal > 0 && saldo < capacidadeTotal * 0.2;
-    return { ...i, saldo, minimo, critico, atencao };
+    return { ...i, saldo, saldoCd, saldoAtm, minimo, critico, atencao };
   });
+
 
 
 
@@ -233,7 +235,13 @@ function ControleEstoque() {
         <TabsList>
           <TabsTrigger value="controle">Controle de Estoque</TabsTrigger>
           <TabsTrigger value="nova">Nova Movimentação</TabsTrigger>
+          <TabsTrigger value="glossario">Glossário do Estoque</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="glossario" className="pt-3">
+          <GlossarioEstoque />
+        </TabsContent>
+
 
         <TabsContent value="nova" className="pt-3">
           <MovimentacaoForm />
@@ -274,15 +282,18 @@ function ControleEstoque() {
 
       <Card className="p-0 overflow-hidden">
         <table className="excel-table">
-          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Estoque Mínimo</th><th className="num">Saldo Atual (bobinas)</th><th>Situação</th></tr></thead>
+          <thead><tr><th>Item</th><th className="num">Bobinas / Caixa</th><th className="num">Estoque Mínimo</th><th className="num">Saldo CD</th><th className="num">Saldo ATM</th><th className="num">QTD REAL TOTAL ATUAL</th><th>Situação</th></tr></thead>
           <tbody>
-            {saldos.length === 0 && <tr><td colSpan={5} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
+            {saldos.length === 0 && <tr><td colSpan={7} className="text-center py-6 font-bold text-muted-foreground">Nenhum item cadastrado</td></tr>}
             {saldos.map((i: any) => (
               <tr key={i.id}>
                 <td>{i.nome}</td>
                 <td className="num">{i.bobinas_por_caixa}</td>
                 <td className="num">{i.minimo}</td>
-                <td className={`num font-bold ${i.critico ? "text-red-600" : i.atencao ? "text-orange-500" : ""}`}>{i.saldo}</td>
+                <td className="num">{i.saldoCd}</td>
+                <td className="num">{i.saldoAtm}</td>
+                <td className={`num font-bold ${corSaldo(i.saldo)}`}>{i.saldo}</td>
+
                 <td>
                   {i.critico ? (
                     <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">Abaixo do mínimo</span>

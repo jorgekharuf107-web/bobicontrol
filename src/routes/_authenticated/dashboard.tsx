@@ -16,6 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAccessibleLinhas } from "@/lib/use-accessible-linhas";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { usePendingMovimentacoes } from "@/lib/offline-queue";
+import { useSaldoReal } from "@/lib/use-estoque-saldo";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -76,6 +78,7 @@ function Dashboard() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [linhaFiltro, setLinhaFiltro] = useState<string>("todas");
   const pendentes = usePendingMovimentacoes();
+  const { rows: rowsSaldo } = useSaldoReal();
   const { user, isAdmin, isGestor } = useCurrentUser();
   const podeAprovar = isAdmin || isGestor;
   const { data: linhas = [] } = useAccessibleLinhas();
@@ -160,18 +163,14 @@ function Dashboard() {
   const totalAbastecimentos = movsFiltradas.filter((m: any) => m.tipo === "Abastecimento").length;
   const totalEntradas = movsFiltradas.filter((m: any) => m.tipo === "Entrada" || m.tipo === "Recebimento").length;
 
-  // Nível estimado por ATM: soma abastecimentos (destino=ATM) - saídas (origem=ATM) nos últimos 30 dias
+  // Nível real por ATM — vem sempre do saldo calculado (estoque_saldo + fila offline)
   const nivelPorAtm = useMemo(() => {
-    const agora = Date.now();
-    const cutoff = agora - 30 * 24 * 60 * 60 * 1000;
     const acc: Record<string, number> = {};
-    movsFiltradas.forEach((m: any) => {
-      if (new Date(m.data).getTime() < cutoff) return;
-      if (m.destino_tipo === "ATM" && m.destino_id) acc[m.destino_id] = (acc[m.destino_id] ?? 0) + (m.qtd ?? 0);
-      if (m.origem_tipo === "ATM" && m.origem_id) acc[m.origem_id] = (acc[m.origem_id] ?? 0) - (m.qtd ?? 0);
+    rowsSaldo.filter((r) => r.local_tipo === "ATM").forEach((r) => {
+      acc[r.local_id] = (acc[r.local_id] ?? 0) + r.saldo_total;
     });
     return acc;
-  }, [movsFiltradas]);
+  }, [rowsSaldo]);
 
   const atmsComNivel = useMemo(() => {
     return atmsFiltradas.map((a: any) => {
@@ -181,6 +180,7 @@ function Dashboard() {
       return { id: a.id, id_atm: a.id_atm, cap, saldo, pct, min: a.nivel_minimo ?? 20 };
     });
   }, [atmsFiltradas, nivelPorAtm]);
+
 
   const altoVolume = atmsComNivel.filter((a) => a.pct >= 80).length;
   const baixoVolume = atmsComNivel.filter((a) => a.pct >= 50 && a.pct < 80).length;

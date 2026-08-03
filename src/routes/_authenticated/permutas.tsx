@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BackButton } from "@/components/back-button";
+import { GlossarioEstoque } from "@/components/glossario-estoque";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { LinhaBadge } from "@/lib/use-accessible-linhas";
@@ -103,7 +104,7 @@ function Permutas() {
       }
     }
     setForm({ ...emptyForm, data: nowLocal() });
-    ["permutas", "movs-all", "movs-page", "estoque", "dashboard-stats"]
+    ["permutas", "movs-all", "movs-page", "estoque", "estoque-saldo", "dashboard-stats"]
       .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
   }
 
@@ -164,7 +165,13 @@ function Permutas() {
         <TabsList>
           <TabsTrigger value="permutas">Permutas entre Linhas</TabsTrigger>
           <TabsTrigger value="historico">Histórico</TabsTrigger>
+          <TabsTrigger value="glossario">Glossário do Estoque</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="glossario" className="pt-3">
+          <GlossarioEstoque />
+        </TabsContent>
+
 
         <TabsContent value="permutas" className="space-y-4 pt-3">
           <Card className="p-3 space-y-3">

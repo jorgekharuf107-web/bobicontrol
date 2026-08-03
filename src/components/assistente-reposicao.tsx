@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSaldoReal, corSaldo } from "@/lib/use-estoque-saldo";
 
 type AtmRow = {
   id: string;
@@ -14,9 +15,13 @@ type AtmRow = {
   modelo: string | null;
   linha_id: string | null;
   estacao_id: string | null;
+  capacidade_bobinas?: number | null;
+  nivel_minimo?: number | null;
+  cd_id?: string | null;
 };
 
 const TIPOS_BOBINA = ["Caixa (6 bobinas)", "Bobina Avulsa 100%", "Bobina Avulsa < 50%"];
+
 
 export function AssistenteReposicao() {
   const [linhaId, setLinhaId] = useState("");
@@ -47,11 +52,26 @@ export function AssistenteReposicao() {
     queryFn: async () => {
       const { data } = await supabase
         .from("atms")
-        .select("id, id_atm, modelo, linha_id, estacao_id")
+        .select("id, id_atm, modelo, linha_id, estacao_id, capacidade_bobinas, nivel_minimo, cd_id")
         .order("id_atm");
       return (data ?? []) as AtmRow[];
     },
   });
+
+  /** Entregas agendadas ainda não recebidas — entram no cálculo da necessidade. */
+  const { data: agendamentos = [] } = useQuery({
+    queryKey: ["ar-agendamentos"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("agendamentos_entrega")
+        .select("id, estacao_cd_id, status, agendamento_itens(qtd_caixas, qtd_bobina_100, qtd_bobina_50)")
+        .neq("status", "Recebido");
+      return data ?? [];
+    },
+  });
+
+  const { porLocal } = useSaldoReal();
+
 
   const estacoesFiltradas = useMemo(
     () => (linhaId ? estacoes.filter((e: any) => e.linha_id === linhaId) : estacoes),
@@ -71,6 +91,30 @@ export function AssistenteReposicao() {
     atmsFiltrados.forEach((a) => a.modelo && set.add(a.modelo));
     return Array.from(set).sort();
   }, [atmsFiltrados]);
+
+  /** Necessidade = capacidade do ATM − saldo real do ATM − bobinas já agendadas para o CD que o atende. */
+  const analise = useMemo(() => {
+    const atm = atms.find((a) => a.id === atmId);
+    if (!atm) return null;
+    const saldoAtm = porLocal("ATM", atm.id);
+    const capacidade = atm.capacidade_bobinas || 0;
+    const saldoCd = atm.cd_id ? porLocal("CD", atm.cd_id) : 0;
+    const emTransito = (agendamentos as any[])
+      .filter((ag) => !atm.cd_id || ag.estacao_cd_id === atm.cd_id)
+      .reduce(
+        (acc, ag) =>
+          acc +
+          (ag.agendamento_itens ?? []).reduce(
+            (s: number, it: any) => s + (it.qtd_caixas ?? 0) * 6 + (it.qtd_bobina_100 ?? 0) + (it.qtd_bobina_50 ?? 0),
+            0,
+          ),
+        0,
+      );
+    const necessidade = Math.max(0, capacidade - saldoAtm - emTransito);
+    return { saldoAtm, capacidade, saldoCd, emTransito, necessidade, minimo: atm.nivel_minimo ?? 0 };
+  }, [atms, atmId, agendamentos, porLocal]);
+
+
 
   async function registrar() {
     if (!atmId || !tipo) {
@@ -191,6 +235,18 @@ export function AssistenteReposicao() {
           </Select>
         </div>
       </div>
+
+      {analise && (
+        <div className="rounded-md border p-3 text-sm space-y-1 bg-muted/40">
+          <p className="font-semibold">Cálculo automático (saldo real + agendamentos)</p>
+          <p>Saldo real no ATM: <span className={`font-bold ${corSaldo(analise.saldoAtm)}`}>{analise.saldoAtm}</span> bobina(s)</p>
+          <p>Saldo real no CD que atende: <span className={`font-bold ${corSaldo(analise.saldoCd)}`}>{analise.saldoCd}</span> bobina(s)</p>
+          <p>Entregas agendadas ainda não recebidas: <span className="font-bold">{analise.emTransito}</span> bobina(s)</p>
+          <p>Capacidade do ATM: <span className="font-bold">{analise.capacidade}</span> bobina(s)</p>
+          <p>Necessidade de reposição: <span className="font-bold text-primary">{analise.necessidade}</span> bobina(s)</p>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <Button onClick={registrar} disabled={saving} size="sm">
           <Send className="h-4 w-4" /> Registrar Solicitação

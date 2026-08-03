@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { useSaldoReal } from "@/lib/use-estoque-saldo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -100,10 +101,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       return Array.from(new Set((data ?? []).map((r: any) => r.transportadora).filter(Boolean))).sort() as string[];
     },
   });
-  const { data: estoque = [] } = useQuery({
-    queryKey: ["estoque"],
-    queryFn: async () => (await supabase.from("estoque").select("*")).data ?? [],
-  });
+  const { porLocal } = useSaldoReal();
 
   const cdsFiltrados = (cds as any[]).filter((c) => !linhaId || c.linha_id === linhaId);
   const atmsFiltrados = (atms as any[]).filter((a) => !linhaId || a.linha_id === linhaId);
@@ -125,22 +123,12 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   const q50 = t50 ? form.qtd_bobina_50 : 0;
   const totalBobinas = qCaixas * porCaixa + q100 + q50;
 
-  /** Saldo do CD de origem (banco + movimentações offline pendentes). */
+  /** Saldo real do CD de origem — vem da view estoque_saldo (já inclui a fila offline). */
   const saldoOrigem = useMemo(() => {
     if (isRecebimento || !form.origem_id || !form.item_id) return null;
-    const base = (estoque as any[])
-      .filter((e) => e.local_tipo === "CD" && e.local_id === form.origem_id && e.item_id === form.item_id)
-      .reduce((a, e) => a + (e.total_bobinas ?? 0), 0);
-    const delta = pendentes
-      .filter((p) => p.item_id === form.item_id)
-      .reduce((a, p) => {
-        let d = 0;
-        if (p.destino_tipo === "CD" && p.destino_id === form.origem_id) d += p.qtd ?? 0;
-        if (p.origem_tipo === "CD" && p.origem_id === form.origem_id) d -= p.qtd ?? 0;
-        return a + d;
-      }, 0);
-    return base + delta;
-  }, [estoque, pendentes, form.origem_id, form.item_id, isRecebimento]);
+    return porLocal("CD", form.origem_id, form.item_id);
+  }, [porLocal, form.origem_id, form.item_id, isRecebimento]);
+
 
   function limpar() {
     setForm({ ...empty, data: nowLocal() });
@@ -208,7 +196,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       }
     }
     limpar();
-    ["movs-page", "movs-all", "saldo-itens", "estoque", "dashboard-stats", "permutas", "permutas-atm"]
+    ["movs-page", "movs-all", "saldo-itens", "estoque", "estoque-saldo", "dashboard-stats", "permutas", "permutas-atm"]
       .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
     onSaved?.();
   }

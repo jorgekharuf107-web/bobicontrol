@@ -21,6 +21,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendEmail } from "@/lib/email.functions";
 import { confirmarExclusao } from "@/components/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GlossarioEstoque } from "@/components/glossario-estoque";
+
 
 export const Route = createFileRoute("/_authenticated/agendamentos-entrega")({
   head: () => ({
@@ -100,8 +102,9 @@ function AgendamentosEntregaPage() {
   const { data: tecnicos = [] } = useQuery({
     queryKey: ["tecnicos-agend"],
     queryFn: async () =>
-      (await supabase.from("usuarios").select("id, nome_completo, email").eq("ativo", true).order("nome_completo")).data ?? [],
+      (await supabase.from("usuarios").select("id, nome_completo, email").eq("perfil", "tecnico_estacao").eq("ativo", true).order("nome_completo")).data ?? [],
   });
+
   const { data: fornecedores = [] } = useQuery({
     queryKey: ["fornecedores-agend"],
     queryFn: async () =>
@@ -582,7 +585,13 @@ function AgendamentosEntregaPage() {
           <TabsTrigger value="lista">Agendamentos de Entrega</TabsTrigger>
           <TabsTrigger value="novo">Novo Agendamento</TabsTrigger>
           <TabsTrigger value="itens">Itens do Agendamento</TabsTrigger>
+          <TabsTrigger value="glossario">Glossário do Estoque</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="glossario" className="pt-3">
+          <GlossarioEstoque />
+        </TabsContent>
+
 
         <TabsContent value="lista" className="space-y-3 pt-3">
           <div className="flex justify-end">

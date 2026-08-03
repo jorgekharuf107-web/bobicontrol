@@ -15,6 +15,8 @@ import { BackButton } from "@/components/back-button";
 import { CsvExportButton } from "@/components/csv-export-button";
 import { TableSearch } from "@/components/table-search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GlossarioEstoque } from "@/components/glossario-estoque";
+
 import { nowLocal } from "@/components/movimentacao-form";
 import { enqueue } from "@/lib/offline-queue";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -55,8 +57,9 @@ function PermutasAtm() {
   const { data: tecnicos = [] } = useQuery({
     queryKey: ["tecnicos-permuta-atm"],
     queryFn: async () =>
-      (await supabase.from("usuarios").select("id, nome_completo").eq("ativo", true).order("nome_completo")).data ?? [],
+      (await supabase.from("usuarios").select("id, nome_completo").eq("perfil", "tecnico_estacao").eq("ativo", true).order("nome_completo")).data ?? [],
   });
+
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-sel"],
     queryFn: async () => (await supabase.from("itens").select("id, nome").order("nome")).data ?? [],
@@ -105,7 +108,7 @@ function PermutasAtm() {
     }
     setOpen(false);
     setForm({ origem_id: "", destino_id: "", item_id: "", qtd: 1, motivo: "", data_criacao: nowLocal(), tecnico_id: "" });
-    ["permutas-atm", "movs-all", "movs-page", "estoque", "dashboard-stats"]
+    ["permutas-atm", "movs-all", "movs-page", "estoque", "estoque-saldo", "dashboard-stats"]
       .forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
   }
 
@@ -158,7 +161,13 @@ function PermutasAtm() {
         <TabsList>
           <TabsTrigger value="lista">Permutas entre ATM</TabsTrigger>
           <TabsTrigger value="historico">Histórico</TabsTrigger>
+          <TabsTrigger value="glossario">Glossário do Estoque</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="glossario" className="pt-3">
+          <GlossarioEstoque />
+        </TabsContent>
+
 
         <TabsContent value="lista" className="space-y-3 pt-3">
           <TableSearch
