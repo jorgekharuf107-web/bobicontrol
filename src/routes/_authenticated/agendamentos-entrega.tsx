@@ -47,30 +47,39 @@ type ItemForm = {
   qtd_bobina_100: number;
   qtd_bobina_50: number;
 };
+type StatusAgendamento = "Agendado" | "Em Rota" | "Entregue" | "Recebido" | "Cancelado";
 type Header = {
   estacao_cd_id: string;
+  atm_id: string;
   data_hora_entrega: string;
   nome_motorista: string;
   celular_motorista: string;
   transportadora: string;
   numero_nf: string;
   tecnico_id: string;
-  status: "Agendado" | "Recebido" | "Cancelado";
+  status: StatusAgendamento;
   modo_offline: boolean;
   observacao: string;
 };
 const emptyHeader: Header = {
-  estacao_cd_id: "", data_hora_entrega: "", nome_motorista: "", celular_motorista: "",
+  estacao_cd_id: "", atm_id: "", data_hora_entrega: "", nome_motorista: "", celular_motorista: "",
   transportadora: "", numero_nf: "", tecnico_id: "", status: "Agendado",
   modo_offline: false, observacao: "",
 };
 const emptyItem: ItemForm = { item_id: "", qtd_caixas: 0, qtd_bobina_100: 0, qtd_bobina_50: 0 };
 
+/** Status que reservam estoque no CD (regra de ouro: item agendado fica bloqueado). */
+const STATUS_RESERVA: StatusAgendamento[] = ["Agendado", "Em Rota"];
+const STATUS_LISTA: StatusAgendamento[] = ["Agendado", "Em Rota", "Entregue", "Recebido", "Cancelado"];
+
 const STATUS_TONE: Record<string, string> = {
   Agendado: "bg-blue-100 text-blue-900",
+  "Em Rota": "bg-amber-100 text-amber-900",
+  Entregue: "bg-green-100 text-green-900",
   Recebido: "bg-green-100 text-green-900",
   Cancelado: "bg-red-100 text-red-900",
 };
+
 
 function AgendamentosEntregaPage() {
   const qc = useQueryClient();
