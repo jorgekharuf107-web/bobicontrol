@@ -94,13 +94,6 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     queryFn: async () =>
       (await supabase.from("motoristas").select("id, nome_completo, fornecedor_id").order("nome_completo")).data ?? [],
   });
-  const { data: transportadoras = [] } = useQuery({
-    queryKey: ["transportadoras-mov"],
-    queryFn: async () => {
-      const { data } = await supabase.from("agendamentos_entrega").select("transportadora");
-      return Array.from(new Set((data ?? []).map((r: any) => r.transportadora).filter(Boolean))).sort() as string[];
-    },
-  });
   const { porLocal } = useSaldoReal();
 
   const cdsFiltrados = (cds as any[]).filter((c) => !linhaId || c.linha_id === linhaId);
