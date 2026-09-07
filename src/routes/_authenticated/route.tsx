@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useRouter, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -32,7 +32,6 @@ function papelBadge(p: string | null) {
 }
 
 function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
-  const router = useRouter();
   const { nome, perfil, user } = useCurrentUser();
   const display = nome ?? user?.email ?? "Usuário";
   const initials = (display.match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase();

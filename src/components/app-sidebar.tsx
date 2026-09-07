@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Link, useRouterState, useRouter } from "@tanstack/react-router";
+import { LinkState, useRouter } from "@tanstack/react-router";
 
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
@@ -52,7 +52,6 @@ const sobreItem: Item = { title: "Sobre", to: "/admin/sobre", icon: Info };
 
 
 export function AppSidebar() {
-  const router = useRouter();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { isAdmin, isSuperAdmin, perfil, nome } = useCurrentUser();
   const { isMobile, desktopOpen, mobileOpen, closeMobile } = useSidebar();
