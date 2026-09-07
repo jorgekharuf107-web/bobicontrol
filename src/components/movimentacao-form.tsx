@@ -59,8 +59,8 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
   const [t100, setT100] = useState(false);
   const [t50, setT50] = useState(false);
   const [fornecedorId, setFornecedorId] = useState("");
-  const [transportadora, setTransportadora] = useState("");
-  const [motoristaId, setMotoristaId] = useState("");
+  const [motorista1Id, setMotorista1Id] = useState("");
+  const [motorista2Id, setMotorista2Id] = useState("");
 
   const { data: itens = [] } = useQuery({
     queryKey: ["itens-mov"],
@@ -93,13 +93,6 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     queryKey: ["motoristas-mov"],
     queryFn: async () =>
       (await supabase.from("motoristas").select("id, nome_completo, fornecedor_id").order("nome_completo")).data ?? [],
-  });
-  const { data: transportadoras = [] } = useQuery({
-    queryKey: ["transportadoras-mov"],
-    queryFn: async () => {
-      const { data } = await supabase.from("agendamentos_entrega").select("transportadora");
-      return Array.from(new Set((data ?? []).map((r: any) => r.transportadora).filter(Boolean))).sort() as string[];
-    },
   });
   const { porLocal } = useSaldoReal();
 
@@ -134,7 +127,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     setForm({ ...empty, data: nowLocal() });
     setLinhaId("");
     setTCaixa(true); setT100(false); setT50(false);
-    setFornecedorId(""); setTransportadora(""); setMotoristaId("");
+    setFornecedorId(""); setMotorista1Id(""); setMotorista2Id("");
   }
 
   async function registrar() {
@@ -168,14 +161,16 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       destino_id: p.data.destino_id || null,
       linha_origem_id: linhaId || null,
       linha_destino_id: linhaId || null,
+      motorista1_id: isRecebimento ? motorista1Id || null : null,
+      motorista2_id: isRecebimento ? motorista2Id || null : null,
       observacao: (() => {
         if (!isRecebimento) return p.data.observacao || null;
+        const nome = (id: string) => (motoristas as any[]).find((m) => m.id === id)?.nome_completo;
         const forn = (fornecedores as any[]).find((f) => f.id === fornecedorId)?.razao_social;
-        const moto = (motoristas as any[]).find((m) => m.id === motoristaId)?.nome_completo;
         const extra = [
           forn && `Fornecedor: ${forn}`,
-          transportadora && `Transportadora: ${transportadora}`,
-          moto && `Motorista: ${moto}`,
+          motorista1Id && `Motorista 1: ${nome(motorista1Id)}`,
+          motorista2Id && `Motorista 2: ${nome(motorista2Id)}`,
         ].filter(Boolean).join(" | ");
         return [p.data.observacao, extra].filter(Boolean).join(" — ") || null;
       })(),
@@ -251,11 +246,11 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
         {isRecebimento ? (
           <fieldset className="rounded border bg-white/60 p-2">
             <legend className="text-[11px] font-semibold px-1">Origem — Fornecedor</legend>
-            <div className="flex gap-2 flex-wrap">
-              <div className="w-52">
+            <div className="space-y-2">
+              <div>
                 <Label className={labelC}>Fornecedor *</Label>
                 <Select value={fornecedorId || undefined}
-                  onValueChange={(v) => { setFornecedorId(v); setMotoristaId(""); }}>
+                  onValueChange={(v) => { setFornecedorId(v); setMotorista1Id(""); setMotorista2Id(""); }}>
                   <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {fornecedores.length === 0
@@ -264,27 +259,29 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="w-44">
-                <Label className={labelC}>Transportadora</Label>
-                <Select value={transportadora || undefined} onValueChange={setTransportadora}>
-                  <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {transportadoras.length === 0
-                      ? <SelectItem value="__none" disabled>Nenhuma transportadora</SelectItem>
-                      : (transportadoras as string[]).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-44">
-                <Label className={labelC}>Motorista</Label>
-                <Select value={motoristaId || undefined} onValueChange={setMotoristaId}>
-                  <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {motoristasFiltrados.length === 0
-                      ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
-                      : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className={labelC}>Motorista 1</Label>
+                  <Select value={motorista1Id || undefined} onValueChange={setMotorista1Id}>
+                    <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      {motoristasFiltrados.length === 0
+                        ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
+                        : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className={labelC}>Motorista 2</Label>
+                  <Select value={motorista2Id || undefined} onValueChange={setMotorista2Id}>
+                    <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      {motoristasFiltrados.length === 0
+                        ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
+                        : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </fieldset>

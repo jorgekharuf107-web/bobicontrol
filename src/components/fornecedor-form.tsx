@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BackButton } from "@/components/back-button";
 
 type Fornecedor = {
   id?: string; razao_social: string; cnpj: string; cidade: string; estado: string;
-  contato_principal: string; status: "ativo" | "inativo"; telefone: string; email: string;
+  contato_principal: string; status: "ativo" | "inativo"; telefone: string; celular: string; email: string;
   endereco: string; bairro: string; cidade_endereco: string; estado_uf: string; cep: string;
   fornecedor_ativo_sim_nao: boolean; fornecedor_padrao: boolean;
 };
@@ -25,7 +24,7 @@ type Motorista = {
 
 const emptyFornecedor: Fornecedor = {
   razao_social: "", cnpj: "", cidade: "", estado: "", contato_principal: "",
-  status: "ativo", telefone: "", email: "", endereco: "", bairro: "",
+  status: "ativo", telefone: "", celular: "", email: "", endereco: "", bairro: "",
   cidade_endereco: "", estado_uf: "", cep: "", fornecedor_ativo_sim_nao: true,
   fornecedor_padrao: false,
 };
@@ -33,6 +32,46 @@ const emptyFornecedor: Fornecedor = {
 const emptyMotorista = (tipo: "motorista1" | "motorista2"): Motorista => ({
   nome_completo: "", cpf: "", celular: "", email: "", tipo_contato: tipo,
 });
+
+/* ---------- Máscaras ---------- */
+const dig = (v: string) => v.replace(/\D/g, "");
+
+/** 00.000.000/0000-00 */
+function maskCnpj(v: string) {
+  const d = dig(v).slice(0, 14);
+  return d
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
+}
+/** (00) 00000-0000 */
+function maskCelular(v: string) {
+  const d = dig(v).slice(0, 11);
+  if (d.length <= 2) return d.replace(/^(\d{0,2})/, "($1");
+  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+/** (00) 0000-0000 */
+function maskFixo(v: string) {
+  const d = dig(v).slice(0, 10);
+  if (d.length <= 2) return d.replace(/^(\d{0,2})/, "($1");
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+}
+/** 00000-000 */
+function maskCep(v: string) {
+  const d = dig(v).slice(0, 8);
+  return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+}
+/** 000.000.000-00 */
+function maskCpf(v: string) {
+  const d = dig(v).slice(0, 11);
+  return d
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d{1,2})$/, ".$1-$2");
+}
 
 export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
   const router = useRouter();
@@ -47,7 +86,7 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
     if (!fornecedorId) return;
     (async () => {
       const { data: f } = await supabase.from("fornecedores").select("*").eq("id", fornecedorId).maybeSingle();
-      if (f) setForn(f as any);
+      if (f) setForn({ ...emptyFornecedor, ...(f as any), celular: (f as any).celular ?? "" });
       const { data: motoristas } = await supabase.from("motoristas").select("*").eq("fornecedor_id", fornecedorId);
       const mot1 = motoristas?.find((m: any) => m.tipo_contato === "motorista1");
       const mot2 = motoristas?.find((m: any) => m.tipo_contato === "motorista2");
@@ -64,8 +103,10 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
     setSaving(true);
     try {
       let id = fornecedorId;
-      const payload = { ...forn };
-      delete (payload as any).id;
+      const payload: any = { ...forn };
+      delete payload.id;
+      // Cidade/Estado do cadastro acompanham o endereço (campos duplicados removidos da tela)
+      payload.cidade = forn.cidade_endereco;
       // Se marcado como padrão, desmarca os outros (índice único exige)
       if (payload.fornecedor_padrao) {
         await supabase.from("fornecedores").update({ fornecedor_padrao: false }).eq("fornecedor_padrao", true);
@@ -99,6 +140,10 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
     }
   }
 
+  const inp = "h-7 text-xs max-w-md";
+  const inpFull = "h-7 text-xs";
+  const lbl = "text-[11px]";
+
   const MotoristaTab = ({ value, m, onChange, title }: {
     value: string; m: Motorista; onChange: (m: Motorista) => void; title: string;
   }) => (
@@ -106,21 +151,18 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
       <Card className="p-3">
         <h3 className="font-medium mb-2 text-[13px]">{title}</h3>
         <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1 col-span-2"><Label className="text-[11px]">Nome completo</Label>
-            <Input className="h-7 text-xs" value={m.nome_completo} onChange={(e) => onChange({ ...m, nome_completo: e.target.value })} /></div>
-          <div className="space-y-1"><Label className="text-[11px]">CPF</Label>
-            <Input className="h-7 text-xs" value={m.cpf} onChange={(e) => onChange({ ...m, cpf: e.target.value })} /></div>
-          <div className="space-y-1"><Label className="text-[11px]">Celular</Label>
-            <Input className="h-7 text-xs" value={m.celular} onChange={(e) => onChange({ ...m, celular: e.target.value })} /></div>
-          <div className="space-y-1 col-span-2"><Label className="text-[11px]">Email</Label>
-            <Input className="h-7 text-xs" type="email" value={m.email} onChange={(e) => onChange({ ...m, email: e.target.value })} /></div>
+          <div className="space-y-1 col-span-2"><Label className={lbl}>Nome completo</Label>
+            <Input className={inpFull} maxLength={100} value={m.nome_completo} onChange={(e) => onChange({ ...m, nome_completo: e.target.value })} /></div>
+          <div className="space-y-1"><Label className={lbl}>CPF</Label>
+            <Input className={inp} maxLength={14} value={m.cpf} onChange={(e) => onChange({ ...m, cpf: maskCpf(e.target.value) })} /></div>
+          <div className="space-y-1"><Label className={lbl}>Celular</Label>
+            <Input className={inp} maxLength={15} value={m.celular} onChange={(e) => onChange({ ...m, celular: maskCelular(e.target.value) })} /></div>
+          <div className="space-y-1 col-span-2"><Label className={lbl}>Email</Label>
+            <Input className={inpFull} type="email" maxLength={100} value={m.email} onChange={(e) => onChange({ ...m, email: e.target.value })} /></div>
         </div>
       </Card>
     </TabsContent>
   );
-
-  const inp = "h-7 text-xs";
-  const lbl = "text-[11px]";
 
   return (
     <div className="space-y-3 max-w-3xl">
@@ -142,17 +184,19 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
           <Card className="p-3 space-y-3">
             <div>
               <h3 className="font-medium mb-2 text-[13px]">Identificação</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1 col-span-2"><Label className={lbl}>Razão Social</Label>
-                  <Input className={inp} value={forn.razao_social} onChange={(e) => setForn({ ...forn, razao_social: e.target.value })} /></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="space-y-1 md:col-span-2"><Label className={lbl}>Razão Social</Label>
+                  <Input className={inpFull} maxLength={150} value={forn.razao_social} onChange={(e) => setForn({ ...forn, razao_social: e.target.value })} /></div>
                 <div className="space-y-1"><Label className={lbl}>CNPJ</Label>
-                  <Input className={inp} value={forn.cnpj} onChange={(e) => setForn({ ...forn, cnpj: e.target.value })} /></div>
+                  <Input className={inp} maxLength={18} placeholder="00.000.000/0000-00" value={forn.cnpj} onChange={(e) => setForn({ ...forn, cnpj: maskCnpj(e.target.value) })} /></div>
                 <div className="space-y-1"><Label className={lbl}>Contato principal</Label>
-                  <Input className={inp} value={forn.contato_principal} onChange={(e) => setForn({ ...forn, contato_principal: e.target.value })} /></div>
-                <div className="space-y-1"><Label className={lbl}>Telefone</Label>
-                  <Input className={inp} value={forn.telefone} onChange={(e) => setForn({ ...forn, telefone: e.target.value })} /></div>
-                <div className="space-y-1"><Label className={lbl}>Email</Label>
-                  <Input className={inp} type="email" value={forn.email} onChange={(e) => setForn({ ...forn, email: e.target.value })} /></div>
+                  <Input className={inp} maxLength={50} value={forn.contato_principal} onChange={(e) => setForn({ ...forn, contato_principal: e.target.value })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Celular</Label>
+                  <Input className={inp} maxLength={15} placeholder="(00) 00000-0000" value={forn.celular} onChange={(e) => setForn({ ...forn, celular: maskCelular(e.target.value) })} /></div>
+                <div className="space-y-1"><Label className={lbl}>Telefone Fixo</Label>
+                  <Input className={inp} maxLength={14} placeholder="(00) 0000-0000" value={forn.telefone} onChange={(e) => setForn({ ...forn, telefone: maskFixo(e.target.value) })} /></div>
+                <div className="space-y-1 md:col-span-2"><Label className={lbl}>Email</Label>
+                  <Input className={inpFull} type="email" maxLength={100} value={forn.email} onChange={(e) => setForn({ ...forn, email: e.target.value })} /></div>
                 <div className="space-y-1"><Label className={lbl}>Status</Label>
                   <div className="flex items-center gap-2 h-7">
                     <Switch
@@ -162,7 +206,7 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
                     <span className="text-xs">{forn.status === "ativo" ? "Ativo" : "Inativo"}</span>
                   </div>
                 </div>
-                <div className="col-span-2 flex items-center gap-2 rounded border border-blue-200 bg-blue-50 px-2 py-1.5">
+                <div className="md:col-span-2 flex items-center gap-2 rounded border border-blue-200 bg-blue-50 px-2 py-1.5">
                   <input
                     id="fornecedor_padrao"
                     type="checkbox"
@@ -180,23 +224,19 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
 
             <div>
               <h3 className="font-medium mb-2 text-[13px]">Endereço</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1 col-span-2"><Label className={lbl}>Endereço</Label>
-                  <Input className={inp} value={forn.endereco} onChange={(e) => setForn({ ...forn, endereco: e.target.value })} /></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="space-y-1 md:col-span-2"><Label className={lbl}>Endereço</Label>
+                  <Input className={inp} maxLength={120} value={forn.endereco} onChange={(e) => setForn({ ...forn, endereco: e.target.value })} /></div>
                 <div className="space-y-1"><Label className={lbl}>Bairro</Label>
-                  <Input className={inp} value={forn.bairro} onChange={(e) => setForn({ ...forn, bairro: e.target.value })} /></div>
+                  <Input className={inp} maxLength={50} value={forn.bairro} onChange={(e) => setForn({ ...forn, bairro: e.target.value })} /></div>
                 <div className="space-y-1"><Label className={lbl}>CEP</Label>
-                  <Input className={inp} value={forn.cep} onChange={(e) => setForn({ ...forn, cep: e.target.value })} /></div>
+                  <Input className={inp} maxLength={10} placeholder="00000-000" value={forn.cep} onChange={(e) => setForn({ ...forn, cep: maskCep(e.target.value) })} /></div>
                 <div className="space-y-1"><Label className={lbl}>Cidade</Label>
-                  <Input className={inp} value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value, cidade: e.target.value })} /></div>
+                  <Input className={inp} maxLength={50} value={forn.cidade_endereco} onChange={(e) => setForn({ ...forn, cidade_endereco: e.target.value, cidade: e.target.value })} /></div>
                 <div className="space-y-1"><Label className={lbl}>Estado</Label>
-                  <Input className={inp} value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
+                  <Input className={inp} maxLength={50} value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
                 <div className="space-y-1"><Label className={lbl}>UF</Label>
-                  <Input className={inp} maxLength={2} value={forn.estado_uf} onChange={(e) => setForn({ ...forn, estado_uf: e.target.value.toUpperCase() })} /></div>
-                <div className="space-y-1"><Label className={lbl}>Cidade (cadastro)</Label>
-                  <Input className={inp} value={forn.cidade} onChange={(e) => setForn({ ...forn, cidade: e.target.value })} /></div>
-                <div className="space-y-1"><Label className={lbl}>Estado (cadastro)</Label>
-                  <Input className={inp} value={forn.estado} onChange={(e) => setForn({ ...forn, estado: e.target.value })} /></div>
+                  <Input className={inp} maxLength={3} value={forn.estado_uf} onChange={(e) => setForn({ ...forn, estado_uf: e.target.value.toUpperCase() })} /></div>
               </div>
             </div>
           </Card>
@@ -213,4 +253,3 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
     </div>
   );
 }
-

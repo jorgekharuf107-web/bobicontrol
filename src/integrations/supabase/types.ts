@@ -514,6 +514,7 @@ export type Database = {
       fornecedores: {
         Row: {
           bairro: string | null
+          celular: string | null
           cep: string | null
           cidade: string | null
           cidade_endereco: string | null
@@ -536,6 +537,7 @@ export type Database = {
         }
         Insert: {
           bairro?: string | null
+          celular?: string | null
           cep?: string | null
           cidade?: string | null
           cidade_endereco?: string | null
@@ -558,6 +560,7 @@ export type Database = {
         }
         Update: {
           bairro?: string | null
+          celular?: string | null
           cep?: string | null
           cidade?: string | null
           cidade_endereco?: string | null
@@ -770,6 +773,8 @@ export type Database = {
           linha_destino_id: string | null
           linha_origem_id: string | null
           motivo_permuta: string | null
+          motorista1_id: string | null
+          motorista2_id: string | null
           observacao: string | null
           origem_id: string | null
           origem_tipo: Database["public"]["Enums"]["local_tipo"] | null
@@ -799,6 +804,8 @@ export type Database = {
           linha_destino_id?: string | null
           linha_origem_id?: string | null
           motivo_permuta?: string | null
+          motorista1_id?: string | null
+          motorista2_id?: string | null
           observacao?: string | null
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
@@ -828,6 +835,8 @@ export type Database = {
           linha_destino_id?: string | null
           linha_origem_id?: string | null
           motivo_permuta?: string | null
+          motorista1_id?: string | null
+          motorista2_id?: string | null
           observacao?: string | null
           origem_id?: string | null
           origem_tipo?: Database["public"]["Enums"]["local_tipo"] | null
@@ -849,6 +858,20 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimentacoes_motorista1_id_fkey"
+            columns: ["motorista1_id"]
+            isOneToOne: false
+            referencedRelation: "motoristas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimentacoes_motorista2_id_fkey"
+            columns: ["motorista2_id"]
+            isOneToOne: false
+            referencedRelation: "motoristas"
             referencedColumns: ["id"]
           },
           {
