@@ -127,7 +127,7 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
     setForm({ ...empty, data: nowLocal() });
     setLinhaId("");
     setTCaixa(true); setT100(false); setT50(false);
-    setFornecedorId(""); setTransportadora(""); setMotoristaId("");
+    setFornecedorId(""); setMotorista1Id(""); setMotorista2Id("");
   }
 
   async function registrar() {
