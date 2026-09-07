@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Link, useRouterState, useRouter } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
@@ -52,7 +52,6 @@ const sobreItem: Item = { title: "Sobre", to: "/admin/sobre", icon: Info };
 
 
 export function AppSidebar() {
-  const router = useRouter();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { isAdmin, isSuperAdmin, perfil, nome } = useCurrentUser();
   const { isMobile, desktopOpen, mobileOpen, closeMobile } = useSidebar();
@@ -70,8 +69,9 @@ export function AppSidebar() {
 
 
   async function signOut() {
-    await supabase.auth.signOut();
-    router.navigate({ to: "/", replace: true });
+    try { await supabase.auth.signOut(); } catch { /* noop */ }
+    try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
+    window.location.replace("/");
   }
 
   const NavGroup = ({ label, items }: { label: string; items: Item[] }) => (

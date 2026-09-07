@@ -61,10 +61,22 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
+  // Já autenticado (inclusive ao voltar do Google): segue direto para o destino
+  useEffect(() => {
+    let ativo = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (ativo && data.session) window.location.replace(alvo);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) window.location.replace(alvo);
+    });
+    return () => { ativo = false; sub.subscription.unsubscribe(); };
+  }, [alvo]);
+
   async function signInGoogle() {
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}/auth?destino=${destino}`,
     });
     if (result.error) {
       toast.error("Falha ao entrar com Google", { description: result.error.message });
@@ -92,7 +104,8 @@ function AuthPage() {
       setLoading(false);
       return;
     }
-    router.navigate({ to: alvo, replace: true });
+    // Garante que a sessão esteja gravada antes de entrar na área protegida
+    window.location.replace(alvo);
   }
 
 

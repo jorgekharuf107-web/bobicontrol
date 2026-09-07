@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useRouter, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useCurrentUser } from "@/lib/use-current-user";
@@ -8,7 +8,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User as UserIcon, Moon, Sun, Menu } from "lucide-react";
+import { LogOut, Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "@/lib/use-theme";
 import { APP_FOOTER } from "@/lib/app-config";
 import { SidebarProvider, useSidebar } from "@/lib/use-sidebar";
@@ -32,14 +32,14 @@ function papelBadge(p: string | null) {
 }
 
 function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
-  const router = useRouter();
   const { nome, perfil, user } = useCurrentUser();
   const display = nome ?? user?.email ?? "Usuário";
   const initials = (display.match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase();
 
   async function signOut() {
-    await supabase.auth.signOut();
-    router.navigate({ to: "/", replace: true });
+    try { await supabase.auth.signOut(); } catch { /* noop */ }
+    try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
+    window.location.replace("/");
   }
 
   const { theme, toggle } = useTheme();
@@ -81,9 +81,6 @@ function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => router.navigate({ to: "/admin/usuarios" })}>
-            <UserIcon className="h-4 w-4 mr-2" /> Meu Perfil
-          </DropdownMenuItem>
           <DropdownMenuItem onSelect={signOut} className="text-red-600">
             <LogOut className="h-4 w-4 mr-2" /> Sair
           </DropdownMenuItem>
