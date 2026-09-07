@@ -246,11 +246,11 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
         {isRecebimento ? (
           <fieldset className="rounded border bg-white/60 p-2">
             <legend className="text-[11px] font-semibold px-1">Origem — Fornecedor</legend>
-            <div className="flex gap-2 flex-wrap">
-              <div className="w-52">
+            <div className="space-y-2">
+              <div>
                 <Label className={labelC}>Fornecedor *</Label>
                 <Select value={fornecedorId || undefined}
-                  onValueChange={(v) => { setFornecedorId(v); setMotoristaId(""); }}>
+                  onValueChange={(v) => { setFornecedorId(v); setMotorista1Id(""); setMotorista2Id(""); }}>
                   <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {fornecedores.length === 0
@@ -259,27 +259,29 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="w-44">
-                <Label className={labelC}>Transportadora</Label>
-                <Select value={transportadora || undefined} onValueChange={setTransportadora}>
-                  <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {transportadoras.length === 0
-                      ? <SelectItem value="__none" disabled>Nenhuma transportadora</SelectItem>
-                      : (transportadoras as string[]).map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-44">
-                <Label className={labelC}>Motorista</Label>
-                <Select value={motoristaId || undefined} onValueChange={setMotoristaId}>
-                  <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {motoristasFiltrados.length === 0
-                      ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
-                      : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className={labelC}>Motorista 1</Label>
+                  <Select value={motorista1Id || undefined} onValueChange={setMotorista1Id}>
+                    <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      {motoristasFiltrados.length === 0
+                        ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
+                        : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className={labelC}>Motorista 2</Label>
+                  <Select value={motorista2Id || undefined} onValueChange={setMotorista2Id}>
+                    <SelectTrigger className={inputH}><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      {motoristasFiltrados.length === 0
+                        ? <SelectItem value="__none" disabled>Nenhum motorista</SelectItem>
+                        : motoristasFiltrados.map((m: any) => <SelectItem key={m.id} value={m.id}>{m.nome_completo}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </fieldset>
