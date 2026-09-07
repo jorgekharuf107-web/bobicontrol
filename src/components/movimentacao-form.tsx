@@ -161,14 +161,16 @@ export function MovimentacaoForm({ onSaved }: { onSaved?: () => void }) {
       destino_id: p.data.destino_id || null,
       linha_origem_id: linhaId || null,
       linha_destino_id: linhaId || null,
+      motorista1_id: isRecebimento ? motorista1Id || null : null,
+      motorista2_id: isRecebimento ? motorista2Id || null : null,
       observacao: (() => {
         if (!isRecebimento) return p.data.observacao || null;
+        const nome = (id: string) => (motoristas as any[]).find((m) => m.id === id)?.nome_completo;
         const forn = (fornecedores as any[]).find((f) => f.id === fornecedorId)?.razao_social;
-        const moto = (motoristas as any[]).find((m) => m.id === motoristaId)?.nome_completo;
         const extra = [
           forn && `Fornecedor: ${forn}`,
-          transportadora && `Transportadora: ${transportadora}`,
-          moto && `Motorista: ${moto}`,
+          motorista1Id && `Motorista 1: ${nome(motorista1Id)}`,
+          motorista2Id && `Motorista 2: ${nome(motorista2Id)}`,
         ].filter(Boolean).join(" | ");
         return [p.data.observacao, extra].filter(Boolean).join(" — ") || null;
       })(),
