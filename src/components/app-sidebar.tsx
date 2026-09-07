@@ -70,8 +70,9 @@ export function AppSidebar() {
 
 
   async function signOut() {
-    await supabase.auth.signOut();
-    router.navigate({ to: "/", replace: true });
+    try { await supabase.auth.signOut(); } catch { /* noop */ }
+    try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
+    window.location.replace("/");
   }
 
   const NavGroup = ({ label, items }: { label: string; items: Item[] }) => (

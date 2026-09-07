@@ -38,8 +38,9 @@ function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
   const initials = (display.match(/\b\w/g) ?? []).slice(0, 2).join("").toUpperCase();
 
   async function signOut() {
-    await supabase.auth.signOut();
-    router.navigate({ to: "/", replace: true });
+    try { await supabase.auth.signOut(); } catch { /* noop */ }
+    try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
+    window.location.replace("/");
   }
 
   const { theme, toggle } = useTheme();
@@ -81,9 +82,6 @@ function TopHeader({ showMenu = true }: { showMenu?: boolean }) {
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => router.navigate({ to: "/admin/usuarios" })}>
-            <UserIcon className="h-4 w-4 mr-2" /> Meu Perfil
-          </DropdownMenuItem>
           <DropdownMenuItem onSelect={signOut} className="text-red-600">
             <LogOut className="h-4 w-4 mr-2" /> Sair
           </DropdownMenuItem>
