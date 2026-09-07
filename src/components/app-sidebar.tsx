@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { LinkState, useRouter } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 
 import {
   LayoutDashboard, FileBarChart, PackagePlus, Boxes, Layers,
