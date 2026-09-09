@@ -55,6 +55,8 @@ type Header = {
   data_hora_entrega: string;
   nome_motorista: string;
   celular_motorista: string;
+  nome_motorista2: string;
+  celular_motorista2: string;
   transportadora: string;
   numero_nf: string;
   tecnico_id: string;
@@ -64,6 +66,7 @@ type Header = {
 };
 const emptyHeader: Header = {
   estacao_cd_id: "", atm_id: "", data_hora_entrega: "", nome_motorista: "", celular_motorista: "",
+  nome_motorista2: "", celular_motorista2: "",
   transportadora: "", numero_nf: "", tecnico_id: "", status: "Agendado",
   modo_offline: false, observacao: "",
 };
@@ -377,6 +380,8 @@ function AgendamentosEntregaPage() {
       data_hora_entrega: new Date(header.data_hora_entrega).toISOString(),
       nome_motorista: header.nome_motorista.trim(),
       celular_motorista: header.celular_motorista || null,
+      nome_motorista2: header.nome_motorista2 || null,
+      celular_motorista2: header.celular_motorista2 || null,
       transportadora: header.transportadora || null,
       numero_nf: header.numero_nf || null,
       tecnico_id: header.tecnico_id || null,
@@ -607,15 +612,49 @@ function AgendamentosEntregaPage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="min-w-0">
-          <Label className="text-[11px]">Motorista *</Label>
-          <Input className="h-9" maxLength={50} value={header.nome_motorista}
-            onChange={(e) => setHeader({ ...header, nome_motorista: e.target.value })} />
-        </div>
-        <div className="min-w-0">
-          <Label className="text-[11px]">Celular Motorista</Label>
-          <Input className="h-9" maxLength={50} value={header.celular_motorista}
-            onChange={(e) => setHeader({ ...header, celular_motorista: e.target.value })} />
+        <div className="min-w-0 md:col-span-2 grid grid-cols-2 gap-2">
+          <div className="min-w-0">
+            <Label className="text-[11px]">Motorista 1 / Celular *</Label>
+            <Select
+              value={(motoristas as any[]).find((m) => m.nome_completo === header.nome_motorista)?.id ?? undefined}
+              onValueChange={(v) => {
+                const m = (motoristas as any[]).find((x) => x.id === v);
+                setHeader((h) => ({ ...h, nome_motorista: m?.nome_completo ?? "", celular_motorista: m?.celular ?? "" }));
+              }}
+            >
+              <SelectTrigger className="h-9 w-full min-w-0">
+                <SelectValue placeholder={fornecedorId ? "Selecione" : "Escolha o fornecedor"} />
+              </SelectTrigger>
+              <SelectContent className="max-w-[min(92vw,420px)]">
+                {(motoristas as any[]).map((m) => (
+                  <SelectItem key={m.id} value={m.id} className="whitespace-normal break-words">
+                    {m.nome_completo}{m.celular ? ` · ${m.celular}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="min-w-0">
+            <Label className="text-[11px]">Motorista 2 / Celular</Label>
+            <Select
+              value={(motoristas as any[]).find((m) => m.nome_completo === header.nome_motorista2)?.id ?? undefined}
+              onValueChange={(v) => {
+                const m = (motoristas as any[]).find((x) => x.id === v);
+                setHeader((h) => ({ ...h, nome_motorista2: m?.nome_completo ?? "", celular_motorista2: m?.celular ?? "" }));
+              }}
+            >
+              <SelectTrigger className="h-9 w-full min-w-0">
+                <SelectValue placeholder={fornecedorId ? "Selecione" : "Escolha o fornecedor"} />
+              </SelectTrigger>
+              <SelectContent className="max-w-[min(92vw,420px)]">
+                {(motoristas as any[]).map((m) => (
+                  <SelectItem key={m.id} value={m.id} className="whitespace-normal break-words">
+                    {m.nome_completo}{m.celular ? ` · ${m.celular}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="min-w-0">
           <Label className="text-[11px]">Transportadora</Label>
@@ -776,11 +815,6 @@ function AgendamentosEntregaPage() {
 
 
         <TabsContent value="lista" className="space-y-3 pt-3">
-          <div className="flex justify-end">
-            {canManageEstoque && (
-              <Button onClick={abrirNovo}><Plus className="h-4 w-4" /> Novo Agendamento</Button>
-            )}
-          </div>
 
           <TableSearch
             search={busca}
