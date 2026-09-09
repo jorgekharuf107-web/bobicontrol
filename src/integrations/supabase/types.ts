@@ -66,12 +66,14 @@ export type Database = {
         Row: {
           atm_id: string | null
           celular_motorista: string | null
+          celular_motorista2: string | null
           created_at: string
           data_hora_entrega: string
           estacao_cd_id: string
           id: string
           modo_offline: boolean
           nome_motorista: string
+          nome_motorista2: string | null
           numero_nf: string | null
           observacao: string | null
           status: string
@@ -81,12 +83,14 @@ export type Database = {
         Insert: {
           atm_id?: string | null
           celular_motorista?: string | null
+          celular_motorista2?: string | null
           created_at?: string
           data_hora_entrega: string
           estacao_cd_id: string
           id?: string
           modo_offline?: boolean
           nome_motorista: string
+          nome_motorista2?: string | null
           numero_nf?: string | null
           observacao?: string | null
           status?: string
@@ -96,12 +100,14 @@ export type Database = {
         Update: {
           atm_id?: string | null
           celular_motorista?: string | null
+          celular_motorista2?: string | null
           created_at?: string
           data_hora_entrega?: string
           estacao_cd_id?: string
           id?: string
           modo_offline?: boolean
           nome_motorista?: string
+          nome_motorista2?: string | null
           numero_nf?: string | null
           observacao?: string | null
           status?: string
