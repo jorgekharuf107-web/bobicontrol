@@ -131,7 +131,7 @@ function AgendamentosEntregaPage() {
       (await supabase.from("motoristas").select("id, nome_completo, celular, tipo_contato")
         .eq("fornecedor_id", fornecedorId).order("tipo_contato")).data ?? [],
   });
-  const contatosFornecedor = (motoristas as any[]).slice(0, 2);
+  
 
   // Auto-preenche Motorista (1º contato) ao selecionar o Fornecedor
   useEffect(() => {
@@ -226,6 +226,8 @@ function AgendamentosEntregaPage() {
       data_hora_entrega: row.data_hora_entrega?.slice(0, 16) ?? "",
       nome_motorista: row.nome_motorista ?? "",
       celular_motorista: row.celular_motorista ?? "",
+      nome_motorista2: row.nome_motorista2 ?? "",
+      celular_motorista2: row.celular_motorista2 ?? "",
       transportadora: row.transportadora ?? "",
       numero_nf: row.numero_nf ?? "",
       tecnico_id: row.tecnico_id ?? "",
@@ -585,16 +587,6 @@ function AgendamentosEntregaPage() {
               ))}
             </SelectContent>
           </Select>
-          {contatosFornecedor.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {contatosFornecedor.map((m: any, idx: number) => (
-                <Button key={m.id} type="button" size="sm" variant="outline" className="h-8 text-[12px]"
-                  onClick={() => usarContato(m)}>
-                  {idx + 1}º contato: {m.nome_completo}{m.celular ? ` · ${m.celular}` : ""}
-                </Button>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className="min-w-0">
