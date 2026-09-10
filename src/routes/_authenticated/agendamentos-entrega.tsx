@@ -145,9 +145,6 @@ function AgendamentosEntregaPage() {
     }));
   }, [fornecedorId, motoristas]);
 
-  function usarContato(m: any) {
-    setHeader((h) => ({ ...h, nome_motorista: m.nome_completo ?? "", celular_motorista: m.celular ?? "" }));
-  }
   function aplicarFornecedor(id: string) {
     setFornecedorId(id);
     const f = (fornecedores as any[]).find((x) => x.id === id);
