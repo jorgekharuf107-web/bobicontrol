@@ -73,6 +73,37 @@ function maskCpf(v: string) {
     .replace(/\.(\d{3})(\d{1,2})$/, ".$1-$2");
 }
 
+const inp = "h-7 text-xs max-w-md";
+const inpFull = "h-7 text-xs";
+const lbl = "text-[11px]";
+
+type MotoristaTabProps = {
+  value: string;
+  m: Motorista;
+  onChange: (m: Motorista) => void;
+  title: string;
+};
+
+function MotoristaTab({ value, m, onChange, title }: MotoristaTabProps) {
+  return (
+    <TabsContent value={value}>
+      <Card className="p-3">
+        <h3 className="font-medium mb-2 text-[13px]">{title}</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1 col-span-2"><Label className={lbl}>Nome completo</Label>
+            <Input className={inpFull} maxLength={100} value={m.nome_completo} onChange={(e) => onChange({ ...m, nome_completo: e.target.value })} /></div>
+          <div className="space-y-1"><Label className={lbl}>CPF</Label>
+            <Input className={inp} maxLength={14} value={m.cpf} onChange={(e) => onChange({ ...m, cpf: maskCpf(e.target.value) })} /></div>
+          <div className="space-y-1"><Label className={lbl}>Celular</Label>
+            <Input className={inp} maxLength={15} value={m.celular} onChange={(e) => onChange({ ...m, celular: maskCelular(e.target.value) })} /></div>
+          <div className="space-y-1 col-span-2"><Label className={lbl}>Email</Label>
+            <Input className={inpFull} type="email" maxLength={100} value={m.email} onChange={(e) => onChange({ ...m, email: e.target.value })} /></div>
+        </div>
+      </Card>
+    </TabsContent>
+  );
+}
+
 export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
   const router = useRouter();
   const isEdit = !!fornecedorId;
@@ -140,29 +171,6 @@ export function FornecedorForm({ fornecedorId }: { fornecedorId?: string }) {
     }
   }
 
-  const inp = "h-7 text-xs max-w-md";
-  const inpFull = "h-7 text-xs";
-  const lbl = "text-[11px]";
-
-  const MotoristaTab = ({ value, m, onChange, title }: {
-    value: string; m: Motorista; onChange: (m: Motorista) => void; title: string;
-  }) => (
-    <TabsContent value={value}>
-      <Card className="p-3">
-        <h3 className="font-medium mb-2 text-[13px]">{title}</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1 col-span-2"><Label className={lbl}>Nome completo</Label>
-            <Input className={inpFull} maxLength={100} value={m.nome_completo} onChange={(e) => onChange({ ...m, nome_completo: e.target.value })} /></div>
-          <div className="space-y-1"><Label className={lbl}>CPF</Label>
-            <Input className={inp} maxLength={14} value={m.cpf} onChange={(e) => onChange({ ...m, cpf: maskCpf(e.target.value) })} /></div>
-          <div className="space-y-1"><Label className={lbl}>Celular</Label>
-            <Input className={inp} maxLength={15} value={m.celular} onChange={(e) => onChange({ ...m, celular: maskCelular(e.target.value) })} /></div>
-          <div className="space-y-1 col-span-2"><Label className={lbl}>Email</Label>
-            <Input className={inpFull} type="email" maxLength={100} value={m.email} onChange={(e) => onChange({ ...m, email: e.target.value })} /></div>
-        </div>
-      </Card>
-    </TabsContent>
-  );
 
   return (
     <div className="space-y-3 max-w-3xl">
