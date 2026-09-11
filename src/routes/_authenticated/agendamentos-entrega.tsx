@@ -72,6 +72,13 @@ const emptyHeader: Header = {
 };
 const emptyItem: ItemForm = { item_id: "", qtd_caixas: 0, qtd_bobina_100: 0, qtd_bobina_50: 0 };
 
+function maskCelular(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits ? `(${digits}` : "";
+  if (digits.length <= 7) return `(${digits.slice(0, 2)})${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)})${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 /** Status que reservam estoque no CD (regra de ouro: item agendado fica bloqueado). */
 const STATUS_RESERVA: StatusAgendamento[] = ["Agendado", "Em Rota"];
 const STATUS_LISTA: StatusAgendamento[] = ["Agendado", "Em Rota", "Entregue", "Recebido", "Cancelado"];
@@ -133,22 +140,31 @@ function AgendamentosEntregaPage() {
   });
   
 
-  // Auto-preenche Motorista (1º contato) ao selecionar o Fornecedor
+  // Auto-preenche cada motorista cadastrado no respectivo contato do fornecedor.
   useEffect(() => {
     if (!fornecedorId) return;
-    const primeiro = (motoristas as any[])[0];
-    if (!primeiro) return;
-    setHeader((h) => (h.nome_motorista ? h : {
+    const motorista1 = (motoristas as any[]).find((m) => m.tipo_contato === "motorista1");
+    const motorista2 = (motoristas as any[]).find((m) => m.tipo_contato === "motorista2");
+    setHeader((h) => ({
       ...h,
-      nome_motorista: primeiro.nome_completo ?? "",
-      celular_motorista: primeiro.celular ?? h.celular_motorista,
+      nome_motorista: motorista1?.nome_completo ?? "",
+      celular_motorista: maskCelular(motorista1?.celular ?? ""),
+      nome_motorista2: motorista2?.nome_completo ?? "",
+      celular_motorista2: maskCelular(motorista2?.celular ?? ""),
     }));
   }, [fornecedorId, motoristas]);
 
   function aplicarFornecedor(id: string) {
     setFornecedorId(id);
     const f = (fornecedores as any[]).find((x) => x.id === id);
-    setHeader((h) => ({ ...h, transportadora: f?.razao_social ?? h.transportadora }));
+    setHeader((h) => ({
+      ...h,
+      transportadora: f?.razao_social ?? "",
+      nome_motorista: "",
+      celular_motorista: "",
+      nome_motorista2: "",
+      celular_motorista2: "",
+    }));
   }
 
   const { data: itensCatalogo = [] } = useQuery({
@@ -547,7 +563,7 @@ function AgendamentosEntregaPage() {
         <div className="min-w-0">
           <Label className="text-[11px]">CD de origem / recebimento *</Label>
           <Select value={header.estacao_cd_id} onValueChange={(v) => setHeader({ ...header, estacao_cd_id: v, atm_id: "" })}>
-            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Selecione o CD" /></SelectTrigger>
+            <SelectTrigger className="h-7 w-full px-2 text-xs [&>span]:whitespace-normal [&>span]:break-words"><SelectValue placeholder="Selecione o CD" /></SelectTrigger>
             <SelectContent className="max-w-[min(92vw,420px)]">
               {cds.map((c: any) => (
                 <SelectItem key={c.id} value={c.id} className="whitespace-normal break-words">
@@ -561,7 +577,7 @@ function AgendamentosEntregaPage() {
         <div className="min-w-0">
           <Label className="text-[11px]">ATM de destino (abastecimento)</Label>
           <Select value={header.atm_id || undefined} onValueChange={(v) => setHeader({ ...header, atm_id: v })}>
-            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Opcional" /></SelectTrigger>
+            <SelectTrigger className="h-7 w-full px-2 text-xs [&>span]:whitespace-normal [&>span]:break-words"><SelectValue placeholder="Opcional" /></SelectTrigger>
             <SelectContent className="max-w-[min(92vw,420px)]">
               {atmsDoCd.map((a: any) => (
                 <SelectItem key={a.id} value={a.id} className="whitespace-normal break-words">
@@ -575,7 +591,7 @@ function AgendamentosEntregaPage() {
         <div className="md:col-span-2 rounded border bg-muted/40 p-2 space-y-2">
           <Label className="text-[11px]">Fornecedor / Transportadora (auto-preenche motorista)</Label>
           <Select value={fornecedorId || undefined} onValueChange={aplicarFornecedor}>
-            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
+            <SelectTrigger className="h-7 w-full px-2 text-xs [&>span]:whitespace-normal [&>span]:break-words"><SelectValue placeholder="Selecione o fornecedor" /></SelectTrigger>
             <SelectContent className="max-w-[min(92vw,480px)]">
               {fornecedores.map((f: any) => (
                 <SelectItem key={f.id} value={f.id} className="whitespace-normal break-words">
@@ -588,77 +604,103 @@ function AgendamentosEntregaPage() {
 
         <div className="min-w-0">
           <Label className="text-[11px]">Data/Hora *</Label>
-          <Input type="datetime-local" className="h-9 w-auto min-w-[190px]"
+          <Input type="datetime-local" className="h-7 w-auto max-w-full px-2 text-xs"
             value={header.data_hora_entrega}
             onChange={(e) => setHeader({ ...header, data_hora_entrega: e.target.value })} />
         </div>
         <div className="min-w-0">
           <Label className="text-[11px]">Status</Label>
           <Select value={header.status} onValueChange={(v: any) => setHeader({ ...header, status: v })}>
-            <SelectTrigger className="h-9 w-full"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-7 w-full px-2 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               {STATUS_LISTA.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="min-w-0 md:col-span-2 grid grid-cols-2 gap-2">
-          <div className="min-w-0">
-            <Label className="text-[11px]">Motorista 1 / Celular *</Label>
-            <Select
-              value={(motoristas as any[]).find((m) => m.nome_completo === header.nome_motorista)?.id ?? undefined}
-              onValueChange={(v) => {
-                const m = (motoristas as any[]).find((x) => x.id === v);
-                setHeader((h) => ({ ...h, nome_motorista: m?.nome_completo ?? "", celular_motorista: m?.celular ?? "" }));
-              }}
-            >
-              <SelectTrigger className="h-9 w-full min-w-0">
-                <SelectValue placeholder={fornecedorId ? "Selecione" : "Escolha o fornecedor"} />
-              </SelectTrigger>
-              <SelectContent className="max-w-[min(92vw,420px)]">
-                {(motoristas as any[]).map((m) => (
-                  <SelectItem key={m.id} value={m.id} className="whitespace-normal break-words">
-                    {m.nome_completo}{m.celular ? ` · ${m.celular}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="min-w-0 grid grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] gap-1">
+            <div className="min-w-0">
+              <Label className="text-[10px]">Motorista 1 *</Label>
+              <Select
+                value={(motoristas as any[]).find((m) => m.tipo_contato === "motorista1" && m.nome_completo === header.nome_motorista)?.id ?? ""}
+                onValueChange={(v) => {
+                  const m = (motoristas as any[]).find((x) => x.id === v);
+                  setHeader((h) => ({ ...h, nome_motorista: m?.nome_completo ?? "", celular_motorista: maskCelular(m?.celular ?? "") }));
+                }}
+              >
+                <SelectTrigger className="h-7 w-full min-w-0 px-1.5 text-[10px] [&>span]:whitespace-normal [&>span]:break-words">
+                  <SelectValue placeholder={fornecedorId ? "Selecione" : "Fornecedor"} />
+                </SelectTrigger>
+                <SelectContent className="max-w-[min(92vw,320px)]">
+                  {(motoristas as any[]).filter((m) => m.tipo_contato === "motorista1").map((m) => (
+                    <SelectItem key={m.id} value={m.id} className="whitespace-normal break-words text-xs">
+                      {m.nome_completo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="min-w-0">
+              <Label className="text-[10px]">Celular</Label>
+              <Input
+                className="h-7 min-w-0 px-1.5 text-[10px]"
+                maxLength={14}
+                inputMode="numeric"
+                placeholder="(00)00000-0000"
+                value={header.celular_motorista}
+                onChange={(e) => setHeader({ ...header, celular_motorista: maskCelular(e.target.value) })}
+              />
+            </div>
           </div>
-          <div className="min-w-0">
-            <Label className="text-[11px]">Motorista 2 / Celular</Label>
-            <Select
-              value={(motoristas as any[]).find((m) => m.nome_completo === header.nome_motorista2)?.id ?? undefined}
-              onValueChange={(v) => {
-                const m = (motoristas as any[]).find((x) => x.id === v);
-                setHeader((h) => ({ ...h, nome_motorista2: m?.nome_completo ?? "", celular_motorista2: m?.celular ?? "" }));
-              }}
-            >
-              <SelectTrigger className="h-9 w-full min-w-0">
-                <SelectValue placeholder={fornecedorId ? "Selecione" : "Escolha o fornecedor"} />
-              </SelectTrigger>
-              <SelectContent className="max-w-[min(92vw,420px)]">
-                {(motoristas as any[]).map((m) => (
-                  <SelectItem key={m.id} value={m.id} className="whitespace-normal break-words">
-                    {m.nome_completo}{m.celular ? ` · ${m.celular}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="min-w-0 grid grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] gap-1">
+            <div className="min-w-0">
+              <Label className="text-[10px]">Motorista 2</Label>
+              <Select
+                value={(motoristas as any[]).find((m) => m.tipo_contato === "motorista2" && m.nome_completo === header.nome_motorista2)?.id ?? ""}
+                onValueChange={(v) => {
+                  const m = (motoristas as any[]).find((x) => x.id === v);
+                  setHeader((h) => ({ ...h, nome_motorista2: m?.nome_completo ?? "", celular_motorista2: maskCelular(m?.celular ?? "") }));
+                }}
+              >
+                <SelectTrigger className="h-7 w-full min-w-0 px-1.5 text-[10px] [&>span]:whitespace-normal [&>span]:break-words">
+                  <SelectValue placeholder={fornecedorId ? "Selecione" : "Fornecedor"} />
+                </SelectTrigger>
+                <SelectContent className="max-w-[min(92vw,320px)]">
+                  {(motoristas as any[]).filter((m) => m.tipo_contato === "motorista2").map((m) => (
+                    <SelectItem key={m.id} value={m.id} className="whitespace-normal break-words text-xs">
+                      {m.nome_completo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="min-w-0">
+              <Label className="text-[10px]">Celular</Label>
+              <Input
+                className="h-7 min-w-0 px-1.5 text-[10px]"
+                maxLength={14}
+                inputMode="numeric"
+                placeholder="(00)00000-0000"
+                value={header.celular_motorista2}
+                onChange={(e) => setHeader({ ...header, celular_motorista2: maskCelular(e.target.value) })}
+              />
+            </div>
           </div>
         </div>
         <div className="min-w-0">
           <Label className="text-[11px]">Transportadora</Label>
-          <Input className="h-9" maxLength={50} value={header.transportadora}
+          <Input className="h-7 px-2 text-xs" maxLength={50} value={header.transportadora}
             onChange={(e) => setHeader({ ...header, transportadora: e.target.value })} />
         </div>
         <div className="min-w-0">
           <Label className="text-[11px]">Nº NF</Label>
-          <Input className="h-9" maxLength={50} value={header.numero_nf}
+          <Input className="h-7 px-2 text-xs" maxLength={50} value={header.numero_nf}
             onChange={(e) => setHeader({ ...header, numero_nf: e.target.value })} />
         </div>
         <div className="min-w-0">
           <Label className="text-[11px]">Técnico Responsável</Label>
           <Select value={header.tecnico_id} onValueChange={(v) => setHeader({ ...header, tecnico_id: v })}>
-            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Selecione" /></SelectTrigger>
+            <SelectTrigger className="h-7 w-full px-2 text-xs [&>span]:whitespace-normal [&>span]:break-words"><SelectValue placeholder="Selecione" /></SelectTrigger>
             <SelectContent className="max-w-[min(92vw,420px)]">
               {tecnicos.map((t: any) => (
                 <SelectItem key={t.id} value={t.id} className="whitespace-normal break-words">{t.nome_completo}</SelectItem>
