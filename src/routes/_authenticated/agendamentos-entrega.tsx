@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Check, X, CloudOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,27 +131,39 @@ function AgendamentosEntregaPage() {
       (await supabase.from("fornecedores").select("id, razao_social, telefone, fornecedor_padrao")
         .order("razao_social")).data ?? [],
   });
-  const { data: motoristas = [] } = useQuery({
+  const { data: motoristasData } = useQuery({
     queryKey: ["motoristas-agend", fornecedorId],
     enabled: !!fornecedorId,
+    placeholderData: (prev: any) => prev,
     queryFn: async () =>
       (await supabase.from("motoristas").select("id, nome_completo, celular, tipo_contato")
         .eq("fornecedor_id", fornecedorId).order("tipo_contato")).data ?? [],
   });
-  
+  // Referência estável: `data ?? []` inline criava array novo a cada render e,
+  // por estar nas deps do useEffect abaixo, causava loop infinito (React #185).
+  const motoristas = useMemo(() => motoristasData ?? [], [motoristasData]);
 
   // Auto-preenche cada motorista cadastrado no respectivo contato do fornecedor.
   useEffect(() => {
     if (!fornecedorId) return;
     const motorista1 = (motoristas as any[]).find((m) => m.tipo_contato === "motorista1");
     const motorista2 = (motoristas as any[]).find((m) => m.tipo_contato === "motorista2");
-    setHeader((h) => ({
-      ...h,
-      nome_motorista: motorista1?.nome_completo ?? "",
-      celular_motorista: maskCelular(motorista1?.celular ?? ""),
-      nome_motorista2: motorista2?.nome_completo ?? "",
-      celular_motorista2: maskCelular(motorista2?.celular ?? ""),
-    }));
+    setHeader((h) => {
+      const next = {
+        nome_motorista: motorista1?.nome_completo ?? "",
+        celular_motorista: maskCelular(motorista1?.celular ?? ""),
+        nome_motorista2: motorista2?.nome_completo ?? "",
+        celular_motorista2: maskCelular(motorista2?.celular ?? ""),
+      };
+      // Evita setState redundante (e re-render em ciclo) quando nada mudou.
+      if (
+        h.nome_motorista === next.nome_motorista &&
+        h.celular_motorista === next.celular_motorista &&
+        h.nome_motorista2 === next.nome_motorista2 &&
+        h.celular_motorista2 === next.celular_motorista2
+      ) return h;
+      return { ...h, ...next };
+    });
   }, [fornecedorId, motoristas]);
 
   function aplicarFornecedor(id: string) {
