@@ -84,59 +84,82 @@ function ImportAtmPage() {
       const XLSX = await import("xlsx");
       const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
 
-      let melhor: { nome: string; registros: Linha[] } | null = null;
-      let faltandoGlobal: string[] = HEADERS.slice();
-
-      for (const nome of wb.SheetNames) {
-        const matriz = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[nome], {
-          header: 1,
-          defval: "",
-          raw: false,
-          blankrows: false,
-        });
-        for (let i = 0; i < Math.min(matriz.length, 10); i++) {
-          const cabecalho = (matriz[i] ?? []).map(chave);
-          if (!cabecalho.includes("ID") || !cabecalho.includes("TOPDESK")) continue;
-          const faltando = HEADERS.filter((h) => !cabecalho.includes(chave(h)));
-          if (faltando.length) {
-            if (faltando.length < faltandoGlobal.length) faltandoGlobal = faltando;
-            continue;
-          }
-          const registros: Linha[] = [];
-          for (let j = i + 1; j < matriz.length; j++) {
-            const celulas = matriz[j] ?? [];
-            const reg: Linha = {};
-            cabecalho.forEach((h, idx) => {
-              const campo = CAMPO[h];
-              if (!campo) return;
-              const valor = limpar(celulas[idx]);
-              reg[campo] = valor === "" || valor === "-" ? null : valor;
-            });
-            if (reg.id_atm) registros.push(reg);
-          }
-          if (registros.length && (!melhor || registros.length > melhor.registros.length)) {
-            melhor = { nome, registros };
-          }
-          break;
-        }
+      // Usar apenas a aba "BASE OFFICIAL - atualização"
+      const nomeAba =
+        wb.SheetNames.find((n) => chave(n) === chave("BASE OFFICIAL - atualização")) ??
+        wb.SheetNames.find((n) => chave(n).includes("BASE OFFICIAL"));
+      if (!nomeAba) {
+        setErroHeaders(`Aba "BASE OFFICIAL - atualização" não encontrada. Abas do arquivo: ${wb.SheetNames.join(", ")}`);
+        toast.error("Aba oficial não encontrada");
+        return;
       }
 
-      if (!melhor) {
-        setErroHeaders(`Cabeçalhos obrigatórios não encontrados. Faltando: ${faltandoGlobal.join(", ")}`);
+      const matriz = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[nomeAba], {
+        header: 1,
+        defval: "",
+        raw: false,
+        blankrows: false,
+      });
+
+      // Header na linha 1; trim e remover colunas vazias / __EMPTY
+      const idxId = (matriz[0] ?? []).findIndex((c) => chave(c) === "ID");
+      if (idxId < 0) {
+        setErroHeaders('Cabeçalho "ID" não encontrado na linha 1 da aba oficial.');
+        toast.error("Planilha sem o cabeçalho ID");
+        return;
+      }
+      const colunas: { idx: number; campo: string }[] = [];
+      (matriz[0] ?? []).forEach((c, idx) => {
+        const h = chave(c);
+        if (!h || h.startsWith("EMPTY")) return;
+        const campo = CAMPO[h];
+        if (campo) colunas.push({ idx, campo });
+      });
+      const faltando = HEADERS.filter((h) => !colunas.some((c) => c.campo === CAMPO[chave(h)]));
+      if (faltando.length) {
+        setErroHeaders(`Cabeçalhos obrigatórios não encontrados. Faltando: ${faltando.join(", ")}`);
         toast.error("Planilha sem os cabeçalhos esperados");
+        return;
+      }
+
+      const registros: Linha[] = [];
+      for (let j = 1; j < matriz.length; j++) {
+        const celulas = matriz[j] ?? [];
+        const id = limpar(celulas[idxId]);
+        const primeiraCelula = chave(celulas[0]);
+        // Parar ao encontrar rodapé de tabela dinâmica ou ID vazio
+        if (
+          !id ||
+          primeiraCelula.includes("ROTULOS DE LINHA") ||
+          primeiraCelula.includes("TOTAL GERAL") ||
+          primeiraCelula.includes("CONTAGEM")
+        ) {
+          break;
+        }
+        const reg: Linha = {};
+        for (const { idx, campo } of colunas) {
+          const valor = limpar(celulas[idx]);
+          reg[campo] = valor === "" || valor === "-" ? null : valor;
+        }
+        registros.push(reg);
+      }
+
+      if (!registros.length) {
+        setErroHeaders("Nenhuma linha válida encontrada na aba oficial.");
+        toast.error("Nenhuma ATM válida na planilha");
         return;
       }
 
       // remove IDs duplicados dentro do próprio arquivo (mantém o último)
       const mapa = new Map<string, Linha>();
-      for (const r of melhor.registros) mapa.set(String(r.id_atm), r);
-      const registros = [...mapa.values()];
+      for (const r of registros) mapa.set(String(r.id_atm), r);
+      const unicos = [...mapa.values()];
 
-      setAba(melhor.nome);
-      setLinhas(registros);
+      setAba(nomeAba);
+      setLinhas(unicos);
       // eslint-disable-next-line no-console
-      console.log(`[import-atm] aba "${melhor.nome}" — ${registros.length} linhas. Preview 5:`, registros.slice(0, 5));
-      toast.success(`${registros.length} ATMs lidas da aba "${melhor.nome}"`);
+      console.log(`[import-atm] aba "${nomeAba}" — ${unicos.length} linhas. Preview 5:`, unicos.slice(0, 5));
+      toast.success(`${unicos.length} ATMs lidas da aba "${nomeAba}"`);
     } catch (e) {
       toast.error(`Erro ao ler arquivo: ${(e as Error).message}`);
     }
