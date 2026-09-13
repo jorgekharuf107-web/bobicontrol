@@ -175,16 +175,24 @@ export type Database = {
           capacidade_bobinas: number
           cd_id: string | null
           criado_em: string
+          empresa: string | null
           estacao: string | null
           estacao_id: string | null
           id: string
           id_atm: string
+          linha: string | null
           linha_id: string | null
           localizacao_detalhada: string | null
           modelo: string | null
           nivel_minimo: number
+          numero_de_serie: string | null
+          observacao: string | null
+          patrimonio: string | null
           possui_cd: boolean
+          produtos: string | null
           status_operacional: Database["public"]["Enums"]["status_operacional"]
+          topdesk: string | null
+          transaciona: string | null
           usuario_atm: string | null
         }
         Insert: {
@@ -194,16 +202,24 @@ export type Database = {
           capacidade_bobinas?: number
           cd_id?: string | null
           criado_em?: string
+          empresa?: string | null
           estacao?: string | null
           estacao_id?: string | null
           id?: string
           id_atm: string
+          linha?: string | null
           linha_id?: string | null
           localizacao_detalhada?: string | null
           modelo?: string | null
           nivel_minimo?: number
+          numero_de_serie?: string | null
+          observacao?: string | null
+          patrimonio?: string | null
           possui_cd?: boolean
+          produtos?: string | null
           status_operacional?: Database["public"]["Enums"]["status_operacional"]
+          topdesk?: string | null
+          transaciona?: string | null
           usuario_atm?: string | null
         }
         Update: {
@@ -213,16 +229,24 @@ export type Database = {
           capacidade_bobinas?: number
           cd_id?: string | null
           criado_em?: string
+          empresa?: string | null
           estacao?: string | null
           estacao_id?: string | null
           id?: string
           id_atm?: string
+          linha?: string | null
           linha_id?: string | null
           localizacao_detalhada?: string | null
           modelo?: string | null
           nivel_minimo?: number
+          numero_de_serie?: string | null
+          observacao?: string | null
+          patrimonio?: string | null
           possui_cd?: boolean
+          produtos?: string | null
           status_operacional?: Database["public"]["Enums"]["status_operacional"]
+          topdesk?: string | null
+          transaciona?: string | null
           usuario_atm?: string | null
         }
         Relationships: [

@@ -34,6 +34,7 @@ import { Route as AuthenticatedAdminAlertasRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminAuditoriaRouteImport } from './routes/_authenticated/admin/auditoria'
 import { Route as AuthenticatedAdminBackupRouteImport } from './routes/_authenticated/admin/backup'
 import { Route as AuthenticatedAdminConfiguracoesRouteImport } from './routes/_authenticated/admin/configuracoes'
+import { Route as AuthenticatedAdminImportAtmRouteImport } from './routes/_authenticated/admin/import-atm'
 import { Route as AuthenticatedAdminSobreRouteImport } from './routes/_authenticated/admin/sobre'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedEstoqueMovimentacoesRouteImport } from './routes/_authenticated/estoque.movimentacoes'
@@ -177,6 +178,12 @@ const AuthenticatedAdminConfiguracoesRoute =
     path: '/admin/configuracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminImportAtmRoute =
+  AuthenticatedAdminImportAtmRouteImport.update({
+    id: '/admin/import-atm',
+    path: '/admin/import-atm',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSobreRoute = AuthenticatedAdminSobreRouteImport.update({
   id: '/admin/sobre',
   path: '/admin/sobre',
@@ -238,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/admin/import-atm': typeof AuthenticatedAdminImportAtmRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -270,6 +278,7 @@ export interface FileRoutesByTo {
   '/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/admin/import-atm': typeof AuthenticatedAdminImportAtmRoute
   '/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -304,6 +313,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/auditoria': typeof AuthenticatedAdminAuditoriaRoute
   '/_authenticated/admin/backup': typeof AuthenticatedAdminBackupRoute
   '/_authenticated/admin/configuracoes': typeof AuthenticatedAdminConfiguracoesRoute
+  '/_authenticated/admin/import-atm': typeof AuthenticatedAdminImportAtmRoute
   '/_authenticated/admin/sobre': typeof AuthenticatedAdminSobreRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/estoque/movimentacoes': typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/backup'
     | '/admin/configuracoes'
+    | '/admin/import-atm'
     | '/admin/sobre'
     | '/admin/usuarios'
     | '/estoque/movimentacoes'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/admin/auditoria'
     | '/admin/backup'
     | '/admin/configuracoes'
+    | '/admin/import-atm'
     | '/admin/sobre'
     | '/admin/usuarios'
     | '/estoque/movimentacoes'
@@ -403,6 +415,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/auditoria'
     | '/_authenticated/admin/backup'
     | '/_authenticated/admin/configuracoes'
+    | '/_authenticated/admin/import-atm'
     | '/_authenticated/admin/sobre'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/estoque/movimentacoes'
@@ -596,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/import-atm': {
+      id: '/_authenticated/admin/import-atm'
+      path: '/admin/import-atm'
+      fullPath: '/admin/import-atm'
+      preLoaderRoute: typeof AuthenticatedAdminImportAtmRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/sobre': {
       id: '/_authenticated/admin/sobre'
       path: '/admin/sobre'
@@ -662,6 +682,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAuditoriaRoute: typeof AuthenticatedAdminAuditoriaRoute
   AuthenticatedAdminBackupRoute: typeof AuthenticatedAdminBackupRoute
   AuthenticatedAdminConfiguracoesRoute: typeof AuthenticatedAdminConfiguracoesRoute
+  AuthenticatedAdminImportAtmRoute: typeof AuthenticatedAdminImportAtmRoute
   AuthenticatedAdminSobreRoute: typeof AuthenticatedAdminSobreRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedEstoqueMovimentacoesRoute: typeof AuthenticatedEstoqueMovimentacoesRoute
@@ -692,6 +713,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAuditoriaRoute: AuthenticatedAdminAuditoriaRoute,
   AuthenticatedAdminBackupRoute: AuthenticatedAdminBackupRoute,
   AuthenticatedAdminConfiguracoesRoute: AuthenticatedAdminConfiguracoesRoute,
+  AuthenticatedAdminImportAtmRoute: AuthenticatedAdminImportAtmRoute,
   AuthenticatedAdminSobreRoute: AuthenticatedAdminSobreRoute,
   AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
   AuthenticatedEstoqueMovimentacoesRoute:
