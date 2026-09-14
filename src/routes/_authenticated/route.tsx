@@ -19,7 +19,12 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { destino: "dashboard" } });
+    if (error || !data.user) {
+      // Token inválido/expirado: limpa a sessão local para que a tela de
+      // login não redirecione de volta (loop login <-> dashboard)
+      try { await supabase.auth.signOut({ scope: "local" }); } catch { /* noop */ }
+      throw redirect({ to: "/auth", search: { destino: "dashboard" } });
+    }
     return { user: data.user };
   },
   component: AuthenticatedLayout,

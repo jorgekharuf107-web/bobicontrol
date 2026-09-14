@@ -61,11 +61,20 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  // Já autenticado (inclusive ao voltar do Google): segue direto para o destino
+  // Já autenticado (inclusive ao voltar do Google): segue direto para o destino.
+  // Usa getUser() (valida no servidor) em vez de getSession() (cache local):
+  // um token expirado no cache causava loop login <-> dashboard, pois o
+  // guarda da área protegida rejeitava o token e devolvia para /auth.
   useEffect(() => {
     let ativo = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (ativo && data.session) window.location.replace(alvo);
+    supabase.auth.getUser().then(({ data, error }) => {
+      if (!ativo) return;
+      if (error || !data.user) {
+        // Sessão inválida/expirada: limpa o cache local para quebrar o loop
+        supabase.auth.signOut({ scope: "local" }).catch(() => {});
+        return;
+      }
+      window.location.replace(alvo);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) window.location.replace(alvo);
